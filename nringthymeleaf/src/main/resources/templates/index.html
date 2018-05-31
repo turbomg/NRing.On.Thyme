@@ -1,14 +1,75 @@
 <!DOCTYPE html>
-<html>
-<head lang="en">
-
-    <title>ThymeLeaf Fan</title>
-
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <!--<link rel="stylesheet" href="dist/css/style.css">-->
+    <link href="../static/css/style.css" th:href="@{css/style.css}" rel="stylesheet" />
+    <title>Document</title>
 </head>
 <body>
+    <div class="containerbody">
+        <div class="titlebar">
+            <h1>View / Edit Event</h1>
+        </div>
+        <div class="windowbody">
+            <div class="titlebarbody">
+                <h2>Event details</h2>
+            </div>
+            <div class="row">
+                <div class="choice1">
+                    <div class="label1">
+                        <h3>Event type:</h3>
+                    </div>
+                    <div class="radio">
+                        <input id="radio-1" name="radio" type="radio" checked>
+                        <label for="radio-1" class="radio-label">Touristenfahrten</label>
+                    </div>
+                    
+                    <div class="radio">
+                        <input id="radio-2" name="radio" type="radio">
+                        <label  for="radio-2" class="radio-label">Trackday</label>
+                    </div>
+                    
+                    <div class="radio">
+                        <input id="radio-3" name="radio" type="radio">
+                        <label for="radio-3" class="radio-label">Road tour</label>
+                    </div>
+                    <div class="radio">
+                        <!-- <input id="radio-3" name="radio" type="radio" disabled> -->
+                        <input id="radio-3" name="radio" type="radio">
+                        <label for="radio-3" class="radio-label">Event</label>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="choice2">
+                    <div class="containercolumn">
+                        <label class="eventname">Event name:
+                            <input id="eventname" name="eventname" type="text">
+                        </label><br>
+                        <label class="date">Date:
+                            <input id="date" name="date" type="text">
+                        </label><br>
+                        <label class="staff">Staff responsible:
+                            <input id="Staff" name="staff" type="text">
+                        </label><br>
+                    </div>
+                    <div class="containercolumn">
 
-<div class="container">
-
+                    </div>
+                    <div class="containercolumn">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="titlebarbody"><h2>Internal information</h2></div>
+            <div class="titlebarbody"><h2>Public pricing</h2></div>
+            <div class="titlebarbody"><h2>Public information</h2></div>
+        </div>
+    </div>
 </div>
+
 </body>
 </html>
