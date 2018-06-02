@@ -1,4 +1,4 @@
 package com.katamlek.nringthymeleaf.domain;
 
-public class CustomerHistory {
+public class CustomerTest {
 }
