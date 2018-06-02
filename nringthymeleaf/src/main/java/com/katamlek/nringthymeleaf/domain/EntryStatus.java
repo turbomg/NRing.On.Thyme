@@ -2,5 +2,5 @@ package com.katamlek.nringthymeleaf.domain;
 
 // Priority - low
 public enum EntryStatus {
-    ACTIVE, DELETED
+    NOT_CROSSED_OUT, CROSSED_OUT
 }

@@ -1,4 +1,5 @@
 package com.katamlek.nringthymeleaf.domain;
 
-public class EventPublicInformationNote {
+public enum UserBranding {
+    NURBURG, SPA
 }

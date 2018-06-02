@@ -1,5 +1,11 @@
 package com.katamlek.nringthymeleaf.domain;
 
+/*
+Handles available services, like GoPro, car etc.
+ */
+
+//TODO is is some kind of a dictionary data or?
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -9,16 +15,20 @@ import java.util.Calendar;
 
 @Entity
 @Data
-@NoArgsConstructor
 @AllArgsConstructor
-public class BookingDocument {
+@NoArgsConstructor
+public class BookedService {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    @Temporal(TemporalType.DATE)
-    private Calendar date;
+    @Temporal(TemporalType.TIMESTAMP)
+    private Calendar bookedFor;
 
+    private Car car;
     private String description;
-    private String additionalNotes; //relate to Entry? Don't think so
+
+    private Long unitPrice;
+    private int quantity;
+    private Long totalAmount;
 }
