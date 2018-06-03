@@ -1,4 +1,5 @@
 package com.katamlek.nringthymeleaf.domain;
 
-public class EventPublicInformation {
+public enum CarColor {
+    WHITE, BLUE, RED
 }

@@ -28,10 +28,10 @@ public class Customer {
     private boolean newsletter;
     private Agent agent;
     private CustomerGroup customerGroup;
-    private List<Entry> customerNotes;
+    private List<Note> customerNotes;
     private CustomerEmergencyContact customerEmergencyContact;
     private List<CustomerDocument> customerDocuments;
-    private List<Entry> customerHistory;
+    private List<Note> customerHistory;
 
     @Temporal(TemporalType.DATE)
     Calendar lastEdit;

@@ -11,11 +11,15 @@ import javax.persistence.Id;
 @Entity
 @Data
 @NoArgsConstructor
-public class EventPublicPricing {
+public class EventInternalInfo {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    private Long eventEntryFee;
-    private Long additionalDriver;
+    private String eventOrganizer;
+    private int currentEntriesNo;
+    private Long currentEntriesValue;
+    private Long eventCostToRSR;
+    private int spacesBooked;
+    private EventInternalInfoNote eventPrivateNote;
 }

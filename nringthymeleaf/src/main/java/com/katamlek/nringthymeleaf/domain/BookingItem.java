@@ -1,4 +1,5 @@
 package com.katamlek.nringthymeleaf.domain;
 
-public class EntityInternalInformation {
+public class BookingItem {
+    //todo
 }

@@ -21,7 +21,7 @@ public class Event {
 
     private String eventName;
 
-    private String eventLocation;
+    private LocationDefinition eventLocation;
 
     private String eventTrack;
 
@@ -31,7 +31,7 @@ public class Event {
     @Temporal(TemporalType.TIMESTAMP)
     private Calendar eventEndDateTime;
 
-    private String eventResponsibleUser;
+    private User eventResponsibleUser;
 
     private boolean visibleWhenNoBookings;
     private boolean visibleInPublicCalendar;

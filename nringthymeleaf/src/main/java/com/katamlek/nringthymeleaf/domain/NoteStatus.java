@@ -1,6 +1,6 @@
 package com.katamlek.nringthymeleaf.domain;
 
 // Priority - low
-public enum EntryStatus {
+public enum NoteStatus {
     NOT_CROSSED_OUT, CROSSED_OUT
 }

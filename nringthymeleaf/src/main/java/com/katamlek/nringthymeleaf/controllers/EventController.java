@@ -6,6 +6,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+//todo no command, services, converters - well maybe I'd need a service for a dashboard or something of that kind
 
 @Controller
 public class EventController {

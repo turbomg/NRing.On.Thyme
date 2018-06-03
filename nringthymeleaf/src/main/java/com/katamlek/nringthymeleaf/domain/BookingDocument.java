@@ -20,5 +20,5 @@ public class BookingDocument {
     private Calendar date;
 
     private String description;
-    private String additionalNotes; //relate to Entry? Don't think so
+    private String additionalNotes; //relate to Note? Don't think so
 }

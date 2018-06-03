@@ -18,7 +18,7 @@ public class Booking {
     private Long id;
 
     private User createdBy;
-    private List<Entry> bookingNotes;
+    private List<BookingNote> bookingNotes;
 
     @Temporal(TemporalType.TIMESTAMP)
     private Calendar createDate;

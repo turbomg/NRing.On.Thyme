@@ -3,10 +3,8 @@ package com.katamlek.nringthymeleaf.domain;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
+import java.util.Calendar;
 import java.util.List;
 
 @Entity
@@ -17,11 +15,33 @@ public class Car {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
+    private String model;
+    private String plate;
+    private CarColor carColor;
+    private Long lastMileage;
+
+    @Temporal(TemporalType.TIMESTAMP)
+    private Calendar firstBooking;
+
+    @Temporal(TemporalType.TIMESTAMP)
+    private Calendar lastBooking;
+
+    private MileageType mileageType;
+    private CarFleet carFleet;
+
+    @Temporal(TemporalType.DATE)
+    private Calendar nextTUV;
+
+    private Long nextServiceAtKm;
+
+    private LocationDefinition currentLocation;
+
     private CarStatus carStatus;
     private boolean currentlyInUse;
-    private int kmOut;
-    private int kmIn;
-    private List<Entry> mechanicNotes;
-    private boolean substitute; // is the car a substitute for another (broken) one
+
+    private List<CarNote> carNotes;
+    private List<Note> carHistory;
+
+    private CarPricing carPricing;
 
 }
