@@ -1,4 +1,4 @@
 package com.katamlek.nringthymeleaf.domain;
 
-public enum EmailConfirmationReminder {
+public class PriceListNote extends Note {
 }

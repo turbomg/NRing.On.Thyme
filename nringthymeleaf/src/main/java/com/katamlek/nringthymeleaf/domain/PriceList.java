@@ -16,9 +16,7 @@ public class PriceList {
 
     private String pricingDescription;
     private Long pricingUnit;
-    private List<PriceNote> pricingDefinitionNoteList;
+    private List<PriceListNote> pricingDefinitionNoteList;
     private Long defaultPrice;
     private PriceGroup pricingGroup;
-
-
 }

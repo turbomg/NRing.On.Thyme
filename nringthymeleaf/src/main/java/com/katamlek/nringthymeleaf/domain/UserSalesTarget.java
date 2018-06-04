@@ -9,7 +9,6 @@ import java.util.Calendar;
 
 @Entity
 @Data
-@NoArgsConstructor
 public class UserSalesTarget {
     @Id
     @GeneratedValue
@@ -17,13 +16,7 @@ public class UserSalesTarget {
 
     User user;
 
-    @Temporal(TemporalType.DATE)
-    // Entered as the last day of the month
+    @Temporal(TemporalType.DATE) // Entered automatically as the last day of the month
     private Calendar periodTo;
     private Long targetAmount;
-
-    @Autowired
-    public UserSalesTarget(User user) {
-        this.user = user;
-    }
 }

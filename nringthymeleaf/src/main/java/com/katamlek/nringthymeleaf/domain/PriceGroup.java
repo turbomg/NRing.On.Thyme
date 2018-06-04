@@ -19,6 +19,5 @@ public class PriceGroup {
     private Long pricingGroupDefaultDiscount;
     private int pricingGroupStartQuantity;
     private int pricingGroupEndQuantity;
-    private Long pricingGroupRouding;
-
+    private Long pricingGroupRounding;
 }

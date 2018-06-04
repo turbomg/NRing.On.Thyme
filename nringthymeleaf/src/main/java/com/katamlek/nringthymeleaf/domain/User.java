@@ -31,7 +31,7 @@ public class User {
     private String email;
     private UserBranding branding;
 //    private Set<UserRole> userRole; -- see notes in UserRole class.
-//    private Set<RoleOperations> userOperations; -- as above
+//    private Set<UserOperations> userOperations; -- as above
 
     @Autowired
     public User(UserBranding branding, Set<UserRole> userRole) {

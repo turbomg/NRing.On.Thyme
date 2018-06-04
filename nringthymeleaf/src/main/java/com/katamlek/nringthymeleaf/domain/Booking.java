@@ -45,7 +45,7 @@ public class Booking {
 
     private List<PriceList> bookedServicesList;
 
-    private List<Payment> paymentList;
+    private List<PaymentNote> paymentList;
     private List<BookingDocument> bookingDocumentList;
 
     private BookingStatus bookingStatus; // dodatkowo, zeby moc zamykac zlecenia po sprawdzeniu samochodu
