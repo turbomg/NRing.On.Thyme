@@ -1,32 +1,37 @@
 package com.katamlek.nringthymeleaf.domain;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotNull;
 import java.util.Calendar;
 import java.util.List;
 
 @Entity
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
 public class Customer {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
     @Temporal(TemporalType.DATE)
-    private Calendar createDate; // = Customer since
-    private User createdBy;
-    private String firstName;
-    private String lastName;
-    private String address;
-    private String phoneNumber;
-    private String email;
-    private boolean newsletter;
-    private Agent agent;
+    private Calendar customerCreateDate; // = Customer since
+
+    private User customerCreatedBy;
+
+    @NotNull
+    private String customerFirstName;
+
+    private String customerLastName;
+    private String customerAddress;
+    private String customerPhoneNumber;
+
+    @Email
+    private String customerEmail;
+
+    private boolean customerNewsletter;
+    private Agent customerAgent;
     private CustomerGroup customerGroup;
     private List<Note> customerNotes;
     private CustomerEmergencyContact customerEmergencyContact;
@@ -34,5 +39,5 @@ public class Customer {
     private List<Note> customerHistory;
 
     @Temporal(TemporalType.DATE)
-    Calendar lastEdit;
+    Calendar customerLastEdit;
 }

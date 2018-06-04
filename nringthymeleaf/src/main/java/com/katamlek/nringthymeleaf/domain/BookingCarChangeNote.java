@@ -8,20 +8,20 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.validation.constraints.NotNull;
 
-/**
- * Account definitions used when recording payments.
- */
-
 @Entity
 @Data
-public class AccountDefinition {
+public class BookingCarChangeNote extends Note {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
     @NotNull
-    private String accountName;
+    private Car newCar;
 
-    @NotNull
-    private String accountCode;
+    private CarStatus newCarStatus;
+    private String notes;
+    private Long carMileageOut;
+    private Long carMileageIn;
+    private Long carMileageTotalKM;
+    private Long carMileageTotalMIL;
 }

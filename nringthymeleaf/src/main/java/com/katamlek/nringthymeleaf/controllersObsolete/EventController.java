@@ -1,6 +1,5 @@
-package com.katamlek.nringthymeleaf.controllers;
+package com.katamlek.nringthymeleaf.controllersObsolete;
 
-import com.katamlek.nringthymeleaf.domain.Event;
 import com.katamlek.nringthymeleaf.repositories.EventRepository;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;

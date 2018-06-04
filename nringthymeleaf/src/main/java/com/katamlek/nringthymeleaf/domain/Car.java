@@ -1,22 +1,23 @@
 package com.katamlek.nringthymeleaf.domain;
 
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 import java.util.Calendar;
 import java.util.List;
 
 @Entity
 @Data
-@NoArgsConstructor
 public class Car {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
+    @NotNull
     private String model;
     private String plate;
+
     private CarColor carColor;
     private Long lastMileage;
 
@@ -40,8 +41,7 @@ public class Car {
     private boolean currentlyInUse;
 
     private List<CarNote> carNotes;
-    private List<Note> carHistory;
+    private List<CarNote> carHistory;
 
     private CarPricing carPricing;
-
 }

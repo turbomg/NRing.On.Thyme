@@ -1,4 +1,4 @@
 package com.katamlek.nringthymeleaf.domain;
 
-public class PricingDefinition {
+public class PriceNote {
 }

@@ -6,22 +6,19 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.validation.constraints.NotNull;
-
-/**
- * Account definitions used when recording payments.
- */
 
 @Entity
 @Data
-public class AccountDefinition {
+public class PriceGroup {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    @NotNull
-    private String accountName;
+    private String pricingGroupName;
+    private String pricingGroupUnit;
+    private Long pricingGroupDefaultDiscount;
+    private int pricingGroupStartQuantity;
+    private int pricingGroupEndQuantity;
+    private Long pricingGroupRouding;
 
-    @NotNull
-    private String accountCode;
 }

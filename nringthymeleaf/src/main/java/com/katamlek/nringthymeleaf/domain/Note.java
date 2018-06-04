@@ -1,7 +1,6 @@
 package com.katamlek.nringthymeleaf.domain;
 
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
+import javax.persistence.*;
 import java.util.Calendar;
 
 /**
@@ -13,7 +12,8 @@ import java.util.Calendar;
 // TODO Which class relates to other classes? Check!
 
 public class Note {
-
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
     public String id;
     public User enteredBy;
 
