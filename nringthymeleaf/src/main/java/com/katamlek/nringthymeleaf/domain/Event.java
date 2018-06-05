@@ -10,7 +10,7 @@ import java.util.Calendar;
 @Data
 public class Event {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     public Long id;
 
     private EventType eventType;
@@ -18,6 +18,7 @@ public class Event {
     @NotNull
     private String eventName;
 
+    @OneToOne
     private LocationDefinition eventLocation;
 
     private String eventTrack;
@@ -28,8 +29,12 @@ public class Event {
     @Temporal(TemporalType.TIMESTAMP)
     private Calendar eventEndDateTime;
 
+    @OneToOne
     private User eventResponsibleUser;
 
     private boolean visibleWhenNoBookings;
     private boolean visibleInPublicCalendar;
+
+    @OneToOne
+    private EventPublicPricing eventPublicPricing;
 }

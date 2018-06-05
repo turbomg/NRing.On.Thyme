@@ -2,10 +2,7 @@ package com.katamlek.nringthymeleaf.domain;
 
 import lombok.Data;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 
 /**
@@ -16,7 +13,7 @@ import javax.validation.constraints.NotNull;
 @Data
 public class AccountDefinition {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @NotNull
@@ -24,4 +21,10 @@ public class AccountDefinition {
 
     @NotNull
     private String accountCode;
+
+    @OneToOne
+    private LocationDefinition locationDefinition;
+
+    @OneToOne
+    private PaymentDefinition paymentDefinition;
 }

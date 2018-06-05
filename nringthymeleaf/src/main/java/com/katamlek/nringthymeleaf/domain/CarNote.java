@@ -2,10 +2,7 @@ package com.katamlek.nringthymeleaf.domain;
 
 import lombok.Data;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
 
 /**
  * Car history entry.
@@ -19,4 +16,7 @@ public class CarNote extends Note {
     private Long carMileageIn;
     private Long carMileageTotalKM;
     private Long carMileageTotalMIL;
+
+    @ManyToOne
+    private Car car;
 }

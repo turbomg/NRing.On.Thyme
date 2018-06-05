@@ -9,12 +9,17 @@ import java.util.Calendar;
 @Data
 public class BookingDocument {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Temporal(TemporalType.DATE)
     private Calendar date;
 
     private String bookingDocumentDescription;
+
+    @Lob
     private String bookingDocumentAdditionalInfo;
+
+    @ManyToOne
+    Booking booking;
 }

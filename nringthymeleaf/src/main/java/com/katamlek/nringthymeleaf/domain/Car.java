@@ -11,7 +11,7 @@ import java.util.List;
 @Data
 public class Car {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @NotNull
@@ -28,6 +28,7 @@ public class Car {
     private Calendar lastBooking;
 
     private MileageType mileageType;
+
     private CarFleet carFleet;
 
     @Temporal(TemporalType.DATE)
@@ -35,13 +36,24 @@ public class Car {
 
     private Long nextServiceAtKm;
 
+    @OneToOne
     private LocationDefinition currentLocation;
 
     private CarStatus carStatus;
     private boolean currentlyInUse;
 
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "car")
     private List<CarNote> carNotes;
+
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "car")
     private List<CarNote> carHistory;
 
-    private CarPricing carPricing;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "car")
+    private List<CarPricing> carPricing;
+
+    @ManyToMany(mappedBy = "bookedCarsList")
+    private List<Booking> bookings;
+
+    @OneToOne
+    private BookingCarChangeNote bookingCarChangeNote;
 }

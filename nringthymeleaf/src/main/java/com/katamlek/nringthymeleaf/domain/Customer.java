@@ -12,12 +12,13 @@ import java.util.List;
 @Data
 public class Customer {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Temporal(TemporalType.DATE)
     private Calendar customerCreateDate; // = Customer since
 
+    @OneToOne
     private User customerCreatedBy;
 
     @NotNull
@@ -31,13 +32,29 @@ public class Customer {
     private String customerEmail;
 
     private boolean customerNewsletter;
+
+    @OneToOne
     private Agent customerAgent;
+
     private CustomerGroup customerGroup;
-    private List<Note> customerNotes;
-    private CustomerEmergencyContact customerEmergencyContact;
+
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "customer")
+    private List<CustomerNote> customerNotes;
+
+    @ManyToMany
+    @JoinTable(name = "customer_customeremergencycontact", joinColumns = @JoinColumn(name = "customer_id"),
+            inverseJoinColumns = @JoinColumn(name = "customeremergencycontact_id"))
+    private List<CustomerEmergencyContact> customerEmergencyContacts;
+
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "customer")
     private List<CustomerDocument> customerDocuments;
-    private List<Note> customerHistory;
+
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "customer")
+    private List<CustomerNote> customerHistory;
 
     @Temporal(TemporalType.DATE)
     Calendar customerLastEdit;
+
+    @ManyToMany(mappedBy = "customers")
+    private List<Booking> bookings;
 }

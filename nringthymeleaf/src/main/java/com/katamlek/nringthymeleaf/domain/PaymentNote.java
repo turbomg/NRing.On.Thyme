@@ -3,6 +3,7 @@ package com.katamlek.nringthymeleaf.domain;
 import lombok.Data;
 
 import javax.persistence.Entity;
+import javax.persistence.ManyToOne;
 import javax.validation.constraints.NotNull;
 
 @Entity
@@ -12,5 +13,8 @@ public class PaymentNote extends Note {
 
     @NotNull
     private Long paymentAmount;
+
+    @ManyToOne
+    Booking booking;
 
 }

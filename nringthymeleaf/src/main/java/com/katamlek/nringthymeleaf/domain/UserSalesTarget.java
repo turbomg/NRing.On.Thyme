@@ -11,10 +11,11 @@ import java.util.Calendar;
 @Data
 public class UserSalesTarget {
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    User user;
+    @OneToOne
+    private User user;
 
     @Temporal(TemporalType.DATE) // Entered automatically as the last day of the month
     private Calendar periodTo;

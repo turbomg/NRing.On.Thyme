@@ -17,17 +17,19 @@ import java.util.Calendar;
 @Data
 public class Note {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    public String id;
-
-    public User enteredBy;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private String id;
 
     @Temporal(TemporalType.TIMESTAMP)
-    public Calendar enteredOn;
+    private Calendar enteredOn;
 
-    public String text;
-    public NoteStatus noteStatus;
+    @Lob
+    private String text;
+    private NoteStatus noteStatus;
 
-    public boolean isHistoryNote;
+    private boolean isHistoryNote;
+
+    @ManyToOne
+    private User user; // entered by
 
 }

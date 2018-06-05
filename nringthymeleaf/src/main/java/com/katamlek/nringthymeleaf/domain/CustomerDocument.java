@@ -9,11 +9,17 @@ import java.util.Calendar;
 @Data
 public class CustomerDocument {
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Temporal(TemporalType.DATE)
     private Calendar documentedEnteredOn;
-    private User documentEnteredByUser;
+
+    @OneToOne
+    private User user; // document entered by user xyz
+
     private String documentType;
+
+    @ManyToOne
+    private Customer customer;
 }
