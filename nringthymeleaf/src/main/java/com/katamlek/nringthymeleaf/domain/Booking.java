@@ -36,7 +36,6 @@ public class Booking {
     @NotNull
     private PaymentStatus paymentStatus;
 
-    @Email
     private boolean emailConfirmationSent;
 
     @Temporal(TemporalType.DATE)

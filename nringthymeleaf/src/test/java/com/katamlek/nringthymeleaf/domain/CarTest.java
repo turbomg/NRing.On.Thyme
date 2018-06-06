@@ -1,19 +1,13 @@
 package com.katamlek.nringthymeleaf.domain;
 
 import com.katamlek.nringthymeleaf.repositories.CarRepository;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import javax.persistence.Entity;
-
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(SpringRunner.class)
 @DataJpaTest
@@ -21,15 +15,6 @@ public class CarTest {
 
     @Autowired
     private CarRepository carRepository;
-
-//    @Rule
-//    public Car car;
-
-//    @Before
-//    public void setUp() {
-//        Car car = new Car();
-//
-//    }
 
     // Read test methods
     @Test
@@ -69,13 +54,11 @@ public class CarTest {
 
         Car foundById = carRepository.findById(car.getId()).get();
         assertThat(foundById.equals(car));
-
     }
 
     // Create test methods
     @Test
     public void save() {
-
         Car persisted = new Car();
         persisted.setModel("Citroen");
 
@@ -88,33 +71,45 @@ public class CarTest {
         Car found = carRepository.findById(persisted.getId()).get();
 
         assertThat(found.getModel().equalsIgnoreCase(" citroen"));
-
     }
 
-//    @Test
-//    // Update
-//
-//
-//    @Test
-//    // Delete
-//
-//
-//    public void getId() throws Exception {
-//        Long idValue = 4L;
-//
-//        car.setId(idValue);
-//
-//        assertEquals(idValue, car.getId());
-//    }
+    // Update test methods
+    @Test
+    public void update() {
+        Car car = new Car();
+        car.setModel("BMW");
 
-    //TODO other tests of the domain objects
+        carRepository.save(car);
 
-//
-//    @Test
-//    public void getDescription() throws Exception {
-//    }
-//
-//    @Test
-//    public void getRecipes() throws Exception {
-//    }
+        Iterable<Car> cars = carRepository.findAll();
+
+        assertThat(cars).contains(car);
+
+        carRepository.findById(car.getId());
+        car.setModel("Kia");
+        carRepository.save(car);
+
+        Car found = carRepository.findById(car.getId()).get();
+
+        assertThat(found.getModel().equalsIgnoreCase(" kia"));
+    }
+
+    // Delete test methods
+    @Test
+    public void delete() {
+        Car car = new Car();
+        car.setModel("Ferrari");
+
+        carRepository.save(car);
+
+        Iterable<Car> cars = carRepository.findAll();
+
+        assertThat(cars).contains(car);
+
+        carRepository.delete(car);
+
+        cars = carRepository.findAll();
+
+        assertThat(cars).doesNotContain(car);
+    }
 }
