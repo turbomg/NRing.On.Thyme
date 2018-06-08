@@ -18,7 +18,7 @@ import java.util.Calendar;
 public class Note {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private String id;
+    private Long id;
 
     @Temporal(TemporalType.TIMESTAMP)
     private Calendar enteredOn;

@@ -18,7 +18,7 @@ public class CarPricing {
     private Long startKM;
     private Long per10KM;
     private boolean instruction;
-    private String group;
+    private String carPricingGroup;
 
     @ManyToOne
     private Car car;

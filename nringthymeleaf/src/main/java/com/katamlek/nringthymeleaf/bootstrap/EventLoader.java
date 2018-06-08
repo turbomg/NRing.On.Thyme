@@ -1,50 +1,50 @@
-package com.katamlek.nringthymeleaf.bootstrap;
-
-import com.katamlek.nringthymeleaf.domain.Event;
-import com.katamlek.nringthymeleaf.domain.LocationDefinition;
-import com.katamlek.nringthymeleaf.repositories.EventRepository;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationListener;
-import org.springframework.context.event.ContextRefreshedEvent;
-import org.springframework.stereotype.Component;
-
-import java.math.BigDecimal;
-
-@Component
-public class EventLoader implements ApplicationListener<ContextRefreshedEvent> {
-
-    private EventRepository eventRepository;
-
-    private Logger log = LogManager.getLogger(EventLoader.class);
-
-    public EventLoader(EventRepository eventRepository) {
-        this.eventRepository = eventRepository;
-    }
-
-    @Override
-    public void onApplicationEvent(ContextRefreshedEvent event) {
-        initData();
-    }
-
-    private void initData() {
-//        Event nightKnight = new Event();
+//package com.katamlek.nringthymeleaf.bootstrap;
 //
-//        nightKnight.setEventName("Night Knight");
-//        nightKnight.setEventLocation(new LocationDefinition());
+//import com.katamlek.nringthymeleaf.domain.Event;
+//import com.katamlek.nringthymeleaf.domain.LocationDefinition;
+//import com.katamlek.nringthymeleaf.repositories.EventRepository;
+//import org.apache.logging.log4j.LogManager;
+//import org.apache.logging.log4j.Logger;
+//import org.springframework.beans.factory.annotation.Autowired;
+//import org.springframework.context.ApplicationListener;
+//import org.springframework.context.event.ContextRefreshedEvent;
+//import org.springframework.stereotype.Component;
 //
-//        eventRepository.save(nightKnight);
+//import java.math.BigDecimal;
 //
-//        log.info("Saved Night Knight - id: " + nightKnight.getId());
+//@Component
+//public class EventLoader implements ApplicationListener<ContextRefreshedEvent> {
 //
-//        Event coldDawn = new Event();
+//    private EventRepository eventRepository;
 //
-//        coldDawn.setEventName("Cold Dawn");
-//        coldDawn.setEventLocation(new LocationDefinition()  );
+//    private Logger log = LogManager.getLogger(EventLoader.class);
 //
-//        eventRepository.save(coldDawn);
+//    public EventLoader(EventRepository eventRepository) {
+//        this.eventRepository = eventRepository;
+//    }
 //
-//        log.info("Saved Cold Dawn - id:" + coldDawn.getId());
-    }
-}
+//    @Override
+//    public void onApplicationEvent(ContextRefreshedEvent event) {
+//        initData();
+//    }
+//
+//    private void initData() {
+////        Event nightKnight = new Event();
+////
+////        nightKnight.setEventName("Night Knight");
+////        nightKnight.setEventLocation(new LocationDefinition());
+////
+////        eventRepository.save(nightKnight);
+////
+////        log.info("Saved Night Knight - id: " + nightKnight.getId());
+////
+////        Event coldDawn = new Event();
+////
+////        coldDawn.setEventName("Cold Dawn");
+////        coldDawn.setEventLocation(new LocationDefinition()  );
+////
+////        eventRepository.save(coldDawn);
+////
+////        log.info("Saved Cold Dawn - id:" + coldDawn.getId());
+//    }
+//}

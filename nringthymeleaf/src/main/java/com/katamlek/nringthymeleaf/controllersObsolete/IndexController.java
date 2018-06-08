@@ -1,12 +1,12 @@
-package com.katamlek.nringthymeleaf.controllersObsolete;
-
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestMapping;
-
-@Controller
-public class IndexController {
-    @RequestMapping("/")
-    String index(){
-        return "index";
-    }
-}
+//package com.katamlek.nringthymeleaf.controllersObsolete;
+//
+//import org.springframework.stereotype.Controller;
+//import org.springframework.web.bind.annotation.RequestMapping;
+//
+//@Controller
+//public class IndexController {
+//    @RequestMapping("/")
+//    String index(){
+//        return "index";
+//    }
+//}
