@@ -5,7 +5,7 @@
 //import org.springframework.ui.Model;
 //import org.springframework.web.bind.annotation.RequestMapping;
 //
-////todo no command, services, converters - well maybe I'd need a service for a dashboard or something of that kind
+////todo no command, services_if_necessary, converters - well maybe I'd need a service for a dashboard or something of that kind
 //
 //@Controller
 //public class EventController {

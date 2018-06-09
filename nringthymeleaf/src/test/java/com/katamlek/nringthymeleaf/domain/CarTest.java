@@ -1,6 +1,7 @@
 package com.katamlek.nringthymeleaf.domain;
 
 import com.katamlek.nringthymeleaf.repositories.CarRepository;
+import com.sun.xml.internal.bind.v2.TODO;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -14,6 +15,10 @@ import static org.junit.Assert.assertEquals;
 @RunWith(SpringRunner.class)
 @DataJpaTest
 public class CarTest {
+
+    //todo po napisaniu serwisow napisac wszystkie testy na wzor CustomerTest i poprzerabiac te, ktore juz napisane
+    //todo w Customerze jest troche bezsensow, popatrz na kod Guru
+    // chociaz w sumie moje nie sa glupie...
 
 //    Car car;
 //

@@ -1,12 +1,8 @@
 package com.katamlek.nringthymeleaf.domain;
 
-import com.katamlek.nringthymeleaf.repositories.CarRepository;
-import com.katamlek.nringthymeleaf.repositories.CustomerRepository;
-import com.katamlek.nringthymeleaf.services.CustomerServiceImpl;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -17,24 +13,25 @@ import static org.junit.Assert.assertEquals;
 @DataJpaTest
 public class CustomerTest {
 
-    Car car;
+    Customer customer;
 
     @Before
     public void setUp() {
-        car = new Car();
+        customer = new Customer();
     }
 
     @Test
     public void getId() throws Exception {
         Long idValue = 4L;
 
-        car.setId(idValue);
+        customer.setId(idValue);
 
-        assertThat(idValue).isEqualTo(car.getId());
+        assertThat(idValue).isEqualTo(customer.getId());
     }
 
     @Test
     public void getCustomers() throws Exception {
+
     }
 //
 //    @Test

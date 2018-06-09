@@ -1,4 +1,4 @@
-package com.katamlek.nringthymeleaf.services;
+package com.katamlek.nringthymeleaf.services_if_necessary;
 
 import com.katamlek.nringthymeleaf.domain.Customer;
 import com.katamlek.nringthymeleaf.repositories.CustomerRepository;
