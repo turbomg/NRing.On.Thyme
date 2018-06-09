@@ -22,4 +22,6 @@ public class NringthymeleafApplication extends SpringBootServletInitializer {
 //        protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
 //            return application.sources(AppInit.class);
 //	}
+
+    
 }
