@@ -68,7 +68,7 @@ public class AppInit extends UI {
     @Override
     protected void init(VaadinRequest vaadinRequest) {
         //      devBootstrap.initEventData();
-        setContent(new VerticalLayout());
+        setContent(new Label("I'm here!"));
     }
 
 
