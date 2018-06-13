@@ -1,6 +1,6 @@
 package com.katamlek.nringthymeleaf.views;
 
-import com.katamlek.nringthymeleaf.frontend.CarGrid;
+import com.katamlek.nringthymeleaf.frontend.CarGridView;
 import com.vaadin.navigator.View;
 import com.vaadin.spring.annotation.SpringView;
 import com.vaadin.spring.annotation.UIScope;
@@ -10,9 +10,9 @@ import com.vaadin.ui.VerticalLayout;
 @UIScope
 public class CarListView extends VerticalLayout implements View {
 
-    CarGrid carGrid;
+    CarGridView carGrid;
 
-    public CarListView(CarGrid carGrid) {
+    public CarListView(CarGridView carGrid) {
         this.carGrid = carGrid;
     }
 

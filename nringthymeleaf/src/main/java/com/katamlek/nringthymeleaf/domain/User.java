@@ -4,7 +4,9 @@ package com.katamlek.nringthymeleaf.domain;
 Application user.
  */
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -13,6 +15,7 @@ import java.util.Set;
 
 @Entity
 @Data
+@NoArgsConstructor
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -44,4 +47,11 @@ public class User {
 
     @OneToOne
     private CustomerDocument customerDocument;
+
+    private boolean isLoggedIn;
+
+    public User(@NotNull String email, String password) {
+        this.email = email;
+        this.password = password;
+    }
 }
