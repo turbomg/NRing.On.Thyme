@@ -3,6 +3,7 @@ package com.katamlek.nringthymeleaf.domain;
 import lombok.Data;
 
 import javax.persistence.*;
+import java.math.BigDecimal;
 import java.util.List;
 
 @Entity
@@ -14,12 +15,12 @@ public class PriceList {
 
     @Lob
     private String pricingDescription;
-    private Long pricingUnit;
+    private BigDecimal pricingUnit;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "priceList")
     private List<PriceListNote> pricingDefinitionListNote;
 
-    private Long defaultPrice;
+    private BigDecimal defaultPrice;
 
     @OneToOne
     private PriceGroup pricingGroup;

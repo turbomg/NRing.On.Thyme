@@ -4,6 +4,7 @@ import lombok.Data;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
+import java.math.BigDecimal;
 
 @Entity
 @Data
@@ -13,8 +14,8 @@ public class EventPublicPricing {
     private Long id;
 
     @NotNull
-    private Long eventEntryFee;
-    private Long additionalDriverFee;
+    private BigDecimal eventEntryFee;
+    private BigDecimal additionalDriverFee;
 
     @OneToOne
     private Event event;

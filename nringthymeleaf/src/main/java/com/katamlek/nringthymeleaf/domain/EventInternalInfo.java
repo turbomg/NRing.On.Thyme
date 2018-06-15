@@ -3,6 +3,7 @@ package com.katamlek.nringthymeleaf.domain;
 import lombok.Data;
 
 import javax.persistence.*;
+import java.math.BigDecimal;
 import java.util.List;
 
 @Entity
@@ -14,9 +15,9 @@ public class EventInternalInfo {
 
     private String internalEventOrganizer;
     private int internalCurrentEntriesNo;
-    private Long internalCurrentEntriesValue;
-    private Long internalEventCostToRSR;
-    private int internalSpacesBooked;
+    private BigDecimal internalCurrentEntriesValue;
+    private BigDecimal internalEventCostToRSR;
+    private Integer internalSpacesBooked;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "eventInternalInfo")
     private List<EventInternalInfoNote> eventInternalInfoNote;
