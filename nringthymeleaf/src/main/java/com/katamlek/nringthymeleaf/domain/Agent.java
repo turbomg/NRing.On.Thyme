@@ -18,6 +18,7 @@ public class Agent {
     @NotNull
     private String lastName;
 
+    //todo one to one or to many?
     @OneToOne
     private Customer customer;
 }

@@ -33,20 +33,22 @@ public class User {
 
     private String userRole;
 
-    @OneToOne
-    private Booking booking;
+    @OneToMany(mappedBy = "createdBy")
+    private List<Booking> bookings;
 
-    @OneToOne
-    private Customer customer;
+    @OneToMany(mappedBy = "customerCreatedBy")
+    private List<Customer> customers;
 
-    @OneToOne
-    private Event event;
+    //todo fix relationships
+
+    @OneToMany(mappedBy = "eventResponsibleUser")
+    private List<Event> events;
 
     @OneToMany(mappedBy = "user")
     private List<Note> notes;
 
-    @OneToOne
-    private CustomerDocument customerDocument;
+    @OneToMany(mappedBy = "user")
+    private List<CustomerDocument> customerDocuments;
 
     private boolean isLoggedIn;
 

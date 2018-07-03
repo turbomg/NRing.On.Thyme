@@ -6,7 +6,7 @@ import javax.persistence.*;
 
 @Entity
 @Data
-public class PriceGroup {
+public class PricingGroup {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -19,5 +19,8 @@ public class PriceGroup {
     private Long pricingGroupRounding;
 
     @OneToOne
-    private PriceList priceList;
+    private OthersPricing priceList;
+
+    @OneToOne
+    private CarPricing carPricing;
 }

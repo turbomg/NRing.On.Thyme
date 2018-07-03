@@ -3,7 +3,6 @@ package com.katamlek.nringthymeleaf.domain;
 import lombok.Data;
 
 import javax.persistence.*;
-import javax.persistence.criteria.CriteriaBuilder;
 import java.math.BigDecimal;
 
 @Entity
@@ -20,7 +19,9 @@ public class CarPricing {
     private Integer startKM;
     private Integer per10KM;
     private boolean instruction;
-    private String carPricingGroup;
+
+    @OneToOne
+    private PricingGroup carPricingGroup;
 
     @ManyToOne
     private Car car;

@@ -1,4 +1,4 @@
-package com.katamlek.nringthymeleaf.frontend;
+package com.katamlek.nringthymeleaf.frontend.grids;
 
 import com.katamlek.nringthymeleaf.domain.Event;
 import com.katamlek.nringthymeleaf.repositories.EventRepository;
@@ -13,6 +13,8 @@ import java.util.List;
 @SpringComponent
 @UIScope
 public class EventGridView {
+
+    //todo finish this class
 
     private final EventRepository eventRepository;
     final Grid<Event> eventGrid;

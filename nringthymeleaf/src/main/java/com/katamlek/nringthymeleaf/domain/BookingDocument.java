@@ -4,6 +4,7 @@ import lombok.Data;
 
 import javax.persistence.*;
 import java.util.Calendar;
+import java.util.Date;
 
 @Entity
 @Data
@@ -13,7 +14,7 @@ public class BookingDocument {
     private Long id;
 
     @Temporal(TemporalType.DATE)
-    private Calendar date;
+    private Date date;
 
     private String bookingDocumentDescription;
 

@@ -19,4 +19,8 @@ public class PaymentDefinition {
 
     @OneToOne
     private AccountDefinition accountDefinition;
+
+    @OneToOne
+    private BookingPayment bookingPayment;
+
 }

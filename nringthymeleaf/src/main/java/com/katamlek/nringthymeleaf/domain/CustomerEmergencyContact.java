@@ -15,13 +15,13 @@ public class CustomerEmergencyContact {
     private Long id;
 
     @NotNull
-    private String customerFirstName;
+    private String customerEmergencyFirstName;
 
-    private String customerLastName;
-    private String customerPhoneNumber;
+    private String customerEmergencyLastName;
+    private String customerEmergencyPhoneNumber;
 
     @Email
-    private String customerEmail;
+    private String customerEmergcencyEmail;
 
     @ManyToMany(mappedBy = "customerEmergencyContacts")
     private List<Customer> customers;

@@ -1,6 +1,6 @@
 package com.katamlek.nringthymeleaf.views;
 
-import com.katamlek.nringthymeleaf.frontend.CarGridView;
+import com.katamlek.nringthymeleaf.frontend.grids.CarGridView;
 import com.vaadin.navigator.View;
 import com.vaadin.spring.annotation.SpringView;
 import com.vaadin.spring.annotation.UIScope;

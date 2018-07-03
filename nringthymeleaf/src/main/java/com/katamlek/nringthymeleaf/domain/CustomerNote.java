@@ -11,7 +11,7 @@ import javax.persistence.ManyToOne;
 @Entity
 @Data
 public class CustomerNote extends Note {
-    private Long value;
+    private String value;
 
     @ManyToOne
     private Customer customer;

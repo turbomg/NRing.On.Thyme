@@ -15,7 +15,7 @@ public class CustomerDocument {
     @Temporal(TemporalType.DATE)
     private Calendar documentedEnteredOn;
 
-    @OneToOne
+    @ManyToOne
     private User user; // document entered by user xyz
 
     private String documentType;

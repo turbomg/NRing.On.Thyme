@@ -29,7 +29,7 @@ public class Event {
     @Temporal(TemporalType.TIMESTAMP)
     private Calendar eventEndDateTime;
 
-    @OneToOne
+    @ManyToOne
     private User eventResponsibleUser;
 
     private boolean visibleWhenNoBookings;

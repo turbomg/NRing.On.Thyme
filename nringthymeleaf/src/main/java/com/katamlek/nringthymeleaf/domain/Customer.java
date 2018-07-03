@@ -18,7 +18,7 @@ public class Customer {
     @Temporal(TemporalType.DATE)
     private Calendar customerCreateDate; // = Customer since
 
-    @OneToOne
+    @ManyToOne
     private User customerCreatedBy;
 
     @NotNull
@@ -32,6 +32,9 @@ public class Customer {
     private String customerEmail;
 
     private boolean customerNewsletter;
+
+    @Lob
+    private String customerGeneralInformation;
 
     @OneToOne
     private Agent customerAgent;

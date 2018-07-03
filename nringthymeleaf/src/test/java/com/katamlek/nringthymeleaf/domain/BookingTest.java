@@ -10,6 +10,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -44,7 +45,7 @@ public class BookingTest {
         userRepository.save(user);
 
         booking.setCreatedBy(user);
-        booking.setCreateDate(Calendar.getInstance());
+        booking.setCreateDate(new Date());
         booking.setSignatureStatus(SignatureStatus.SIGNED);
         booking.setCustomers(new ArrayList<Customer>());
 
@@ -66,7 +67,7 @@ public class BookingTest {
         userRepository.save(user);
 
         booking.setCreatedBy(user);
-        booking.setCreateDate(Calendar.getInstance());
+        booking.setCreateDate(new Date());
         booking.setSignatureStatus(SignatureStatus.SIGNED);
         booking.setCustomers(new ArrayList<Customer>());
 
@@ -91,7 +92,7 @@ public class BookingTest {
         userRepository.save(user);
 
         persisted.setCreatedBy(user);
-        persisted.setCreateDate(Calendar.getInstance());
+        persisted.setCreateDate(new Date());
         persisted.setSignatureStatus(SignatureStatus.SIGNED);
         persisted.setCustomers(new ArrayList<Customer>());
 
@@ -118,7 +119,7 @@ public class BookingTest {
         userRepository.save(user);
 
         booking.setCreatedBy(user);
-        booking.setCreateDate(Calendar.getInstance());
+        booking.setCreateDate(new Date());
         booking.setSignatureStatus(SignatureStatus.SIGNED);
         booking.setCustomers(new ArrayList<Customer>());
 
@@ -149,7 +150,7 @@ public class BookingTest {
         userRepository.save(user);
 
         booking.setCreatedBy(user);
-        booking.setCreateDate(Calendar.getInstance());
+        booking.setCreateDate(new Date());
         booking.setSignatureStatus(SignatureStatus.SIGNED);
         booking.setCustomers(new ArrayList<Customer>());
 

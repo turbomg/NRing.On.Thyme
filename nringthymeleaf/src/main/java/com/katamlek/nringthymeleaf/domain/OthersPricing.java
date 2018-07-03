@@ -8,7 +8,7 @@ import java.util.List;
 
 @Entity
 @Data
-public class PriceList {
+public class OthersPricing {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -17,13 +17,13 @@ public class PriceList {
     private String pricingDescription;
     private BigDecimal pricingUnit;
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "priceList")
-    private List<PriceListNote> pricingDefinitionListNote;
+    @Lob
+    private String description;
 
     private BigDecimal defaultPrice;
 
     @OneToOne
-    private PriceGroup pricingGroup;
+    private PricingGroup pricingGroup;
 
     @ManyToMany(mappedBy = "bookedServicesList")
     private List<Booking> bookings;

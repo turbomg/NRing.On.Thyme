@@ -5,6 +5,7 @@ import lombok.Data;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 @Entity
@@ -22,17 +23,17 @@ public class Car {
     private Long lastMileage;
 
     @Temporal(TemporalType.TIMESTAMP)
-    private Calendar firstBooking;
+    private Date firstBooking;
 
     @Temporal(TemporalType.TIMESTAMP)
-    private Calendar lastBooking;
+    private Date lastBooking;
 
     private MileageType mileageType;
 
     private CarFleet carFleet;
 
     @Temporal(TemporalType.DATE)
-    private Calendar nextTUV;
+    private Date nextTUV;
 
     private Long nextServiceAtKm;
 
@@ -50,10 +51,5 @@ public class Car {
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "car")
     private List<CarPricing> carPricing;
-
-    @ManyToMany(mappedBy = "bookedCarsList")
-    private List<Booking> bookings;
-
-    @OneToOne
-    private BookingCarChangeNote bookingCarChangeNote;
+    
 }
