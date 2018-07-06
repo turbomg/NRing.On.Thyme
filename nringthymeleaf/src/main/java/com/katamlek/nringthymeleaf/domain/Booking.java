@@ -46,11 +46,13 @@ public class Booking {
     @OneToMany(mappedBy = "booking")
     private List<BookingCar> bookedCarsList;
 
-    //TODO as above
-    @ManyToMany
-    @JoinTable(name = "booking_pricelist", joinColumns = @JoinColumn(name = "booking_id"),
-            inverseJoinColumns = @JoinColumn(name = "pricelist_id"))
-    private List<OthersPricing> bookedServicesList; // package entries
+//    @ManyToMany
+//    @JoinTable(name = "booking_pricelist", joinColumns = @JoinColumn(name = "booking_id"),
+//            inverseJoinColumns = @JoinColumn(name = "pricelist_id"))
+//    private List<OthersPricing> bookedServicesList; // package entries
+
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "booking")
+    private List<BookingPackageItem> packageItems;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "booking")
     private List<PaymentNote> paymentList;

@@ -6,6 +6,7 @@ import com.katamlek.nringthymeleaf.repositories.LocationDefinitionRepository;
 import com.vaadin.navigator.View;
 import com.vaadin.shared.ui.grid.ColumnResizeMode;
 import com.vaadin.spring.annotation.SpringComponent;
+import com.vaadin.spring.annotation.SpringView;
 import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.*;
 import com.vaadin.ui.renderers.ButtonRenderer;
@@ -17,7 +18,7 @@ import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.List;
 
-@SpringComponent
+@SpringView
 @UIScope
 public class CarGridView extends VerticalLayout implements View {
     GridCellFilter filter;

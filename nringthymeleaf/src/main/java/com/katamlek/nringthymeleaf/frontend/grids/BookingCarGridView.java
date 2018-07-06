@@ -4,6 +4,8 @@ import com.katamlek.nringthymeleaf.domain.*;
 import com.katamlek.nringthymeleaf.repositories.BookingCarRepository;
 import com.vaadin.navigator.View;
 import com.vaadin.shared.ui.grid.ColumnResizeMode;
+import com.vaadin.spring.annotation.SpringComponent;
+import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.*;
 import com.vaadin.ui.renderers.ButtonRenderer;
 import org.assertj.core.util.Lists;
@@ -17,6 +19,8 @@ import java.util.Arrays;
  * Grid placed on the booking form, listing the cars.
  */
 
+@SpringComponent
+@UIScope
 public class BookingCarGridView extends VerticalLayout implements View {
     private BookingCarRepository bookingCarRepository;
     private GridCellFilter filter;

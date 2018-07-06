@@ -24,7 +24,7 @@ public class OthersPricing {
 
     @OneToOne
     private PricingGroup pricingGroup;
-
-    @ManyToMany(mappedBy = "bookedServicesList")
-    private List<Booking> bookings;
+//
+//    @ManyToMany(mappedBy = "bookedServicesList")
+//    private List<Booking> bookings;
 }

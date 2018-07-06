@@ -1,9 +1,6 @@
 package com.katamlek.nringthymeleaf.frontend.grids;
 
-import com.katamlek.nringthymeleaf.domain.BookingPayment;
 import com.katamlek.nringthymeleaf.domain.Customer;
-import com.katamlek.nringthymeleaf.domain.CustomerNote;
-import com.katamlek.nringthymeleaf.repositories.CustomerDocumentRepository;
 import com.katamlek.nringthymeleaf.repositories.CustomerNoteRepository;
 import com.katamlek.nringthymeleaf.repositories.CustomerRepository;
 import com.vaadin.navigator.View;
@@ -14,8 +11,6 @@ import com.vaadin.ui.*;
 import com.vaadin.ui.renderers.ButtonRenderer;
 import org.assertj.core.util.Lists;
 import org.vaadin.gridutil.cell.GridCellFilter;
-
-import java.text.SimpleDateFormat;
 
 /**
  * List of the drivers related to the booking.
@@ -108,7 +103,7 @@ public class DriversGridView extends VerticalLayout implements View {
     }
 
     // Build the buttons' row: Add, Clear filters
-    public HorizontalLayout buildCarButtons() {
+    public HorizontalLayout buildDriverButtons() {
         HorizontalLayout buttonsDriverHL = new HorizontalLayout();
 
         Button addDriverBtn = new Button("Add a payment"); // add new document
@@ -134,7 +129,7 @@ public class DriversGridView extends VerticalLayout implements View {
     // Put all together
     public VerticalLayout buildDriverGridView() {
         VerticalLayout bookingDriverGridViewVL = new VerticalLayout();
-        bookingDriverGridViewVL.addComponents(buildCarButtons(), buildDriverGrid());
+        bookingDriverGridViewVL.addComponents(buildDriverButtons(), buildDriverGrid());
         return bookingDriverGridViewVL;
     }
 

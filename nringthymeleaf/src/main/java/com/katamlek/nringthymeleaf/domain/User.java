@@ -39,8 +39,6 @@ public class User {
     @OneToMany(mappedBy = "customerCreatedBy")
     private List<Customer> customers;
 
-    //todo fix relationships
-
     @OneToMany(mappedBy = "eventResponsibleUser")
     private List<Event> events;
 

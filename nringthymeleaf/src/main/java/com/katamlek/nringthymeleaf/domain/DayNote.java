@@ -4,10 +4,11 @@ import lombok.Data;
 
 import javax.persistence.*;
 import java.util.Calendar;
+import java.util.Date;
 
 @Entity
 @Data
 public class DayNote extends Note {
     @Temporal(TemporalType.DATE)
-    private Calendar concernsDay;
+    private Date concernsDay;
 }

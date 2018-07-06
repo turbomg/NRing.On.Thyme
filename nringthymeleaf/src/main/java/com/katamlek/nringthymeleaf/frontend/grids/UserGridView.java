@@ -1,12 +1,13 @@
 package com.katamlek.nringthymeleaf.frontend.grids;
 
-import com.katamlek.nringthymeleaf.domain.CarStatus;
 import com.katamlek.nringthymeleaf.domain.User;
 import com.katamlek.nringthymeleaf.domain.UserRole;
+import com.katamlek.nringthymeleaf.frontend.forms.UserForm;
 import com.katamlek.nringthymeleaf.repositories.UserRepository;
 import com.vaadin.navigator.View;
 import com.vaadin.shared.ui.grid.ColumnResizeMode;
 import com.vaadin.spring.annotation.SpringComponent;
+import com.vaadin.spring.annotation.SpringView;
 import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.*;
 import com.vaadin.ui.renderers.ButtonRenderer;
@@ -20,14 +21,19 @@ import java.util.Arrays;
  * System users list.
  */
 
-@SpringComponent
+@SpringView
 @UIScope
 public class UserGridView extends VerticalLayout implements View {
     private UserRepository userRepository;
+    private UserForm userForm;
+
     private GridCellFilter filter;
 
-    public UserGridView(UserRepository userRepository) {
+    public static final String VIEW_NAME = "user-grid-view";
+
+    public UserGridView(UserRepository userRepository, UserForm userForm) {
         this.userRepository = userRepository;
+        this.userForm = userForm;
         addComponent(buildUserGridView());
     }
 
@@ -62,11 +68,11 @@ public class UserGridView extends VerticalLayout implements View {
             if (event.getMouseEventDetails().isDoubleClick()) {
                 UI.getCurrent().getNavigator().navigateTo("xxx");
                 // todo set navigator to the selected user
-                // todo NOT A NAVIGATOR ! New carEditForm(Long id);
+                // todo NOT A NAVIGATOR ! New userEditForm(Long id);
             }
         });
 
-        // Inline filtering - without Color as it's an icon
+        // Inline filtering
         this.filter = new GridCellFilter(userGrid);
         this.filter.setTextFilter("initials", true, true);
         this.filter.setTextFilter("name", true, true);
@@ -74,14 +80,14 @@ public class UserGridView extends VerticalLayout implements View {
         this.filter.setTextFilter("phoneNumber", true, true);
         this.filter.setTextFilter("email", true, true);
 
-        CellFilterComponent<ComboBox<CarStatus>> roleFilter = this.filter.setComboBoxFilter("userRole", UserRole.class, Arrays.asList(UserRole.values()));
+        CellFilterComponent<ComboBox<UserRole>> roleFilter = this.filter.setComboBoxFilter("userRole", UserRole.class, Arrays.asList(UserRole.values()));
 
         // Inline editor
         userGrid.getEditor().setEnabled(true);
 
         // Extra columns: edit, delete
         userGrid.addColumn(user -> "Edit", new ButtonRenderer(clickEvent -> {
-            //todo navigator
+            userForm.editUser((User) clickEvent.getItem());
         }));
 
         userGrid.addColumn(bookingCar -> "Delete", new ButtonRenderer(clickEvent -> {
@@ -97,9 +103,10 @@ public class UserGridView extends VerticalLayout implements View {
     public HorizontalLayout buildUserButtons() {
         HorizontalLayout buttonsUserHL = new HorizontalLayout();
 
-        Button addUserBtn = new Button("Add a car"); // add new car
-        addUserBtn.addClickListener(e -> UI.getCurrent().getNavigator().navigateTo("aaa"));
-        //todo add navigator
+        Button addUserBtn = new Button("Add user"); // add new user
+        addUserBtn.addClickListener(e -> {
+            UI.getCurrent().getNavigator().navigateTo(UserForm.VIEW_NAME);
+                });
 
         Button clearAllFilters = new Button("Remove filters", e -> {
             filter.clearAllFilters();

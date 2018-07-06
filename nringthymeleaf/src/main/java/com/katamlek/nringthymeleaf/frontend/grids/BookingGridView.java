@@ -6,6 +6,7 @@ import com.katamlek.nringthymeleaf.repositories.UserRepository;
 import com.vaadin.navigator.View;
 import com.vaadin.shared.ui.grid.ColumnResizeMode;
 import com.vaadin.spring.annotation.SpringComponent;
+import com.vaadin.spring.annotation.SpringView;
 import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.*;
 import org.assertj.core.util.Lists;
@@ -17,10 +18,12 @@ import java.util.Arrays;
 
 @SpringComponent
 @UIScope
+@SpringView(name = BookingGridView.VIEW_NAME)
 public class BookingGridView extends VerticalLayout implements View {
-    GridCellFilter filter;
-    BookingRepository bookingRepository;
-    UserRepository userRepository;
+    public static final String VIEW_NAME = "booking-grid";
+    private GridCellFilter filter;
+    private BookingRepository bookingRepository;
+    private UserRepository userRepository;
 
     public BookingGridView(BookingRepository bookingRepository, UserRepository userRepository) {
         this.bookingRepository = bookingRepository;
@@ -40,7 +43,7 @@ public class BookingGridView extends VerticalLayout implements View {
     //    bookingGrid.getColumn("carChangeNotes").setHidden(true);
         bookingGrid.getColumn("customers").setHidden(true);
         bookingGrid.getColumn("bookedCarsList").setHidden(true);
-        bookingGrid.getColumn("bookedServicesList").setHidden(true);
+        bookingGrid.getColumn("packageItems").setHidden(true);
         bookingGrid.getColumn("paymentList").setHidden(true);
         bookingGrid.getColumn("bookingDocumentList").setHidden(true);
 

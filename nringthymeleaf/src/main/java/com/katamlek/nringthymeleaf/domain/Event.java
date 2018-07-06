@@ -5,6 +5,7 @@ import lombok.Data;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.util.Calendar;
+import java.util.Date;
 
 @Entity
 @Data
@@ -24,10 +25,10 @@ public class Event {
     private String eventTrack;
 
     @Temporal(TemporalType.TIMESTAMP)
-    private Calendar eventStartDateTime;
+    private Date eventStartDateTime;
 
     @Temporal(TemporalType.TIMESTAMP)
-    private Calendar eventEndDateTime;
+    private Date eventEndDateTime;
 
     @ManyToOne
     private User eventResponsibleUser;
