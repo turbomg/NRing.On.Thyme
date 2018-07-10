@@ -4,7 +4,7 @@ import lombok.Data;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
-import java.util.Calendar;
+import java.time.LocalDate;
 import java.util.Date;
 
 @Entity
@@ -24,17 +24,26 @@ public class Event {
 
     private String eventTrack;
 
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date eventStartDateTime;
+    @Temporal(TemporalType.DATE)
+    private Date eventDate;
 
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date eventEndDateTime;
+    private String eventStartTime;
+
+    private String eventEndTime;
 
     @ManyToOne
     private User eventResponsibleUser;
 
     private boolean visibleWhenNoBookings;
     private boolean visibleInPublicCalendar;
+
+    public boolean isVisibleWhenNoBookings() {
+        return visibleWhenNoBookings;
+    }
+
+    public void setVisibleWhenNoBookings(boolean visibleWhenNoBookings) {
+        this.visibleWhenNoBookings = visibleWhenNoBookings;
+    }
 
     @OneToOne
     private EventPublicPricing eventPublicPricing;

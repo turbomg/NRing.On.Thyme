@@ -23,4 +23,5 @@ public class PricingGroup {
 
     @OneToOne
     private CarPricing carPricing;
+
 }

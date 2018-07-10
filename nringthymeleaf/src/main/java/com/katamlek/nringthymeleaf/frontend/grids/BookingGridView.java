@@ -18,9 +18,9 @@ import java.util.Arrays;
 
 @SpringComponent
 @UIScope
-@SpringView(name = BookingGridView.VIEW_NAME)
+@SpringView
 public class BookingGridView extends VerticalLayout implements View {
-    public static final String VIEW_NAME = "booking-grid";
+  //  public static final String VIEW_NAME = "booking-grid";
     private GridCellFilter filter;
     private BookingRepository bookingRepository;
     private UserRepository userRepository;

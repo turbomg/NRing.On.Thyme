@@ -24,5 +24,5 @@ public class CustomerEmergencyContact {
     private String customerEmergcencyEmail;
 
     @ManyToMany(mappedBy = "customerEmergencyContacts")
-    private List<Customer> customers;
+    private List<Customer> customers; // one contact can be an emergency contact for different customers and vice versa
 }

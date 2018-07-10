@@ -4,9 +4,12 @@ import lombok.Data;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+
+/**
+ * The fleet objects.
+ */
 
 @Entity
 @Data
@@ -51,5 +54,5 @@ public class Car {
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "car")
     private List<CarPricing> carPricing;
-    
+
 }

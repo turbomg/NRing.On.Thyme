@@ -4,7 +4,10 @@ import lombok.Data;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
-import java.util.List;
+
+/**
+ * Pricing of other services: GoPro, additional driver etc.
+ */
 
 @Entity
 @Data
@@ -24,7 +27,4 @@ public class OthersPricing {
 
     @OneToOne
     private PricingGroup pricingGroup;
-//
-//    @ManyToMany(mappedBy = "bookedServicesList")
-//    private List<Booking> bookings;
 }

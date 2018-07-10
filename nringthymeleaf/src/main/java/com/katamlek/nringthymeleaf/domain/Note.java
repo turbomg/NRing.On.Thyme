@@ -7,6 +7,7 @@ import java.util.Calendar;
 
 /**
  * Note regarding another entity: car note, day note etc.
+ * A base type of note.
  */
 
 

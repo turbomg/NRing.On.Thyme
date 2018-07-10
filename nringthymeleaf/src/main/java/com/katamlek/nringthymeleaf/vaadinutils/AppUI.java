@@ -41,7 +41,7 @@ public class AppUI extends UI implements HasLogger {
 		//todo later on when working on reports
 
 	//	viewProvider.setAccessDeniedViewClass(AccessDeniedView.class);
-		// todo above
+		// todo above, when working on security
 		setContent(mainView);
 
 		navigationManager.navigateToDefaultView();

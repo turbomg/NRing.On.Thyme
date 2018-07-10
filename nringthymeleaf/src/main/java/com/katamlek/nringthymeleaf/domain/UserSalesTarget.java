@@ -15,10 +15,10 @@ public class UserSalesTarget {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToOne
+    @ManyToOne
     private User user;
 
-    @Temporal(TemporalType.DATE) // Entered automatically as the last day of the month
+    @Temporal(TemporalType.DATE) // Entered automatically as the last day of the month; yearly goal = sum of the months
     private Calendar periodTo;
     private BigDecimal targetAmount;
 }

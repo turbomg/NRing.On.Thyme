@@ -38,18 +38,12 @@ public class Booking {
     private boolean emailReminderSent;
 
     @ManyToMany
-    @JoinTable(name = "booking_customer", joinColumns = @JoinColumn(name = "booking_id"),
-            inverseJoinColumns = @JoinColumn(name = "customer_id"))
+    @JoinTable(name = "booking_customer", joinColumns = @JoinColumn(name = "booking_id"), inverseJoinColumns = @JoinColumn(name = "customer_id"))
     @NotNull
     private List<Customer> customers; // drivers
 
     @OneToMany(mappedBy = "booking")
     private List<BookingCar> bookedCarsList;
-
-//    @ManyToMany
-//    @JoinTable(name = "booking_pricelist", joinColumns = @JoinColumn(name = "booking_id"),
-//            inverseJoinColumns = @JoinColumn(name = "pricelist_id"))
-//    private List<OthersPricing> bookedServicesList; // package entries
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "booking")
     private List<BookingPackageItem> packageItems;

@@ -30,7 +30,7 @@ public class DriversGridView extends VerticalLayout implements View {
         this.addComponent(buildDriverGrid());
     }
 
-    // Build the grid with booking payments
+    // Build the grid with drivers
     public Grid<Customer> buildDriverGrid() {
 
         Grid<Customer> driverGrid = new Grid<>(Customer.class);

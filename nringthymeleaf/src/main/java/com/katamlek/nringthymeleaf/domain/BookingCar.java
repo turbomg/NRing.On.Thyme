@@ -24,6 +24,9 @@ public class BookingCar {
     @Lob
     private String mechanicNotes;
 
+    @Lob
+    private String remarks;
+
     @ManyToOne
     private Booking booking;
 

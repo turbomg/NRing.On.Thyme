@@ -45,8 +45,7 @@ public class Customer {
     private List<CustomerNote> customerNotes;
 
     @ManyToMany
-    @JoinTable(name = "customer_customeremergencycontact", joinColumns = @JoinColumn(name = "customer_id"),
-            inverseJoinColumns = @JoinColumn(name = "customeremergencycontact_id"))
+    @JoinTable(name = "customer_customeremergencycontact", joinColumns = @JoinColumn(name = "customer_id"), inverseJoinColumns = @JoinColumn(name = "customeremergencycontact_id"))
     private List<CustomerEmergencyContact> customerEmergencyContacts;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "customer")

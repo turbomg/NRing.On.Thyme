@@ -6,6 +6,11 @@ import javax.persistence.*;
 import java.math.BigDecimal;
 import java.util.Date;
 
+/**
+ * Items on the booking form derived from pricing lists
+ * for Car, Event and Other.
+ */
+
 @Entity
 @Data
 public class BookingPackageItem {

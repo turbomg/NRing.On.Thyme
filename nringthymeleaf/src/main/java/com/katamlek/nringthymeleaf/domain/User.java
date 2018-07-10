@@ -4,14 +4,12 @@ package com.katamlek.nringthymeleaf.domain;
 Application user.
  */
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.util.List;
-import java.util.Set;
 
 @Entity
 @Data
@@ -49,6 +47,9 @@ public class User {
     private List<CustomerDocument> customerDocuments;
 
     private boolean isLoggedIn;
+
+    @OneToMany(mappedBy = "user")
+    private List<UserSalesTarget> userSalesTarget;
 
     public User(@NotNull String email, String password) {
         this.email = email;
