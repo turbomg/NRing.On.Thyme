@@ -1,9 +1,6 @@
 package com.katamlek.nringthymeleaf.frontend.forms;
 
-import com.katamlek.nringthymeleaf.domain.Event;
-import com.katamlek.nringthymeleaf.domain.EventType;
-import com.katamlek.nringthymeleaf.domain.LocationDefinition;
-import com.katamlek.nringthymeleaf.domain.User;
+import com.katamlek.nringthymeleaf.domain.*;
 import com.katamlek.nringthymeleaf.frontend.grids.EventGridView;
 import com.katamlek.nringthymeleaf.frontend.navigation.NavigationManager;
 import com.katamlek.nringthymeleaf.repositories.EventRepository;
@@ -14,13 +11,16 @@ import com.vaadin.data.converter.LocalDateToDateConverter;
 import com.vaadin.data.provider.DataProvider;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener;
+import com.vaadin.shared.ui.grid.ColumnResizeMode;
 import com.vaadin.spring.annotation.SpringView;
 import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.*;
 import org.assertj.core.util.Lists;
 
+import java.math.BigDecimal;
 import java.time.ZoneId;
 import java.util.Date;
+import java.util.List;
 
 @SpringView
 @UIScope
@@ -43,22 +43,42 @@ public class EventForm extends VerticalLayout implements View {
     private Label eventWindowTitleL;
 
     // Section labels + fields
+    // Details
     private Label eventDetailsL = new Label("Event details");
-    RadioButtonGroup<EventType> eventTypeRBGroup;
-    TextField eventNameTF;
-    DateField eventDateDF;
-    ComboBox<User> eventResponsibleUserCB;
-    ComboBox<LocationDefinition> eventLocationCB;
-    TextField eventTrackTF;
-    TextField eventStartTimeTF;
-    TextField eventEndTimeTF;
-    CheckBox hideWhenNoBookings;
-    CheckBox hideFromPublicCalendar;
-
-
-    private Label eventInternalInfoL;
-    private Label eventPublicPriceL;
-    private Label eventPublicInfoL;
+    private RadioButtonGroup<EventType> eventTypeRBGroup;
+    private TextField eventNameTF;
+    private DateField eventDateDF;
+    private ComboBox<User> eventResponsibleUserCB;
+    private ComboBox<LocationDefinition> eventLocationCB;
+    private TextField eventTrackTF;
+    private TextField eventStartTimeTF;
+    private TextField eventEndTimeTF;
+    private CheckBox hideWhenNoBookings;
+    private CheckBox hideFromPublicCalendar;
+    // Internal information
+    private Label eventInternalInfoL = new Label("Internal information");
+    private TextField eventOrganizer;
+    private TextField eventCostToRSR;
+    private TextField eventSpacesBooked;
+    private Grid<EventInternalInfoNote> eventInternalInfoNoteGrid;
+    private Button addNewInternalInfoNoteBTN;
+    private Label eventCurrentEntriesPaid;
+    private Label eventCurrentEntriesUnpaid;
+    private Label eventCurrentValuePaid;
+    private Label eventCurrentValueUnpaid;
+    // Public pricing
+    private Label eventPublicPriceL = new Label("Pubic pricing");
+    private TextField eventEntryFee;
+    private TextField eventAdditionalDriverFee;
+    // Public information
+    private Label eventPublicInfoL = new Label("Public information");
+    private TextField eventCarTypes;
+    private TextField eventTyreTypes;
+    private TextField eventNoiseLimit;
+    private TextField eventTrackdayFormat;
+    private TextField eventPitInUse;
+    private Grid<EventPublicInfoNote> eventPublicInfoNoteGrid;
+    private Button addNewPublicInfoNoteBTN;
 
     Binder<com.katamlek.nringthymeleaf.domain.Event> eventBinder = new Binder<>();
 
@@ -84,19 +104,81 @@ public class EventForm extends VerticalLayout implements View {
     }
 
     // Event internal info - bind to EventInternalInfo class
+    public HorizontalLayout buildInternalInfoSectionVL() {
+        HorizontalLayout internalInfoVL = new HorizontalLayout();
 
-    public VerticalLayout buildInternalInfoSectionVL() {
-        VerticalLayout internalInfoVL = new VerticalLayout();
+        VerticalLayout generalInfoVL = new VerticalLayout();
+        eventOrganizer = new TextField("Organizer");
+        eventCostToRSR = new TextField("Cost to RSR");
+        eventSpacesBooked = new TextField("Spaces booked");
+
+        //todo fix the grid columns - are pretty nonsense 
+        eventInternalInfoNoteGrid = new Grid<>(EventInternalInfoNote.class);
+        eventInternalInfoNoteGrid.getColumn("id").setHidden(true);
+//todo fix this!!! - hide this column        eventInternalInfoNoteGrid.getColumn("isHistoryNote").setHidden(true);
+        eventInternalInfoNoteGrid.getColumns().forEach(column -> column.setSortable(true));
+        eventInternalInfoNoteGrid.setColumnReorderingAllowed(true);
+        eventInternalInfoNoteGrid.setColumnResizeMode(ColumnResizeMode.ANIMATED);
+
+        addNewInternalInfoNoteBTN = new Button("Add a note");
+        //todo
+        addNewInternalInfoNoteBTN.addClickListener(e -> Notification.show("I can't do this for you yet"));
+
+        generalInfoVL.addComponents(eventOrganizer, eventCostToRSR, eventSpacesBooked, eventInternalInfoNoteGrid, addNewInternalInfoNoteBTN);
+
+        VerticalLayout profitVL = new VerticalLayout();
+        eventCurrentEntriesPaid = new Label("Current entries paid:");
+        eventCurrentEntriesUnpaid = new Label("Current unpaid entries:");
+        eventCurrentValuePaid = new Label("Current amount paid:");
+        eventCurrentValueUnpaid = new Label("Outstanding amount:");
+
+        // Query the database for the values
+        //todo query the database
+        Integer entriesPaid = 10;
+        Integer entriesUnpaid = 2;
+        Integer amountPaid = 1000;
+        Integer amountOutstanding = 400;
+        Label paidL = new Label(entriesPaid.toString());
+        Label unpaidL = new Label(entriesUnpaid.toString());
+        Label paidAmtL = new Label(amountPaid.toString());
+        Label unpaidAmtL = new Label(amountOutstanding.toString());
+
+        HorizontalLayout paidEntriesHL = new HorizontalLayout(eventCurrentEntriesPaid, paidL);
+        HorizontalLayout unpaidEntriesHL = new HorizontalLayout(eventCurrentEntriesUnpaid, unpaidL);
+        HorizontalLayout amtPaidHL = new HorizontalLayout(eventCurrentValuePaid, paidAmtL);
+        HorizontalLayout amdUnpaidHL = new HorizontalLayout(eventCurrentValueUnpaid, unpaidAmtL);
+
+        profitVL.addComponents(paidEntriesHL, unpaidEntriesHL, amtPaidHL, amdUnpaidHL);
+
+        internalInfoVL.addComponents(generalInfoVL, profitVL);
 
         return internalInfoVL;
     }
 
+    // Event public pricing - bind to EventPublicPricing class
+    public VerticalLayout buildEventPublicPricingSectionVL() {
+        VerticalLayout publicPricingVL = new VerticalLayout();
+
+        publicPricingVL.addComponents();
+
+        return publicPricingVL;
+    }
+
+    // Event public info - bind to EventPublicInfo class
+    public VerticalLayout buildPublicInfoSectionVL() {
+        VerticalLayout publicInfoVL = new VerticalLayout();
+
+        publicInfoVL.addComponents();
+
+        return publicInfoVL;
+    }
 
     // Put it all together
     public VerticalLayout buildEventForm() {
         VerticalLayout eventForm = new VerticalLayout();
         // Details - label + body
         eventForm.addComponents(eventDetailsL, buildDetailsSectionVL());
+        eventForm.addComponents(eventInternalInfoL, buildInternalInfoSectionVL());
 
         // Internal info - label + body
         //      eventForm.addComponents(eventInternalInfoL, buildInternalInfoSectionVL());
@@ -107,7 +189,7 @@ public class EventForm extends VerticalLayout implements View {
         // Public info - label + body
 
 
-        // Binder for Event class, binding event details
+        // Binder for event details
         eventBinder.forField(eventTypeRBGroup).bind(com.katamlek.nringthymeleaf.domain.Event::getEventType, com.katamlek.nringthymeleaf.domain.Event::setEventType);
 
         eventBinder.forField(eventNameTF).bind(com.katamlek.nringthymeleaf.domain.Event::getEventName, com.katamlek.nringthymeleaf.domain.Event::setEventName);
@@ -131,6 +213,8 @@ public class EventForm extends VerticalLayout implements View {
         eventBinder.forField(hideFromPublicCalendar).bind(com.katamlek.nringthymeleaf.domain.Event::isVisibleInPublicCalendar, com.katamlek.nringthymeleaf.domain.Event::setVisibleInPublicCalendar);
 
         // Binding for event internal info
+
+
 //todo do it on the eventBinder
 
         // Binding for public pricing
@@ -141,18 +225,17 @@ public class EventForm extends VerticalLayout implements View {
 
         // Buttons
         HorizontalLayout buttonsHL = new HorizontalLayout();
-        Button cancel = new Button("Cancel");
-        cancel.addClickListener(e -> navigationManager.navigateTo(EventGridView.class));
-        Button save = new Button("Save");
+        Button cancelBTN = new Button("Cancel");
+        cancelBTN.addClickListener(e -> navigationManager.navigateTo(EventGridView.class));
+        Button saveEventBTN = new Button("Save");
 
-        save.addClickListener(e -> {
+        saveEventBTN.addClickListener(e -> {
+            eventBinder.getBean().setUnderEditing(false);
             eventRepository.save(eventBinder.getBean());
 
         });
 
-        //eventRepository.save(event)); -- ln 212 Order Edit Presenter
-
-        buttonsHL.addComponents(cancel, save);
+        buttonsHL.addComponents(cancelBTN, saveEventBTN);
 
         addComponent(buttonsHL);
 
@@ -173,6 +256,7 @@ public class EventForm extends VerticalLayout implements View {
     }
 
     // Called when user enters view from the list or adding a new event
+    //todo set underEditing flag: true - the form won't open, false - let's go;; after save() set it to false;; update the domain
     public void enterView(Long id) {
         com.katamlek.nringthymeleaf.domain.Event event;
         if (id == null) {
@@ -180,13 +264,14 @@ public class EventForm extends VerticalLayout implements View {
             event = new com.katamlek.nringthymeleaf.domain.Event();
             event.setEventDate(new Date());
             event.setEventType(EventType.EVENT);
+            event.setUnderEditing(true);
             // todo more setters
         } else {
+            //todo check if not under editing -- guess need to save the flag in the DB ?
             event = eventRepository.findById(id).get();
+            event.setUnderEditing(true);
             if (event == null) {
-
-
-                // view.showNotFound();
+                showNotFound();
                 return;
             }
         }

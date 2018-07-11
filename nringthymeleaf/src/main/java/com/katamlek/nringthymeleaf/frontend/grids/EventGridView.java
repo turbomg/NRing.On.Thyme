@@ -78,8 +78,8 @@ public class EventGridView extends VerticalLayout implements View {
         this.filter.setTextFilter("eventTrack", true, true);
 
         this.filter.setDateFilter("eventDate", new SimpleDateFormat("HH:mm:ss dd.MM.yyyy"), true);
-       this.filter.setTextFilter("eventStartTime", true, true);
-       this.filter.setTextFilter("eventEndTime", true, true);
+        this.filter.setTextFilter("eventStartTime", true, true);
+        this.filter.setTextFilter("eventEndTime", true, true);
 
 
         // Inline editor

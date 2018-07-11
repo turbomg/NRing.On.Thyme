@@ -37,14 +37,9 @@ public class Event {
     private boolean visibleWhenNoBookings;
     private boolean visibleInPublicCalendar;
 
-    public boolean isVisibleWhenNoBookings() {
-        return visibleWhenNoBookings;
-    }
-
-    public void setVisibleWhenNoBookings(boolean visibleWhenNoBookings) {
-        this.visibleWhenNoBookings = visibleWhenNoBookings;
-    }
-
     @OneToOne
     private EventPublicPricing eventPublicPricing;
+
+    private boolean isUnderEditing; //todo add this property to every editable class
+
 }
