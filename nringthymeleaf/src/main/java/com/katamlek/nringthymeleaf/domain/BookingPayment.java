@@ -6,6 +6,7 @@ import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.List;
 
 @Entity
 @Data
@@ -18,6 +19,8 @@ public class BookingPayment {
     @NotNull
     private Date paymentDate;
 
+//    private OfConcern concerns;
+
     @OneToOne
     private PaymentNote paymentNote;
 
@@ -28,5 +31,7 @@ public class BookingPayment {
     @OneToOne
     private PaymentDefinition paymentDefinition;
 
+    @ManyToOne
+    private BookingPackageItem bookingPackageItem;
 
 }

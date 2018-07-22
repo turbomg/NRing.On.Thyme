@@ -55,4 +55,6 @@ public class Car {
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "car")
     private List<CarPricing> carPricing;
 
+    private boolean isUnderEditing;
+
 }

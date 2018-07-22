@@ -14,11 +14,18 @@ public class EventInternalInfo {
     private Long id;
 
     private String internalEventOrganizer;
+
+    //todo remove below - dynamic fields on the form
     private int internalCurrentEntriesNo;
     private BigDecimal internalCurrentEntriesValue;
+    //todo end remove
+
     private BigDecimal internalEventCostToRSR;
     private Integer internalSpacesBooked;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "eventInternalInfo")
     private List<EventInternalInfoNote> eventInternalInfoNote;
+
+    @OneToOne
+    private Event event;
 }

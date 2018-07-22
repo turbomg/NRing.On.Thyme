@@ -86,11 +86,11 @@ public class EventGridView extends VerticalLayout implements View {
         eventGrid.getEditor().setEnabled(true);
 
         // Extra columns: edit, delete, view documents
-        eventGrid.addColumn(driver -> "Edit", new ButtonRenderer(clickEvent -> {
+        eventGrid.addColumn(event -> "Edit", new ButtonRenderer(clickEvent -> {
             //todo navigator
         }));
 
-        eventGrid.addColumn(driver -> "Delete", new ButtonRenderer(clickEvent -> {
+        eventGrid.addColumn(event -> "Delete", new ButtonRenderer(clickEvent -> {
             //todo check if works, switch to id?
             eventRepository.delete((com.katamlek.nringthymeleaf.domain.Event) clickEvent.getItem());
         }));

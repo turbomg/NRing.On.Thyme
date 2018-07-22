@@ -12,7 +12,6 @@ import java.util.Calendar;
 
 
 // TODO https://vladmihalcea.com/how-to-inherit-properties-from-a-base-class-entity-using-mappedsuperclass-with-jpa-and-hibernate/
-// TODO Which class relates to other classes? Check!
 
 @Entity
 @Data
