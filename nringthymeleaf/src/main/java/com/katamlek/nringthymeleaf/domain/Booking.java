@@ -15,7 +15,7 @@ public class Booking {
     private Long id;
 
     @ManyToOne
-    private User createdBy;
+    private User createdBy; // if received from the website == "web"
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "booking")
     private List<BookingNote> bookingNotes;

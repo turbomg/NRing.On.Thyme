@@ -6,8 +6,9 @@ package com.katamlek.nringthymeleaf.domain;
  * TO PAY - payment request sent to customer
  * PAID - customer paid, EXTRA_CHARGE_TO_COLLECT - customer crashed a car and needs to settle the damage
  * CANCELLED - rsr cancelled the booking as the customer won't show up/ didn't pay on time/ etc.
+ * CLOSED - no more charges, car returned
  */
 
 public enum BookingStatus {
-    RECEIVED, CONFIRMED_BY_RSR, CONFIRMED_BY_CUSTOMER, PAID, TO_PAY, EXTRA_CHARGE_TO_COLLECT, CANELLED
+    RECEIVED, CONFIRMED_BY_RSR, CONFIRMED_BY_CUSTOMER, PAID, TO_PAY, EXTRA_CHARGE_TO_COLLECT, CANELLED, CLOSED
 }

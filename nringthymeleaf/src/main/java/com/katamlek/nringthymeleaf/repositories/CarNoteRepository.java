@@ -11,5 +11,5 @@ public interface CarNoteRepository extends CrudRepository<CarNote, Long> {
 
     //todo check if iterable ok - no NPE; maybe use Optional
     // find only non-history notes by car id
-    Iterable<CarNote> findByCarIdAndAndHistoryNote(Long aLong, boolean isHistory);
+ //todo   Iterable<CarNote> findByCarIdAndAndHistoryNote(Long aLong, boolean isHistory);
 }

@@ -24,17 +24,12 @@ public class BookingPackageItem {
     @Temporal(TemporalType.TIME)
     private Date startTime;
 
-    private OfConcern concerns;
-
-    /**todo
-     * Add a pricing group EVENT. And then no idea what...
-     * I need an event in events and I need its pricing, and the final price is on the booking form.
-     */
+    // private OfConcern concerns;
 
     private String description;
     private BigDecimal unitPrice;
     private BigDecimal quantity;
-    private PaymentStatus paymentStatus;
+    private PaymentStatus paymentStatus; // helps pick up unpaid items and bookings
 
     //todo add a field with discount?
 

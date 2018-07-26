@@ -13,18 +13,20 @@ import org.assertj.core.util.Lists;
 import org.vaadin.gridutil.cell.GridCellFilter;
 
 /**
- * List of the drivers related to the booking.
- * See: booking add/ edit form.
+* Customer listing used throughout the application.
  */
+
+//todo fix a bit as it was designed as drivers grid :)
+    // todo this is an extra for RSR if no calendar on time
 
 @SpringComponent
 @UIScope
-public class DriversGridView extends VerticalLayout implements View {
+public class CustomersGridView extends VerticalLayout implements View {
     private CustomerRepository customerRepository;
     private CustomerNoteRepository customerNoteRepository;
     private GridCellFilter filter;
 
-    public DriversGridView(CustomerRepository customerRepository, CustomerNoteRepository customerNoteRepository) {
+    public CustomersGridView(CustomerRepository customerRepository, CustomerNoteRepository customerNoteRepository) {
         this.customerRepository = customerRepository;
         this.customerNoteRepository = customerNoteRepository;
         this.addComponent(buildDriverGrid());

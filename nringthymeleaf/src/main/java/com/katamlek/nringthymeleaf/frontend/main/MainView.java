@@ -1,5 +1,6 @@
 package com.katamlek.nringthymeleaf.frontend.main;
 
+import com.katamlek.nringthymeleaf.frontend.forms.BookingForm;
 import com.katamlek.nringthymeleaf.frontend.forms.EventForm;
 import com.katamlek.nringthymeleaf.frontend.grids.BookingGridView;
 import com.katamlek.nringthymeleaf.frontend.grids.CarGridView;
@@ -7,12 +8,15 @@ import com.katamlek.nringthymeleaf.frontend.grids.EventGridView;
 import com.katamlek.nringthymeleaf.frontend.grids.UserGridView;
 import com.katamlek.nringthymeleaf.frontend.navigation.NavigationManager;
 import com.katamlek.nringthymeleaf.frontend.views.*;
+import com.vaadin.icons.VaadinIcons;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewDisplay;
 import com.vaadin.navigator.ViewLeaveAction;
+import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.spring.annotation.SpringViewDisplay;
 import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.*;
+import com.vaadin.ui.themes.ValoTheme;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.PostConstruct;
@@ -33,9 +37,8 @@ public class MainView extends VerticalLayout implements ViewDisplay {
     //	private final SecuredViewAccessControl viewAccessControl;
     //todo when working on security
 
-    //todo add Back to welcome button
-
     private VerticalLayout menu;
+    private Button dashboard;
     private Button myAccount;
     private Button calendar;
     private Button bookings;
@@ -48,7 +51,6 @@ public class MainView extends VerticalLayout implements ViewDisplay {
     private Button logOut;
     private VerticalLayout displayArea;
 
-    @Autowired
     public MainView(NavigationManager navigationManager) {
         this.navigationManager = navigationManager;
         //	this.viewAccessControl = viewAccessControl;
@@ -57,9 +59,10 @@ public class MainView extends VerticalLayout implements ViewDisplay {
 
     @PostConstruct
     public void init() {
+        attachNavigation(dashboard, WelcomeView.class);
         attachNavigation(myAccount, MyAccountView.class);
         attachNavigation(calendar, CalendarView.class);
-        attachNavigation(bookings, BookingGridView.class);
+        attachNavigation(bookings, BookingGridView.class); //todo change to grid later on when done with the form
         attachNavigation(events, EventForm.class); //todo change to grid when done with event form
         attachNavigation(customers, CustomerGridView.class);
         attachNavigation(fleet, CarGridView.class);
@@ -112,7 +115,7 @@ public class MainView extends VerticalLayout implements ViewDisplay {
      * changes.
      */
     public void logout() {
-        //TODO KASIA: not working, fix
+        //todo now redirects to welcome view, fix later when security implemented
         ViewLeaveAction doLogout = () -> {
             UI ui = getUI();
             ui.getSession().getSession().invalidate();
@@ -129,30 +132,91 @@ public class MainView extends VerticalLayout implements ViewDisplay {
         menu = new VerticalLayout();
 
         Label currentUser = new Label();
-        currentUser.setCaption("WHOAMI");
-        //TODO KASIA: get the user from session
+        currentUser.setCaption("XX"); //todo get user initials from session
+        currentUser.addStyleNames(ValoTheme.LABEL_COLORED, ValoTheme.LABEL_LARGE);
+
+        dashboard = new Button("Dashboard");
+        dashboard.addStyleNames(ValoTheme.BUTTON_BORDERLESS, ValoTheme.BUTTON_ICON_ONLY);
+        dashboard.setIcon(VaadinIcons.DASHBOARD);
+        dashboard.setDescription("Dashboard");
 
         myAccount = new Button("My account");
-        calendar = new Button("Calendar");
-        bookings = new Button("Bookings");
-        events = new Button("Events");
-        customers = new Button("Customers");
-        fleet = new Button("Fleet");
-        systemUsers = new Button("User management");
-        reports = new Button("Reports");
-        setup = new Button("Setup");
-        logOut = new Button("Log out");
-        menu.addComponents(currentUser, myAccount, calendar, bookings, events, customers, fleet, systemUsers, reports, setup, logOut);
+        myAccount.addStyleNames(ValoTheme.BUTTON_BORDERLESS, ValoTheme.BUTTON_ICON_ONLY);
+        myAccount.setIcon(VaadinIcons.USER_HEART);
+        myAccount.setDescription("My account");
 
-        // Content panel
+        calendar = new Button("Calendar");
+        calendar.addStyleNames(ValoTheme.BUTTON_BORDERLESS, ValoTheme.BUTTON_ICON_ONLY);
+        calendar.setIcon(VaadinIcons.CALENDAR);
+        calendar.setDescription("Calendar");
+
+
+        bookings = new Button("Bookings");
+        bookings.addStyleNames(ValoTheme.BUTTON_BORDERLESS, ValoTheme.BUTTON_ICON_ONLY);
+        bookings.setIcon(VaadinIcons.OPEN_BOOK);
+        bookings.setDescription("Bookings");
+
+        events = new Button("Events");
+        events.addStyleNames(ValoTheme.BUTTON_BORDERLESS, ValoTheme.BUTTON_ICON_ONLY);
+        events.setIcon(VaadinIcons.SPARK_LINE);
+        events.setDescription("Events");
+
+        customers = new Button("Customers");
+        customers.addStyleNames(ValoTheme.BUTTON_BORDERLESS, ValoTheme.BUTTON_ICON_ONLY);
+        customers.setIcon(VaadinIcons.USERS);
+        customers.setDescription("Customers");
+
+        fleet = new Button("Fleet");
+        fleet.addStyleNames(ValoTheme.BUTTON_BORDERLESS, ValoTheme.BUTTON_ICON_ONLY);
+        fleet.setIcon(VaadinIcons.CAR);
+        fleet.setDescription("Fleet");
+
+        systemUsers = new Button("User management");
+        systemUsers.addStyleNames(ValoTheme.BUTTON_BORDERLESS, ValoTheme.BUTTON_ICON_ONLY);
+        systemUsers.setIcon(VaadinIcons.USER_CHECK);
+        systemUsers.setDescription("User management");
+
+        reports = new Button("Reports");
+        reports.addStyleNames(ValoTheme.BUTTON_BORDERLESS, ValoTheme.BUTTON_ICON_ONLY);
+        reports.setIcon(VaadinIcons.PAPERPLANE);
+        reports.setDescription("Reports");
+
+        setup = new Button("Setup");
+        setup.addStyleNames(ValoTheme.BUTTON_BORDERLESS, ValoTheme.BUTTON_ICON_ONLY);
+        setup.setIcon(VaadinIcons.COGS);
+        setup.setDescription("Setup");
+
+        logOut = new Button("Log out");
+        logOut.addStyleNames(ValoTheme.BUTTON_BORDERLESS, ValoTheme.BUTTON_ICON_ONLY);
+        logOut.setIcon(VaadinIcons.POWER_OFF);
+        logOut.setDescription("Log out");
+
+        menu.addComponents(currentUser, dashboard, myAccount, calendar, bookings, events,
+                customers, fleet, systemUsers, reports, setup, logOut);
+
+        menu.setComponentAlignment(currentUser, Alignment.MIDDLE_CENTER);
+        menu.setComponentAlignment(dashboard, Alignment.MIDDLE_CENTER);
+        menu.setComponentAlignment(myAccount, Alignment.MIDDLE_CENTER);
+        menu.setComponentAlignment(calendar, Alignment.MIDDLE_CENTER);
+        menu.setComponentAlignment(bookings, Alignment.MIDDLE_CENTER);
+        menu.setComponentAlignment(events, Alignment.MIDDLE_CENTER);
+        menu.setComponentAlignment(customers, Alignment.MIDDLE_CENTER);
+        menu.setComponentAlignment(fleet, Alignment.MIDDLE_CENTER);
+        menu.setComponentAlignment(systemUsers, Alignment.MIDDLE_CENTER);
+        menu.setComponentAlignment(reports, Alignment.MIDDLE_CENTER);
+        menu.setComponentAlignment(setup, Alignment.MIDDLE_CENTER);
+        menu.setComponentAlignment(logOut, Alignment.MIDDLE_CENTER);
+
+        menu.setSpacing(false);
+        menu.setMargin(new MarginInfo(false, true, false, false));
+
+        // Contents panel
         displayArea = new VerticalLayout();
         displayArea.setSpacing(false);
         displayArea.setMargin(false);
-        displayArea.setWidthUndefined();
         displayArea.setResponsive(true);
 
         mainLayoutVL.addComponents(menu, displayArea);
-
         return mainLayoutVL;
     }
 }

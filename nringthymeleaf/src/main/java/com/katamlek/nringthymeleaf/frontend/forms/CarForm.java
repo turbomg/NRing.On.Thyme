@@ -115,7 +115,7 @@ public class CarForm extends VerticalLayout implements View {
 
         carNoteG = new Grid<>(CarNote.class);
         //todo get the id parametr and pass to the method -- not sure how :)
-        carNoteG.setItems(Lists.newArrayList(carNoteRepository.findByCarIdAndAndHistoryNote(1l, false)));
+// todo         carNoteG.setItems(Lists.newArrayList(carNoteRepository.findByCarIdAndAndHistoryNote(1l, false)));
 
 
         carNoteG.setColumns("user", "enteredOn", "text");
@@ -151,7 +151,7 @@ public class CarForm extends VerticalLayout implements View {
 
         carHistoryNoteG = new Grid<>(CarNote.class);
         //todo get the id parametr and pass to the method -- not sure how :)
-        carHistoryNoteG.setItems(Lists.newArrayList(carNoteRepository.findByCarIdAndAndHistoryNote(1l, true)));
+     //todo   carHistoryNoteG.setItems(Lists.newArrayList(carNoteRepository.findByCarIdAndAndHistoryNote(1l, true)));
 
         carHistoryNoteG.setColumns("user", "enteredOn", "text", "carMileageOut", "carMileageIn", "carMileageTotalKM", "carMileageTotalMIL");
         carHistoryNoteG.setColumnOrder("user", "enteredOn", "text", "carMileageOut", "carMileageIn", "carMileageTotalKM", "carMileageTotalMIL");

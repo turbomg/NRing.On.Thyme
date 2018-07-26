@@ -4,10 +4,12 @@ import com.katamlek.nringthymeleaf.domain.Car;
 import com.katamlek.nringthymeleaf.frontend.forms.BookingForm;
 import com.katamlek.nringthymeleaf.frontend.forms.CustomerForm;
 import com.katamlek.nringthymeleaf.frontend.grids.EventGridView;
+import com.katamlek.nringthymeleaf.frontend.navigation.NavigationManager;
 import com.katamlek.nringthymeleaf.repositories.EventRepository;
 import com.katamlek.nringthymeleaf.repositories.UserRepository;
 import com.vaadin.navigator.View;
 import com.vaadin.spring.annotation.SpringView;
+import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.*;
 import org.assertj.core.util.Lists;
 
@@ -16,20 +18,20 @@ import java.util.Calendar;
 
 //
 //@SpringComponent
-//@UIScope
+@UIScope
 @SpringView
-//     (name = WelcomeView.VIEW_NAME)
 public class WelcomeView extends VerticalLayout implements View {
-    // public static final String VIEW_NAME = "welcome";
 
     private UserRepository userRepository;
     private EventRepository eventRepository;
+    private NavigationManager navigationManager;
     // private EventGridView eventGridView;
 
-    public WelcomeView(UserRepository userRepository, EventRepository eventRepository) {
+    public WelcomeView(UserRepository userRepository, EventRepository eventRepository, NavigationManager navigationManager) {
         this.userRepository = userRepository;
         this.eventRepository = eventRepository;
         //      this.eventGridView = eventGridView;
+        this.navigationManager = navigationManager;
         addComponent(buildWelcomeView());
     }
 
@@ -81,7 +83,7 @@ public class WelcomeView extends VerticalLayout implements View {
         Button addBookingBtn = new Button("Add booking");
         addBookingBtn.addClickListener(e -> {
             //todo - fix the problem with saving new entities
-            UI.getCurrent().getNavigator().navigateTo(BookingForm.VIEW_NAME);
+            navigationManager.navigateTo(BookingForm.class);
         });
 
         Button addCustomerBtn = new Button("Add customer");
