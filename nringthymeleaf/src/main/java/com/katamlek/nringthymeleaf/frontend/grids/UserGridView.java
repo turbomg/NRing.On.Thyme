@@ -46,15 +46,7 @@ public class UserGridView extends VerticalLayout implements View {
         userGrid.setItems(Lists.newArrayList(userRepository.findAll()));
 
         // Setting visible colums according to specs
-        userGrid.getColumn("id").setHidden(true);
-        userGrid.getColumn("password").setHidden(true);
-        userGrid.getColumn("branding").setHidden(true);
-        userGrid.getColumn("bookings").setHidden(true);
-        userGrid.getColumn("customers").setHidden(true);
-        userGrid.getColumn("events").setHidden(true);
-        userGrid.getColumn("notes").setHidden(true);
-        userGrid.getColumn("customerDocuments").setHidden(true);
-        userGrid.getColumn("loggedIn").setHidden(true);
+        userGrid.setColumns("initials", "name", "surname", "phoneNumber", "email", "userRole");
 
         // Setting column order
         userGrid.setColumnOrder("initials", "name", "surname", "phoneNumber", "email", "userRole");
@@ -99,9 +91,10 @@ public class UserGridView extends VerticalLayout implements View {
         Button addUserBtn = new Button("Add user"); // add new user
         addUserBtn.addStyleNames(ValoTheme.BUTTON_BORDERLESS_COLORED);
         addUserBtn.setIcon(VaadinIcons.PLUS);
-        addUserBtn.addClickListener(e -> {
-            navigationManager.navigateTo(UserForm.class);
-        });
+        addUserBtn.addClickListener(e -> Notification.show("The developer says she's working on it."));
+//        addUserBtn.addClickListener(e -> {
+//            navigationManager.navigateTo(UserForm.class); //todo
+//        });
 
         Button clearAllFilters = new Button("Remove filters", e -> {
             filter.clearAllFilters();

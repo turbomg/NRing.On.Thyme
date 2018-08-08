@@ -44,12 +44,7 @@ public class BookingGridView extends VerticalLayout implements View {
         bookingGrid.setItems(Lists.newArrayList(bookingRepository.findAll()));
 
         // Setting visible colums according to specs
-        bookingGrid.getColumn("id").setHidden(true);
-        bookingGrid.getColumn("bookingNotes").setHidden(true);
-        bookingGrid.getColumn("customers").setHidden(true);
-        bookingGrid.getColumn("paymentList").setHidden(true);
-        bookingGrid.getColumn("bookingDocumentList").setHidden(true);
-        bookingGrid.getColumn("bookingCars").setHidden(true);
+        bookingGrid.setColumns("createdBy", "createDate", "paymentStatus", "bookingStatus", "signatureStatus", "emailConfirmationSent", "emailReminderSendDate", "emailReminderSent");
 
         // Setting column order
         bookingGrid.setColumnOrder("createdBy", "createDate", "paymentStatus", "bookingStatus", "signatureStatus", "emailConfirmationSent", "emailReminderSendDate", "emailReminderSent");
@@ -137,7 +132,7 @@ public class BookingGridView extends VerticalLayout implements View {
         Button cancelButton = new Button(VaadinIcons.DOT_CIRCLE);
         cancelButton.addStyleNames(ValoTheme.BUTTON_SMALL);
         cancelButton.addClickListener(e -> {
-            booking.setBookingStatus(BookingStatus.CANELLED);
+            booking.setBookingStatus(BookingStatus.CANCELLED);
         });
         return cancelButton;
     }

@@ -1,6 +1,8 @@
 package com.katamlek.nringthymeleaf.frontend.grids;
 
+import com.katamlek.nringthymeleaf.domain.CarColor;
 import com.katamlek.nringthymeleaf.domain.Customer;
+import com.katamlek.nringthymeleaf.domain.CustomerGroup;
 import com.katamlek.nringthymeleaf.frontend.forms.CustomerForm;
 import com.katamlek.nringthymeleaf.frontend.navigation.NavigationManager;
 import com.katamlek.nringthymeleaf.repositories.CustomerNoteRepository;
@@ -13,7 +15,10 @@ import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.*;
 import com.vaadin.ui.themes.ValoTheme;
 import org.assertj.core.util.Lists;
+import org.vaadin.gridutil.cell.CellFilterComponent;
 import org.vaadin.gridutil.cell.GridCellFilter;
+
+import java.util.Arrays;
 
 /**
  * Customer listing used throughout the application.
@@ -43,19 +48,7 @@ public class CustomerGridView extends VerticalLayout implements View {
         customerGrid.setItems(Lists.newArrayList(customerRepository.findAll()));
 
         // Setting visible colums according to specs
-        customerGrid.getColumn("customerCreateDate").setHidden(true);
-        customerGrid.getColumn("customerCreatedBy").setHidden(true);
-        customerGrid.getColumn("customerAddress").setHidden(true);
-        customerGrid.getColumn("customerPhoneNumber").setHidden(true);
-        customerGrid.getColumn("customerEmail").setHidden(true);
-        customerGrid.getColumn("customerNewsletter").setHidden(true);
-        customerGrid.getColumn("customerAgent").setHidden(true);
-        customerGrid.getColumn("customerEmergencyContacts").setHidden(true);
-        customerGrid.getColumn("customerDocuments").setHidden(true);
-        customerGrid.getColumn("customerHistory").setHidden(true);
-        customerGrid.getColumn("customerLastEdit").setHidden(true);
-        customerGrid.getColumn("bookings").setHidden(true);
-        customerGrid.getColumn("customerNotes").setHidden(true);
+        customerGrid.setColumns("id", "customerFirstName", "customerLastName", "customerGroup", "customerGeneralInformation");
 
         // Setting column order
         customerGrid.setColumnOrder("id", "customerFirstName", "customerLastName", "customerGroup", "customerGeneralInformation");
@@ -77,7 +70,7 @@ public class CustomerGridView extends VerticalLayout implements View {
         this.filter.setTextFilter("id", true, true);
         this.filter.setTextFilter("customerFirstName", true, true);
         this.filter.setTextFilter("customerLastName", true, true);
-        this.filter.setTextFilter("customerGroup", true, true);
+        CellFilterComponent<ComboBox<CustomerGroup>> customerGroupFilter = this.filter.setComboBoxFilter("customerGroup", CustomerGroup.class, Arrays.asList(CustomerGroup.values()));
         this.filter.setTextFilter("customerGeneralInformation", true, true);
 
         // Inline editor
