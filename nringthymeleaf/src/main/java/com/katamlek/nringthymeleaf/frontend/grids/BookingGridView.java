@@ -26,6 +26,7 @@ public class BookingGridView extends VerticalLayout implements View {
     private BookingRepository bookingRepository;
     private UserRepository userRepository;
     private NavigationManager navigationManager;
+    private Grid<Booking> bookingGrid;
 
     public BookingGridView(BookingRepository bookingRepository, UserRepository userRepository, NavigationManager navigationManager) {
         this.bookingRepository = bookingRepository;
@@ -38,17 +39,14 @@ public class BookingGridView extends VerticalLayout implements View {
     // Build the grid with bookings
     // This one with Booking.class as I don't need any related member fields
     public Grid<Booking> buildBookingGrid() {
-        Grid<Booking> bookingGrid = new Grid<>(Booking.class);
+        bookingGrid = new Grid<>(Booking.class);
 
         bookingGrid.setItems(Lists.newArrayList(bookingRepository.findAll()));
 
         // Setting visible colums according to specs
         bookingGrid.getColumn("id").setHidden(true);
         bookingGrid.getColumn("bookingNotes").setHidden(true);
-        //    bookingGrid.getColumn("carChangeNotes").setHidden(true);
         bookingGrid.getColumn("customers").setHidden(true);
-        bookingGrid.getColumn("bookedCarsList").setHidden(true);
-        bookingGrid.getColumn("packageItems").setHidden(true);
         bookingGrid.getColumn("paymentList").setHidden(true);
         bookingGrid.getColumn("bookingDocumentList").setHidden(true);
         bookingGrid.getColumn("bookingCars").setHidden(true);
@@ -64,9 +62,7 @@ public class BookingGridView extends VerticalLayout implements View {
         // Set open details for editing on double click
         bookingGrid.addItemClickListener(event -> {
             if (event.getMouseEventDetails().isDoubleClick()) {
-                UI.getCurrent().getNavigator().navigateTo("xxx");
-                // todo set navigator to the selected booking
-                // todo NOT A NAVIGATOR ! New carEditForm(Long id); ??
+                navigationManager.navigateTo(BookingForm.class, event.getItem().getId());
             }
         });
 
@@ -77,6 +73,7 @@ public class BookingGridView extends VerticalLayout implements View {
         // Extra buttons - cancel booking, duplicate
         bookingGrid.addComponentColumn(this::buildCancelButton);
         bookingGrid.addComponentColumn(this::buildDuplicateButton);
+        bookingGrid.addComponentColumn(this::buildDeleteButton);
 
         // Inline filtering
         this.filter = new GridCellFilter(bookingGrid);
@@ -96,7 +93,7 @@ public class BookingGridView extends VerticalLayout implements View {
         return bookingGrid;
     }
 
-    // Build the buttons' row: Add, Clear filters
+    // Build the buttons row: Add, Clear filters
     public HorizontalLayout buildBookingButtons() {
         HorizontalLayout buttonsBookingHL = new HorizontalLayout();
         buttonsBookingHL.setMargin(false);
@@ -113,12 +110,12 @@ public class BookingGridView extends VerticalLayout implements View {
         clearAllFilters.setIcon(VaadinIcons.ERASER);
 
         // for testing purposes only - comment out when done
-        Button showMeTestForm = new Button("Show test booking form");
-        showMeTestForm.setStyleName(ValoTheme.BUTTON_BORDERLESS);
-        showMeTestForm.setIcon(VaadinIcons.EYE);
-        showMeTestForm.addClickListener(e -> navigationManager.navigateTo(BookingForm.class));
+//        Button showMeTestForm = new Button("Show test booking form");
+//        showMeTestForm.setStyleName(ValoTheme.BUTTON_BORDERLESS);
+//        showMeTestForm.setIcon(VaadinIcons.EYE);
+//        showMeTestForm.addClickListener(e -> navigationManager.navigateTo(BookingForm.class));
 
-        buttonsBookingHL.addComponents(addBookingBtn, clearAllFilters, showMeTestForm);
+        buttonsBookingHL.addComponents(addBookingBtn, clearAllFilters);
 
         return buttonsBookingHL;
     }
@@ -137,9 +134,11 @@ public class BookingGridView extends VerticalLayout implements View {
 
     // Helper methods
     private Button buildCancelButton(Booking booking) {
-        Button cancelButton = new Button(VaadinIcons.MINUS_CIRCLE);
+        Button cancelButton = new Button(VaadinIcons.DOT_CIRCLE);
         cancelButton.addStyleNames(ValoTheme.BUTTON_SMALL);
-        cancelButton.addClickListener(e -> Notification.show("I can cancel this one for you")); //todo
+        cancelButton.addClickListener(e -> {
+            booking.setBookingStatus(BookingStatus.CANELLED);
+        });
         return cancelButton;
     }
 
@@ -150,4 +149,48 @@ public class BookingGridView extends VerticalLayout implements View {
         return duplicateButton;
     }
 
+    private Button buildDeleteButton(Booking booking) {
+        Button deleteBButton = new Button(VaadinIcons.MINUS_CIRCLE);
+        deleteBButton.addStyleNames(ValoTheme.BUTTON_SMALL);
+        deleteBButton.addClickListener(e -> {
+
+            if (booking.isUnderEditing()) {
+                Notification.show("Someone's working with this booking. I can't delete it now.");
+            } else {
+
+                //Confirmation popup
+                Window window = new Window("Do you really want to delete this booking?");
+
+                //Popup contents
+                VerticalLayout confirmationVL = new VerticalLayout();
+                confirmationVL.addComponent(new Label("There's no undo option and your developer won't help you either."));
+
+                // And buttons
+                Button yesButton = new Button("Proceed");
+                yesButton.addClickListener(event1 -> {
+                    bookingRepository.delete(booking);
+                    bookingGrid.setItems(Lists.newArrayList(bookingRepository.findAll()));
+                    // todo clear filters ??? MATEUSZ? JONO?
+                    window.close();
+                });
+
+                Button noButton = new Button("Give the delete up");
+                noButton.addClickListener(event2 -> {
+                    window.close();
+                });
+
+                HorizontalLayout buttonsLayout = new HorizontalLayout(yesButton, noButton);
+                confirmationVL.addComponent(buttonsLayout);
+
+                window.setContent(confirmationVL);
+
+                window.center();
+                UI.getCurrent().addWindow(window);
+
+            }
+        });
+
+        return deleteBButton;
+    }
 }
+

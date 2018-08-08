@@ -34,4 +34,6 @@ public class BookingPayment {
     @ManyToOne
     private BookingPackageItem bookingPackageItem;
 
+    private boolean isUnderEditing;
+
 }

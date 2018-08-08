@@ -19,25 +19,30 @@ public class BookingPackageItem {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @OneToOne
+    private LocationDefinition locationDefinition;
+
     private Date date;
 
     @Temporal(TemporalType.TIME)
     private Date startTime;
 
-    // private OfConcern concerns;
+    private String description; // car/event/whatever hire type, place, name, a string built from other fields
 
-    private String description;
+    private BigDecimal extraDiscountPercent; // concerns all
+    private BigDecimal extraDiscountAmount; // concerns all
+
+    private String unit;
+
     private BigDecimal unitPrice;
     private BigDecimal quantity;
-    private PaymentStatus paymentStatus; // helps pick up unpaid items and bookings
 
-    //todo add a field with discount?
-
-    @ManyToOne
-    private Booking booking;
+    private BigDecimal total;
 
     private boolean cancelled;
 
-    @OneToMany(mappedBy = "bookingPackageItem")
-    private List<BookingPayment> bookingPayments;
+    private boolean isUnderEditing;
+
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "packageItem")
+    private List<BookingPackageItemNote> bookingPackageItemNoteList;
 }

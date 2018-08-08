@@ -41,10 +41,13 @@ public class Event {
     private boolean visibleInPublicCalendar;
 
     @OneToOne(cascade = CascadeType.ALL)
-    private EventPublicPricing eventPublicPricing;
+    private PriceListEvent eventPublicPricing;
 
     @OneToOne(cascade = CascadeType.ALL)
     private EventInternalInfo eventInternalInfo;
+
+    @OneToOne
+    private BookingPackageItemEvent bookingPackageItemEvent;
 
     private boolean isUnderEditing; //todo add this property to every editable class
 

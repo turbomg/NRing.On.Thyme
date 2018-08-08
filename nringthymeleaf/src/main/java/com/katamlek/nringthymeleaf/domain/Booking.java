@@ -42,11 +42,17 @@ public class Booking {
     @NotNull
     private List<Customer> customers; // drivers
 
-    @OneToMany(mappedBy = "booking")
-    private List<BookingCar> bookedCarsList;
+//    @OneToMany(mappedBy = "booking")
+//    private List<BookingCar> bookedCarsList;
+//
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "booking")
+    private List<BookingPackageItemCar> packageItemsCar;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "booking")
-    private List<BookingPackageItem> packageItems;
+    private List<BookingPackageItemEvent> packageItemsEvent;
+
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "booking")
+    private List<BookingPackageItemOther> packageItemsOther;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "booking")
     private List<PaymentNote> paymentList;
@@ -58,4 +64,6 @@ public class Booking {
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "booking")
     private List<BookingCar> bookingCars;
+
+    private boolean isUnderEditing;
 }

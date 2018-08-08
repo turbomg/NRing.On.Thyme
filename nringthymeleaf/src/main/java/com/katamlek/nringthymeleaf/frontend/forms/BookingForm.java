@@ -1,27 +1,25 @@
 package com.katamlek.nringthymeleaf.frontend.forms;
 
 import com.katamlek.nringthymeleaf.domain.*;
-import com.katamlek.nringthymeleaf.frontend.grids.BookingDocumentsGridView;
 import com.katamlek.nringthymeleaf.frontend.grids.BookingGridView;
+import com.katamlek.nringthymeleaf.frontend.grids.CustomerGridView;
 import com.katamlek.nringthymeleaf.frontend.navigation.NavigationManager;
-import com.katamlek.nringthymeleaf.frontend.views.WelcomeView;
+import com.katamlek.nringthymeleaf.frontend.windows.AddPackageItemWindow;
+import com.katamlek.nringthymeleaf.frontend.windows.BookingNoteWindow;
+import com.katamlek.nringthymeleaf.frontend.windows.TempPackageItemWindow;
 import com.katamlek.nringthymeleaf.repositories.BookingDocumentRepository;
 import com.katamlek.nringthymeleaf.repositories.BookingPackageItemRepository;
 import com.katamlek.nringthymeleaf.repositories.BookingPaymentRepository;
 import com.katamlek.nringthymeleaf.repositories.BookingRepository;
-import com.vaadin.event.dd.acceptcriteria.Not;
 import com.vaadin.icons.VaadinIcons;
 import com.vaadin.navigator.View;
 import com.vaadin.shared.ui.grid.ColumnResizeMode;
 import com.vaadin.spring.annotation.SpringView;
 import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.*;
-import com.vaadin.ui.renderers.ButtonRenderer;
 import com.vaadin.ui.themes.ValoTheme;
 
 import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Date;
 
 /**
  * Builds booking form for already registered booking or from scratch.
@@ -38,13 +36,27 @@ public class BookingForm extends VerticalLayout implements View {
     private BookingPackageItemRepository bookingPackageItemRepository;
     private BookingPaymentRepository bookingPaymentRepository;
     private BookingDocumentRepository bookingDocumentRepository;
+    private BookingNoteWindow bookingNoteWindow;
+    private PaymentForm paymentForm;
+    private TempPackageItemWindow addPackageItemWindow;
 
-    public BookingForm(BookingRepository bookingRepository, NavigationManager navigationManager, BookingPackageItemRepository bookingPackageItemRepository, BookingPaymentRepository bookingPaymentRepository, BookingDocumentRepository bookingDocumentRepository) {
+    public BookingForm(BookingRepository bookingRepository, NavigationManager navigationManager,
+                       BookingPackageItemRepository bookingPackageItemRepository,
+                       BookingPaymentRepository bookingPaymentRepository,
+                       BookingDocumentRepository bookingDocumentRepository,
+                       BookingNoteWindow bookingNoteWindow,
+                       TempPackageItemWindow addPackageItemWindow,
+                       PaymentForm paymentForm
+                       ) {
         this.bookingRepository = bookingRepository;
         this.navigationManager = navigationManager;
         this.bookingPackageItemRepository = bookingPackageItemRepository;
         this.bookingPaymentRepository = bookingPaymentRepository;
         this.bookingDocumentRepository = bookingDocumentRepository;
+        this.bookingNoteWindow = bookingNoteWindow;
+        this.paymentForm = paymentForm;
+        this.addPackageItemWindow = addPackageItemWindow;
+    //    this.addToPackageItemWindow = addToPackageItemWindow;
         addComponent(buildBookingForm());
         setMargin(false);
     }
@@ -90,6 +102,10 @@ public class BookingForm extends VerticalLayout implements View {
     private Grid<BookingDocument> documentG;
     private Button addDocumentB;
 
+    // Booking cars
+    private Grid<BookingCar> bookingCarsG;
+    private Button addBookingCarB;
+
     // Methods that construct sections
     // Details
     public VerticalLayout buildDetailsSection() {
@@ -108,13 +124,14 @@ public class BookingForm extends VerticalLayout implements View {
         emailConfirmationCB = new ComboBox<>("E-mail confirmation");
         emailConfirmationCB.setItems("Sent", "Not sent", "Not required");
         emailReminderCB = new ComboBox<>("E-mail reminder");
-        emailReminderCB.setItems("Sent", "Not sent", "Not required");
+        emailReminderCB.setItems("Seont", "Not sent", "Not required");
         emailReminderDateDF = new DateField();
         //todo emailReminderDateDF.setDefaultValue();
 
         noteG = new Grid<>(BookingNote.class);
         noteG.setColumns("enteredOn", "text");
         //todo for all note grids if note status==deleted change background / cross the text; quick solution: show status column
+        //todo all notes here - set items
 
         noteG.setColumnOrder("enteredOn", "text");
 
@@ -132,10 +149,21 @@ public class BookingForm extends VerticalLayout implements View {
         noteG.addStyleNames(ValoTheme.TABLE_BORDERLESS, ValoTheme.TABLE_COMPACT);
         noteG.setCaption("Booking notes");
 
+        noteG.addItemClickListener(event -> {
+            if (event.getMouseEventDetails().isDoubleClick()) {
+                Notification.show("Please be patient, will open the form soon.");
+                // todo set navigator to the selected car
+                // todo NOT A NAVIGATOR ! New carEditForm(Long id);
+            }
+        });
+
+
         addBookingNoteB = new Button("Add booking note");
         addBookingNoteB.addStyleNames(ValoTheme.BUTTON_BORDERLESS_COLORED, ValoTheme.BUTTON_SMALL);
         addBookingNoteB.setIcon(VaadinIcons.PLUS);
-        addBookingNoteB.addClickListener(e -> Notification.show("Can't do this yet, sorry")); //todo
+        addBookingNoteB.addClickListener(e -> {
+            UI.getCurrent().addWindow(bookingNoteWindow);
+        });
 
         printBookingFormB = new Button("Print\nbooking\nform");
         printBookingFormB.addClickListener(e -> Notification.show("Well, maybe later...")); //todo
@@ -154,7 +182,7 @@ public class BookingForm extends VerticalLayout implements View {
         cancelB.setIcon(VaadinIcons.CLOSE);
 
         duplicateB = new Button("Duplicate booking");
-        //todo   duplicateB.addClickListener()
+        //todo   duplicateB.addClickListener() -- clone() ???
         duplicateB.addStyleNames(ValoTheme.BUTTON_BORDERLESS, ValoTheme.BUTTON_LARGE, ValoTheme.BUTTON_ICON_ALIGN_TOP);
         duplicateB.setIcon(VaadinIcons.COPY);
 
@@ -183,6 +211,14 @@ public class BookingForm extends VerticalLayout implements View {
         driverG.setColumnReorderingAllowed(true);
         driverG.setColumnResizeMode(ColumnResizeMode.ANIMATED);
 
+        driverG.addItemClickListener(event -> {
+            if (event.getMouseEventDetails().isDoubleClick()) {
+                Notification.show("Please be patient, will open the form soon.");
+                // todo set navigator to the selected car
+                // todo NOT A NAVIGATOR ! New carEditForm(Long id);
+            }
+        });
+
         // allow inline editing
         driverG.getEditor().setEnabled(true); //todo allow or not?, no id editing!!!!
 
@@ -193,7 +229,9 @@ public class BookingForm extends VerticalLayout implements View {
 
         findDriverB = new Button("Search for driver");
         findDriverB.addStyleNames(ValoTheme.BUTTON_BORDERLESS, ValoTheme.BUTTON_SMALL);
-        findDriverB.addClickListener(e -> Notification.show("Can't do this right now, get back to me later")); //todo - popup, move data to bean
+        findDriverB.addClickListener(e -> {
+            navigationManager.navigateTo(CustomerGridView.class);
+        }); //todo - how to move data from this list to the form?
         findDriverB.setIcon(VaadinIcons.SEARCH);
 
         addNewDriverB = new Button("Add driver");
@@ -214,7 +252,7 @@ public class BookingForm extends VerticalLayout implements View {
         packageVL.setMargin(false);
 
         packageG = new Grid<>(BookingPackageItem.class);
-        packageG.setColumns("date", "startTime", "description", "unitPrice", "quantity", "paymentStatus", "cancelled");
+        packageG.setColumns("date", "startTime", "description", "unitPrice", "quantity", "cancelled");
 
         packageG.addColumn(item -> {
             Long total = 100l; //todo multiplication
@@ -232,17 +270,48 @@ public class BookingForm extends VerticalLayout implements View {
         // extra button delete
         packageG.addComponentColumn(this::deletePackageItemButton);
 
+        packageG.addItemClickListener(event -> {
+            if (event.getMouseEventDetails().isDoubleClick()) {
+                Notification.show("Please be patient, will open the form soon.");
+                // todo set navigator to the selected car
+                // todo NOT A NAVIGATOR ! New carEditForm(Long id);
+            }
+        });
+
         packageG.setHeightByRows(4);
 
-        packageG.setColumnOrder("date", "startTime", "description", "unitPrice", "quantity", "total", "paymentStatus", "cancelled");
+        packageG.setColumnOrder("date", "startTime", "description", "unitPrice", "quantity", "total", "cancelled");
         packageG.addStyleNames(ValoTheme.TABLE_COMPACT);
 
-        addPackageItemB = new Button("Add package item");
-        addPackageItemB.addStyleNames(ValoTheme.BUTTON_BORDERLESS_COLORED, ValoTheme.BUTTON_SMALL);
-        addPackageItemB.setIcon(VaadinIcons.PLUS);
-        addPackageItemB.addClickListener(e -> Notification.show("Sorry, later :)")); //todo
+//        addPackageItemB = new Button("Add package item");
+//        addPackageItemB.addStyleNames(ValoTheme.BUTTON_BORDERLESS_COLORED, ValoTheme.BUTTON_SMALL);
+//        addPackageItemB.setIcon(VaadinIcons.PLUS);
+//        addPackageItemB.addClickListener(e -> Notification.show("Sorry, later :)")); //todo
+//
+        // Adding items by category
+//        Button addEventBtn = new Button("Add event");
+//        addEventBtn.addClickListener(e -> Notification.show("Nah, nah, nah")); //todo
+//        addEventBtn.addStyleNames(ValoTheme.BUTTON_BORDERLESS_COLORED, ValoTheme.BUTTON_SMALL);
+//        addEventBtn.setIcon(VaadinIcons.SPARK_LINE);
+//
+//        Button addCarBtn = new Button("Add car");
+//        addCarBtn.addClickListener(e -> Notification.show("Ooops, not yet")); //todo
+//        addCarBtn.addStyleNames(ValoTheme.BUTTON_BORDERLESS, ValoTheme.BUTTON_SMALL);
+//        addCarBtn.setIcon(VaadinIcons.CAR);
+//
+//        Button addOtherBtn = new Button("Add other");
+//        addOtherBtn.addClickListener(e -> Notification.show("Ouch, not now")); //todo
+//        addOtherBtn.addStyleNames(ValoTheme.BUTTON_BORDERLESS, ValoTheme.BUTTON_SMALL);
+//        addOtherBtn.setIcon(VaadinIcons.QUESTION);
 
-        packageVL.addComponents(packageG, addPackageItemB);
+        Button addItem = new Button("Add item");
+        addItem.addClickListener(e -> navigationManager.navigateTo(BookingPackageItemForm.class)); //todo
+        addItem.addStyleNames(ValoTheme.BUTTON_BORDERLESS_COLORED, ValoTheme.BUTTON_SMALL);
+        addItem.setIcon(VaadinIcons.PLUS);
+
+     //   HorizontalLayout packageItemOptionsHL = new HorizontalLayout(addEventBtn, addCarBtn, addOtherBtn);
+
+        packageVL.addComponents(packageG, addItem);
         packageVL.setCaption("Package details");
         return packageVL;
     }
@@ -266,12 +335,20 @@ public class BookingForm extends VerticalLayout implements View {
         // extra button delete
         paymentG.addComponentColumn(this::deletePaymentButton);
 
+        paymentG.addItemClickListener(event -> {
+            if (event.getMouseEventDetails().isDoubleClick()) {
+                Notification.show("Please be patient, will open the form soon.");
+                // todo set navigator to the selected car
+                // todo NOT A NAVIGATOR ! New carEditForm(Long id);
+            }
+        });
+
         paymentG.setHeightByRows(4);
 
         addPaymentB = new Button("Add payment");
         addPaymentB.addStyleNames(ValoTheme.BUTTON_BORDERLESS_COLORED, ValoTheme.BUTTON_SMALL);
         addPaymentB.setIcon(VaadinIcons.PLUS);
-        addPaymentB.addClickListener(e -> Notification.show("Still trying")); //todo
+        addPaymentB.addClickListener(e -> paymentsVL.addComponents(paymentForm)); //todo
 
         paymentsVL.addComponents(paymentG, addPaymentB);
         paymentsVL.setCaption("Payments");
@@ -297,6 +374,14 @@ public class BookingForm extends VerticalLayout implements View {
         // extra button delete
         documentG.addComponentColumn(this::deleteDocumentButton);
 
+        documentG.addItemClickListener(event -> {
+            if (event.getMouseEventDetails().isDoubleClick()) {
+                Notification.show("Please be patient, will open the form soon.");
+                // todo set navigator to the selected car
+                // todo NOT A NAVIGATOR ! New carEditForm(Long id);
+            }
+        });
+
         documentG.setSizeFull();
         documentG.setHeightByRows(4);
 
@@ -310,6 +395,49 @@ public class BookingForm extends VerticalLayout implements View {
         documentsVL.addComponents(documentG, addDocumentB);
         documentsVL.setCaption("Booking documents");
         return documentsVL;
+    }
+
+    public VerticalLayout buildBookingCarSection() {
+        VerticalLayout bookingCarsVL = new VerticalLayout();
+
+        bookingCarsVL.setMargin(false);
+
+        bookingCarsG = new Grid<>(BookingCar.class);
+        bookingCarsG.setColumns("model", "plate", "carStatus", "currentlyInUse");
+        bookingCarsG.setColumnOrder("model", "plate", "carStatus", "currentlyInUse");
+
+        bookingCarsG.getColumns().forEach(column -> column.setSortable(true));
+        bookingCarsG.setColumnReorderingAllowed(true);
+        bookingCarsG.setColumnResizeMode(ColumnResizeMode.ANIMATED);
+
+        // allow inline editing
+        bookingCarsG.getEditor().setEnabled(true); //todo allow or not?
+
+        // extra button delete
+        bookingCarsG.addComponentColumn(this::deleteCarButton);
+
+        bookingCarsG.addItemClickListener(event -> {
+            if (event.getMouseEventDetails().isDoubleClick()) {
+                Notification.show("Please be patient, will open the form soon.");
+                // todo set navigator to the selected car
+                // todo NOT A NAVIGATOR ! New carEditForm(Long id);
+            }
+        });
+
+        bookingCarsG.setSizeFull();
+        bookingCarsG.setHeightByRows(4);
+
+        bookingCarsG.addStyleNames(ValoTheme.TABLE_COMPACT);
+
+        addBookingCarB = new Button("Add booking car");
+        addBookingCarB.addStyleNames(ValoTheme.BUTTON_BORDERLESS_COLORED, ValoTheme.BUTTON_SMALL);
+        addBookingCarB.setIcon(VaadinIcons.PLUS);
+        addBookingCarB.addClickListener(e -> navigationManager.navigateTo(BookingCarForm.class)); //todo - get the form, add a car
+
+        bookingCarsVL.addComponents(bookingCarsG, addBookingCarB);
+        bookingCarsVL.setCaption("Booking cars");
+        return bookingCarsVL;
+
     }
 
     // Put it all together
@@ -326,35 +454,38 @@ public class BookingForm extends VerticalLayout implements View {
         saveAll.addClickListener(e -> Notification.show("Comming soon")); //todo
 
         cancelAll = new Button("Cancel");
+        cancelAll.setDescription("Caution! Your data will be lost!");
         cancelAll.addStyleNames(ValoTheme.BUTTON_BORDERLESS);
         cancelAll.setIcon(VaadinIcons.ERASER);
         cancelAll.addClickListener(e -> {
-
-            // Confirmation window
-            Window confirm = new Window("Confirm the operation");
-            confirm.addStyleNames(ValoTheme.WINDOW_TOP_TOOLBAR);
-            VerticalLayout areYouSure = new VerticalLayout(new Label("Are you sure? All the data will be lost."));
-            areYouSure.setDefaultComponentAlignment(Alignment.MIDDLE_CENTER);
-            Button stopThis = new Button("Stay here");
-            stopThis.addStyleNames(ValoTheme.BUTTON_SMALL, ValoTheme.BUTTON_BORDERLESS);
-            stopThis.addClickListener(clickEvent -> confirm.close());
-
-            Button proceed = new Button("Proceed");
-            proceed.addStyleNames(ValoTheme.BUTTON_SMALL, ValoTheme.BUTTON_BORDERLESS);
-            proceed.addClickListener(clickEvent -> {
-                confirm.close(); //todo detach?
-                detach();
-                navigationManager.navigateTo(BookingGridView.class);
-            });
-
-            HorizontalLayout buttons = new HorizontalLayout(stopThis, proceed);
-            buttons.setDefaultComponentAlignment(Alignment.MIDDLE_CENTER);
-            areYouSure.addComponents(buttons);
-            confirm.setContent(areYouSure);
-            confirm.setDraggable(true);
-            confirm.setClosable(true);
-            confirm.center();
-            UI.getCurrent().addWindow(confirm);
+            detach();
+            navigationManager.navigateTo(BookingGridView.class);
+//
+//            // Confirmation window
+//            Window confirm = new Window("Confirm the operation");
+//            confirm.addStyleNames(ValoTheme.WINDOW_TOP_TOOLBAR);
+//            VerticalLayout areYouSure = new VerticalLayout(new Label("Are you sure? All the data will be lost."));
+//            areYouSure.setDefaultComponentAlignment(Alignment.MIDDLE_CENTER);
+//            Button stopThis = new Button("Stay here");
+//            stopThis.addStyleNames(ValoTheme.BUTTON_SMALL, ValoTheme.BUTTON_BORDERLESS);
+//            stopThis.addClickListener(clickEvent -> confirm.close());
+//
+//            Button proceed = new Button("Proceed");
+//            proceed.addStyleNames(ValoTheme.BUTTON_SMALL, ValoTheme.BUTTON_BORDERLESS);
+//            proceed.addClickListener(clickEvent -> {
+//                confirm.close(); //todo detach?
+//                detach();
+//                navigationManager.navigateTo(BookingGridView.class);
+//            });
+//
+//            HorizontalLayout buttons = new HorizontalLayout(stopThis, proceed);
+//            buttons.setDefaultComponentAlignment(Alignment.MIDDLE_CENTER);
+//            areYouSure.addComponents(buttons);
+//            confirm.setContent(areYouSure);
+//            confirm.setDraggable(true);
+//            confirm.setClosable(true);
+//            confirm.center();
+//            UI.getCurrent().addWindow(confirm);
         });
 
         backToList = new Button("Back to list");
@@ -364,7 +495,7 @@ public class BookingForm extends VerticalLayout implements View {
 
         HorizontalLayout buttonsHL = new HorizontalLayout(saveAll, cancelAll, backToList);
 
-        bookingForm.addComponents(bookingFormL, buttonsHL, buildDetailsSection(), buildDriversSection(), buildPackageSection(), buildPaymentsSection(), buildDocumentsSection());
+        bookingForm.addComponents(bookingFormL, buttonsHL, buildDetailsSection(), buildDriversSection(), buildPackageSection(), buildPaymentsSection(), buildDocumentsSection(), buildBookingCarSection());
 
         bookingForm.setMargin(false);
 
@@ -406,6 +537,15 @@ public class BookingForm extends VerticalLayout implements View {
         deleteBDButton.addClickListener(e -> Notification.show("I can cancel this one for you")); //todo
         return deleteBDButton;
     }
+
+    private Button deleteCarButton(BookingCar bookingCar) {
+        Button deleteBCButton = new Button(VaadinIcons.MINUS_CIRCLE);
+        deleteBCButton.addStyleNames(ValoTheme.BUTTON_SMALL);
+        deleteBCButton.addClickListener(e -> Notification.show("I can delete this one for you yet")); //todo
+        return deleteBCButton;
+    }
+
+
 
 
 // todo enter/ onEnter, binding

@@ -26,6 +26,6 @@ public class EventInternalInfo {
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "eventInternalInfo")
     private List<EventInternalInfoNote> eventInternalInfoNote;
 
-    @OneToOne
-    private Event event;
+//    @OneToOne
+//    private Event event;
 }

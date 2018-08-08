@@ -1,23 +1,24 @@
 package com.katamlek.nringthymeleaf.frontend.views;
 
+import com.katamlek.nringthymeleaf.domain.BookingCar;
 import com.katamlek.nringthymeleaf.domain.Car;
+import com.katamlek.nringthymeleaf.domain.Event;
 import com.katamlek.nringthymeleaf.frontend.forms.BookingForm;
 import com.katamlek.nringthymeleaf.frontend.forms.CustomerForm;
-import com.katamlek.nringthymeleaf.frontend.grids.EventGridView;
 import com.katamlek.nringthymeleaf.frontend.navigation.NavigationManager;
 import com.katamlek.nringthymeleaf.repositories.EventRepository;
 import com.katamlek.nringthymeleaf.repositories.UserRepository;
+import com.vaadin.icons.VaadinIcons;
 import com.vaadin.navigator.View;
 import com.vaadin.spring.annotation.SpringView;
 import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.*;
+import com.vaadin.ui.themes.ValoTheme;
 import org.assertj.core.util.Lists;
 
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
+import java.util.Date;
 
-//
-//@SpringComponent
 @UIScope
 @SpringView
 public class WelcomeView extends VerticalLayout implements View {
@@ -26,52 +27,76 @@ public class WelcomeView extends VerticalLayout implements View {
     private EventRepository eventRepository;
     private NavigationManager navigationManager;
     // private EventGridView eventGridView;
+    // Set the dates
+    private SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+    private final Date today = new Date();
+    private final Date tomorrow = today; //todo import DateUtils, use addDays
+
 
     public WelcomeView(UserRepository userRepository, EventRepository eventRepository, NavigationManager navigationManager) {
         this.userRepository = userRepository;
         this.eventRepository = eventRepository;
         //      this.eventGridView = eventGridView;
         this.navigationManager = navigationManager;
+        setMargin(false);
         addComponent(buildWelcomeView());
     }
 
     // Today/ Tomorrow boxes - designed to accept any date
-    public VerticalLayout buildDayOverviewVL(Calendar date) {
-        VerticalLayout dayOverview = new VerticalLayout();
+    public HorizontalLayout buildDayOverviews() {
+        HorizontalLayout dayOverview = new HorizontalLayout();
+        dayOverview.setMargin(false);
 
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-        Calendar now = Calendar.getInstance();
-        String convertedNow = dateFormat.format(now.getTime());
-        String convertedParameter = dateFormat.format(date.getTime());
+        // Grids
+        Grid<com.katamlek.nringthymeleaf.domain.Event> eventsToday = new Grid<>(com.katamlek.nringthymeleaf.domain.Event.class);
+        eventsToday.setItems(Lists.newArrayList(eventRepository.findByEventDate(today)));
+        Grid<com.katamlek.nringthymeleaf.domain.Event> eventsTomorrow = new Grid<>(com.katamlek.nringthymeleaf.domain.Event.class);
+        eventsTomorrow.setItems(Lists.newArrayList(eventRepository.findByEventDate(tomorrow)));
 
+        eventsToday.setHeaderVisible(false);
+        eventsToday.setColumns("eventName", "eventDate", "eventStartTime", "eventEndTime");
+//        eventsToday.addColumn(com.katamlek.nringthymeleaf.domain.Event::getEventName);
+//        eventsToday.addColumn(com.katamlek.nringthymeleaf.domain.Event::getEventDate);
+//        eventsToday.addColumn(com.katamlek.nringthymeleaf.domain.Event::getEventStartTime);
+//        eventsToday.addColumn(com.katamlek.nringthymeleaf.domain.Event::getEventEndTime);
+        eventsToday.addComponentColumn(this::buildCountTodayColumn);
 
-        Grid<com.katamlek.nringthymeleaf.domain.Event> events = new Grid<>();
-        events.setItems(Lists.newArrayList(eventRepository.findAll())); //todo replace with the right query
+        eventsToday.setHeightByRows(4);
+        eventsToday.setCaption("Today " + today);
 
-        events.setHeaderVisible(false);
-        events.addColumn(com.katamlek.nringthymeleaf.domain.Event::getEventName);
-        events.addColumn(com.katamlek.nringthymeleaf.domain.Event::getEventDate);
-        events.addColumn(com.katamlek.nringthymeleaf.domain.Event::getEventStartTime);
-        events.addColumn(com.katamlek.nringthymeleaf.domain.Event::getEventEndTime);
-        events.addColumn(event -> {
-            int placeholder = 0;
-            //todo count the bookings and show totals
-            return placeholder;
+        eventsTomorrow.setHeaderVisible(false);
+        eventsTomorrow.setColumns("eventName", "eventDate", "eventStartTime", "eventEndTime");
+//        eventsTomorrow.addColumn(com.katamlek.nringthymeleaf.domain.Event::getEventName);
+//        eventsTomorrow.addColumn(com.katamlek.nringthymeleaf.domain.Event::getEventDate);
+//        eventsTomorrow.addColumn(com.katamlek.nringthymeleaf.domain.Event::getEventStartTime);
+//        eventsTomorrow.addColumn(com.katamlek.nringthymeleaf.domain.Event::getEventEndTime);
+        eventsTomorrow.addComponentColumn(this::buildCountTomorrowColumn);
+
+        eventsTomorrow.setHeightByRows(4);
+        eventsTomorrow.setCaption("Tomorrow " + tomorrow);
+
+        // Buttons
+        Button goToTodayOverview = new Button("Show overview");
+        goToTodayOverview.addStyleNames(ValoTheme.BUTTON_BORDERLESS, ValoTheme.BUTTON_SMALL);
+        goToTodayOverview.setIcon(VaadinIcons.ARROW_RIGHT);
+        goToTodayOverview.addClickListener(e -> {
+            Notification.show("Not yet"); //todo
         });
 
-        if (convertedNow.equals(convertedParameter)) {
-            events.setCaption("Today");
-        } else setCaption("Tomorrow");
+        Button goToTomorrowOverview = new Button("Show overview");
+        goToTomorrowOverview.addStyleNames(ValoTheme.BUTTON_BORDERLESS, ValoTheme.BUTTON_SMALL);
+        goToTomorrowOverview.setIcon(VaadinIcons.ARROW_RIGHT);
+        goToTomorrowOverview.addClickListener(e -> Notification.show("Not yet")); //todo
 
-        events.setHeightByRows(4);
+        // Put together
+        VerticalLayout todayVL = new VerticalLayout(eventsToday, goToTodayOverview);
+        todayVL.setMargin(false);
 
-        // Button directing to calendar
-        Button goToCalendarBtn = new Button("Show calendar");
-        goToCalendarBtn.addClickListener(e -> {
-            //todo
-        });
+        VerticalLayout tomorrowVL = new VerticalLayout(eventsTomorrow, goToTomorrowOverview);
+        tomorrowVL.setMargin(false);
 
-        dayOverview.addComponents(events, goToCalendarBtn);
+
+        dayOverview.addComponents(todayVL, tomorrowVL);
 
         return dayOverview;
     }
@@ -85,160 +110,188 @@ public class WelcomeView extends VerticalLayout implements View {
             //todo - fix the problem with saving new entities
             navigationManager.navigateTo(BookingForm.class);
         });
+        addBookingBtn.addStyleNames(ValoTheme.BUTTON_BORDERLESS, ValoTheme.BUTTON_LARGE);
 
         Button addCustomerBtn = new Button("Add customer");
-        addBookingBtn.addClickListener(e -> {
-            //todo - fix the problem with saving new entities
-            UI.getCurrent().getNavigator().navigateTo(CustomerForm.VIEW_NAME);
-        });
+        addCustomerBtn.addClickListener(e -> Notification.show("Not yet")); //todo
+        addCustomerBtn.addStyleNames(ValoTheme.BUTTON_BORDERLESS, ValoTheme.BUTTON_LARGE);
 
         // todo - all of the below
         Button printIndemnityForm = new Button("Print blank idemnity form");
         printIndemnityForm.addClickListener(e -> Notification.show("Can't do this for you yet."));
+        printIndemnityForm.addStyleNames(ValoTheme.BUTTON_BORDERLESS, ValoTheme.BUTTON_LARGE);
 
         Button printMileageSheet = new Button("Print mileage sheet");
         printMileageSheet.addClickListener(e -> Notification.show("Can't do this for you yet."));
-
+        printMileageSheet.addStyleNames(ValoTheme.BUTTON_BORDERLESS, ValoTheme.BUTTON_LARGE);
 
         Button printCarChecklist = new Button("Print car checklist");
         printCarChecklist.addClickListener(e -> Notification.show("Can't do this for you yet."));
+        printCarChecklist.addStyleNames(ValoTheme.BUTTON_BORDERLESS, ValoTheme.BUTTON_LARGE);
 
         buttonsRowHL.addComponents(addBookingBtn, addCustomerBtn, printIndemnityForm, printMileageSheet, printCarChecklist);
+
+        buttonsRowHL.setWidth("100%");
 
         return buttonsRowHL;
     }
 
-    public VerticalLayout buildMyBookingsSectionVL() {
-        VerticalLayout bookingsSectionVL = new VerticalLayout();
+    public HorizontalLayout buildProgressSection() {
+        HorizontalLayout progressHL = new HorizontalLayout();
         //      bookingsSectionVL.setCaption("My bookings");
 
-        // The magic grid
-        //todo insert data via booking service class with standard SQL I suppose
-        // Row with monthly data
-        // todo separate stats table?
-        Grid<String> bookingsMonthly = new Grid<>();
-        bookingsMonthly.addColumn(eventM -> {
-            String labelM = "This month";
-            //todo count the bookings and show totals
-            //todo 2 new entities, one for month row, one for year
-            return labelM;
-        });
+        // todo fill the magic grids with data - use queries
 
-        bookingsMonthly.setCaption("My bookings");
-        bookingsMonthly.setHeaderVisible(false);
-        bookingsMonthly.setHeightByRows(2);
+        // The magic grids
+        //todo increase the spacing
+        // Bookings
+        GridLayout bookingsProgress = new GridLayout(4, 3);
+        bookingsProgress.setSpacing(true);
 
-        // Row with yearly data
-        Grid<String> bookingsYtd = new Grid<>();
-        bookingsYtd.addColumn(eventYtd -> {
-            String labelYtd = "This month";
-            //todo count the bookings and show totals
-            //todo 2 new entities, one for month row, one for year
-            return labelYtd;
-        });
+        bookingsProgress.setCaption("My bookings");
+        Label bookingsMadeL = new Label("Bookings made");
+        bookingsMadeL.addStyleNames(ValoTheme.LABEL_BOLD);
+        Label unpaidL = new Label("Unpaid");
+        unpaidL.addStyleNames(ValoTheme.LABEL_BOLD);
+        Label averageL = new Label("Average");
+        averageL.addStyleNames(ValoTheme.LABEL_BOLD);
 
-        bookingsYtd.setHeaderVisible(false);
-        bookingsYtd.setHeightByRows(2);
+        bookingsProgress.addComponent(bookingsMadeL, 1, 0);
+        bookingsProgress.addComponent(unpaidL, 2, 0);
+        bookingsProgress.addComponent(averageL, 3, 0);
 
-        Button myBookings = new Button("View my bookings");
-        myBookings.addClickListener(e -> {
-            // UI.getCurrent().getNavigator().navigateTo(BookingGridView.VIEW_NAME);
-            //todo set filter to current user
-            //todo or add a new view?
-        });
+        Label thisMonthB = new Label("This month");
+        thisMonthB.addStyleNames(ValoTheme.LABEL_BOLD);
+        Label ytdB = new Label("This year");
+        ytdB.addStyleNames(ValoTheme.LABEL_BOLD);
 
-        bookingsSectionVL.addComponents(bookingsMonthly, bookingsYtd, myBookings);
+        bookingsProgress.addComponent(thisMonthB, 0, 1);
+        bookingsProgress.addComponent(ytdB, 0, 2);
 
-        return bookingsSectionVL;
+        bookingsProgress.addComponent(new Label("PLACEHOLDER"), 2, 1);
+
+        bookingsProgress.setSpacing(true);
+
+        // Turnover
+        GridLayout turnoverProgress = new GridLayout(4, 3);
+        turnoverProgress.setWidth(100, Unit.PERCENTAGE);
+        turnoverProgress.setCaption("My turnover progress");
+
+        Label targetL = new Label("Target");
+        targetL.addStyleNames(ValoTheme.LABEL_BOLD);
+        Label bookedL = new Label("Booked");
+        bookedL.addStyleNames(ValoTheme.LABEL_BOLD);
+        Label paidL = new Label("Paid");
+        paidL.addStyleNames(ValoTheme.LABEL_BOLD);
+
+        Label thisMonthP = new Label("This month");
+        thisMonthP.addStyleNames(ValoTheme.LABEL_BOLD);
+        Label ytdP = new Label("This year");
+        ytdP.addStyleNames(ValoTheme.LABEL_BOLD);
+
+        turnoverProgress.addComponent(thisMonthP, 0, 1);
+        turnoverProgress.addComponent(ytdP, 0, 2);
+        turnoverProgress.addComponent(targetL, 1, 0);
+        turnoverProgress.addComponent(bookedL, 2, 0);
+        turnoverProgress.addComponent(paidL, 3, 0);
+
+        turnoverProgress.addComponent(new Label("PLACEHOLDER"), 2, 1);
+        turnoverProgress.setSpacing(true);
+
+        VerticalLayout bookingsVL = new VerticalLayout();
+        bookingsVL.setMargin(false);
+        Button allBookingsBtn = new Button("View all bookings");
+        allBookingsBtn.addStyleNames(ValoTheme.BUTTON_BORDERLESS, ValoTheme.BUTTON_SMALL);
+        allBookingsBtn.setIcon(VaadinIcons.ARROW_RIGHT);
+        allBookingsBtn.addClickListener(e -> Notification.show("Can't do this yet."));
+        bookingsVL.addComponents(bookingsProgress, allBookingsBtn);
+
+        VerticalLayout progressVL = new VerticalLayout();
+        progressVL.setMargin(false);
+        Button overviewBtn = new Button("View details");
+        overviewBtn.addStyleNames(ValoTheme.BUTTON_BORDERLESS, ValoTheme.BUTTON_SMALL);
+        overviewBtn.setIcon(VaadinIcons.ARROW_RIGHT);
+        overviewBtn.addClickListener(e -> Notification.show("Can't do this yet."));
+        progressVL.addComponents(turnoverProgress, overviewBtn);
+
+        progressHL.addComponent(bookingsVL);
+        progressHL.addComponent(progressVL);
+
+        progressHL.setSizeFull();
+        progressHL.setExpandRatio(bookingsVL, 0.50f);
+        progressHL.setExpandRatio(progressVL, 0.50f);
+
+        //todo resize the columns
+
+        return progressHL;
     }
 
-    public VerticalLayout buildTurnoverSectionVL() {
-        VerticalLayout turnoverSectionVL = new VerticalLayout();
-        //      turnoverSectionVL.setCaption("Turnover progress");
-
-        // The magic grid
-        //todo insert data via booking service class with standard SQL I suppose
-        // Row with monthly data
-        // todo separate stats table?
-        Grid<String> turnoverMonthly = new Grid<>();
-        turnoverMonthly.addColumn(eventM -> {
-            String labelM = "This month";
-            //todo count the bookings and show totals
-            //todo 2 new entities, one for month row, one for year
-            return labelM;
-        });
-
-        turnoverMonthly.setCaption("Turnover progress");
-        turnoverMonthly.setHeaderVisible(false);
-        turnoverMonthly.setHeightByRows(2);
-
-        // Row with yearly data
-        Grid<String> turnoverYtd = new Grid<>();
-        turnoverYtd.addColumn(eventYtd -> {
-            String labelYtd = "Overall";
-            //todo count the bookings and show totals
-            //todo 2 new entities, one for month row, one for year
-            return labelYtd;
-        });
-
-        turnoverYtd.setHeaderVisible(false);
-        turnoverYtd.setHeightByRows(2);
-
-        Button progressOverview = new Button("To overview");
-        progressOverview.addClickListener(e -> {
-            //todo where to go? what to do?
-            //todo set filter to current user
-        });
-
-        turnoverSectionVL.addComponents(turnoverMonthly, turnoverYtd, progressOverview);
-
-        return turnoverSectionVL;
-    }
-
-    public VerticalLayout buildCarsToCheckVL() {
+    public VerticalLayout buildCarsToCheckList() {
         VerticalLayout carsToCheck = new VerticalLayout();
 
         // Today grid
-        Grid<Car> todayCarGrid = new Grid<>();
-        //todo - maybe after calendar
-        //todo - edit button
+        Grid<BookingCar> todayCarGrid = new Grid<>(BookingCar.class);
         todayCarGrid.setCaption("Cars to check today");
-        todayCarGrid.setHeightByRows(5);
+        todayCarGrid.setHeightByRows(4);
+        todayCarGrid.setColumns("model", "plate", "remarks");
+//todo        todayCarGrid.setItems();
 
         // Tommorow grid
-        Grid<Car> tomorrowCarGrid = new Grid<>();
-        //todo - maybe after calendar?
-        //todo - edit button
+        Grid<BookingCar> tomorrowCarGrid = new Grid<>(BookingCar.class);
         tomorrowCarGrid.setCaption("Cars to check tomorrow");
-        tomorrowCarGrid.setHeightByRows(5);
+        tomorrowCarGrid.setHeightByRows(4);
+        tomorrowCarGrid.setColumns("model", "plate", "remarks");
+//todo setItems()
 
         carsToCheck.addComponents(todayCarGrid, tomorrowCarGrid);
 
         return carsToCheck;
     }
 
+
     // Put it all together
     public VerticalLayout buildWelcomeView() {
         VerticalLayout welcomeVL = new VerticalLayout();
 //        welcomeVL.addComponent(new Label("Welcome"));
+        welcomeVL.setMargin(false);
 
-        // Horizontal Layout under daily overviews
-        Calendar today = Calendar.getInstance();
-        // todo deal with the damn dates !!!!!
+        Label welcome = new Label("Welcome! Great to see you!");
+        welcome.addStyleNames(ValoTheme.LABEL_NO_MARGIN, ValoTheme.LABEL_LARGE);
 
-        HorizontalLayout overviewsHL = new HorizontalLayout();
-        overviewsHL.addComponents(buildDayOverviewVL(today), buildDayOverviewVL(today));
-        //  overviewsHL.setHeight("300px");
+        welcomeVL.addComponents(welcome, buildDayOverviews(), buildButtonsRow(), buildProgressSection(), buildCarsToCheckList());
+
+//        // Horizontal Layout under daily overviews
+//        Calendar today = Calendar.getInstance();
+//
+//        HorizontalLayout overviewsHL = new HorizontalLayout();
+//        overviewsHL.addComponents(buildDayOverviews(today), buildDayOverviews(today));
+//        //  overviewsHL.setHeight("300px");
 
         //welcomeVL.addComponents(overviewsHL, buildButtonsRow());
 
         HorizontalLayout bookingAndProgressHL = new HorizontalLayout();
-        bookingAndProgressHL.addComponents(buildMyBookingsSectionVL(), buildTurnoverSectionVL());
+        //   bookingAndProgressHL.addComponents(buildMyBookingsSectionVL(), buildTurnoverSectionVL());
 
-        welcomeVL.addComponents(overviewsHL, buildButtonsRow(), bookingAndProgressHL, buildCarsToCheckVL());
+//        welcomeVL.addComponents(overviewsHL, buildButtonsRow(), bookingAndProgressHL, buildCarsToCheckList());
 
-        //     ), bookingAndProgress, buildCarsToCheckVL());
+        //     ), bookingAndProgress, buildCarsToCheckList());
 
         return welcomeVL;
     }
+
+    // Helpers
+    private Button buildCountTomorrowColumn(com.katamlek.nringthymeleaf.domain.Event event) {
+        Button todayCountsB = new Button();
+//todo get Name from row, today        todayCountsL.setCaption(eventRepository.countEventByEventDateAAndEventName());
+        todayCountsB.addStyleNames(ValoTheme.BUTTON_SMALL, ValoTheme.BUTTON_BORDERLESS, ValoTheme.BUTTON_QUIET);
+        return todayCountsB;
+    }
+
+    private Button buildCountTodayColumn(com.katamlek.nringthymeleaf.domain.Event event) {
+        Button tomorrowCountB = new Button();
+        // todo as above tomorrowCountL.setCaption(eventRepository.countEventByEventDateAAndEventName());
+        tomorrowCountB.addStyleNames(ValoTheme.BUTTON_SMALL, ValoTheme.BUTTON_BORDERLESS, ValoTheme.BUTTON_QUIET);
+        return tomorrowCountB;
+    }
+
 }

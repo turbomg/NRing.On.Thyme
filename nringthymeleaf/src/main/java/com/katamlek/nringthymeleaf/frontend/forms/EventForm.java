@@ -101,7 +101,7 @@ public class EventForm extends VerticalLayout implements View {
 
 
     Binder<EventInternalInfo> internalInfoBinder = new Binder<>();
-    Binder<EventPublicPricing> publicPricingBinder = new Binder<>();
+    // Binder<EventPublicPricing> publicPricingBinder = new Binder<>();
     Binder<EventPublicInfo> publicInfoBinder = new Binder<>();
 
     // Event details - bind to Event class
@@ -353,7 +353,7 @@ public class EventForm extends VerticalLayout implements View {
     }
 
     // Called when user enters view from the list or adding a new event
-    //todo set underEditing flag: true - the form won't open, false - let's go;; after save() set it to false;; update the domain
+    //todo underEditing flag after save() set it to false;
     public void enterView(Long id) {
         com.katamlek.nringthymeleaf.domain.Event event;
         if (id == null) {
@@ -365,18 +365,21 @@ public class EventForm extends VerticalLayout implements View {
             event.setUnderEditing(true);
             // todo more setters
         } else {
-            //todo check if not under editing -- guess need to save the flag in the DB ?
-            //todo checked the flags on related data like internal info etc
+            //todo check the flags on related data like internal info etc
             event = eventRepository.findById(id).get();
-            event.setUnderEditing(true);
-            if (event == null) {
-                showNotFound();
-                return;
+            if (event.isUnderEditing()) {
+                Notification.show("Someone is editing this one now. Come back later.");
+                navigationManager.navigateTo(EventGridView.class);
+            } else {
+                event.setUnderEditing(true);
+                if (event == null) {
+                    showNotFound();
+                    return;
+                }
             }
         }
         eventBinder.setBean(event);
         eventNameTF.focus();
-
     }
 
     // Won't hopefully happen

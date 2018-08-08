@@ -59,4 +59,6 @@ public class Customer {
 
     @ManyToMany(mappedBy = "customers")
     private List<Booking> bookings;
+
+    private boolean isUnderEditing;
 }

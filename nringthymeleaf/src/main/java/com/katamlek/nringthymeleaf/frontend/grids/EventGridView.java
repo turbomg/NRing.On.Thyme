@@ -1,55 +1,59 @@
 package com.katamlek.nringthymeleaf.frontend.grids;
 
+import com.katamlek.nringthymeleaf.domain.EventType;
 import com.katamlek.nringthymeleaf.domain.LocationDefinition;
+import com.katamlek.nringthymeleaf.frontend.forms.EventForm;
+import com.katamlek.nringthymeleaf.frontend.navigation.NavigationManager;
 import com.katamlek.nringthymeleaf.repositories.EventRepository;
 import com.katamlek.nringthymeleaf.repositories.LocationDefinitionRepository;
+import com.vaadin.icons.VaadinIcons;
 import com.vaadin.navigator.View;
 import com.vaadin.shared.ui.grid.ColumnResizeMode;
-import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.SpringView;
 import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.*;
-import com.vaadin.ui.renderers.ButtonRenderer;
+import com.vaadin.ui.themes.ValoTheme;
 import org.assertj.core.util.Lists;
 import org.vaadin.gridutil.cell.CellFilterComponent;
 import org.vaadin.gridutil.cell.GridCellFilter;
 
 import java.text.SimpleDateFormat;
 
+/**
+ * Full list of events.
+ */
+
 @SpringView
 @UIScope
 public class EventGridView extends VerticalLayout implements View {
 
-    //todo finish this class
-
     private final EventRepository eventRepository;
     private LocationDefinitionRepository locationDefinitionRepository;
+    private NavigationManager navigationManager;
 
     private GridCellFilter filter;
-//    final Grid<Event> eventGrid;
+    private Grid<com.katamlek.nringthymeleaf.domain.Event> eventGrid;
 
-    public EventGridView(EventRepository eventRepository, LocationDefinitionRepository locationDefinitionRepository) {
+    public EventGridView(EventRepository eventRepository, LocationDefinitionRepository locationDefinitionRepository, NavigationManager navigationManager) {
         this.eventRepository = eventRepository;
         this.locationDefinitionRepository = locationDefinitionRepository;
+        this.navigationManager = navigationManager;
         addComponent(buildEventGridView());
-//        this.eventGrid = new Grid<>(Event.class);
+        setMargin(false);
     }
 
     public Grid<com.katamlek.nringthymeleaf.domain.Event> buildEventGrid() {
 
-        Grid<com.katamlek.nringthymeleaf.domain.Event> eventGrid = new Grid<>(com.katamlek.nringthymeleaf.domain.Event.class);
+        eventGrid = new Grid<>(com.katamlek.nringthymeleaf.domain.Event.class);
         eventGrid.setItems(Lists.newArrayList(eventRepository.findAll()));
 
         // Setting visible colums according to specs
-        eventGrid.getColumn("id").setHidden(true);
-        eventGrid.getColumn("visibleWhenNoBookings").setHidden(true);
-        eventGrid.getColumn("visibleInPublicCalendar").setHidden(true);
-        eventGrid.getColumn("eventPublicPricing").setHidden(true);
-        eventGrid.getColumn("eventResponsibleUser").setHidden(true);
+        eventGrid.setColumns("eventName", "eventType", "eventTrack", "eventDate", "eventStartTime", "eventEndTime");
 
         eventGrid.addColumn(event -> {
-            String location = event.getEventLocation().getLocationName();
-            return location;
+            return "abc";
+//            todo what to do in case of NPE String location = event.getEventLocation().getLocationName();
+//            return location;
         }).setCaption("Location").setId("location");
 
         // Setting column order
@@ -63,17 +67,15 @@ public class EventGridView extends VerticalLayout implements View {
         // Set open document details for editing on double click
         eventGrid.addItemClickListener(event -> {
             if (event.getMouseEventDetails().isDoubleClick()) {
-                UI.getCurrent().getNavigator().navigateTo("xxx");
-                // todo set navigator to the selected car
-                // todo NOT A NAVIGATOR ! New carEditForm(Long id);
+                navigationManager.navigateTo(EventForm.class, event.getItem().getId());
             }
         });
 
         // Inline filtering
         this.filter = new GridCellFilter(eventGrid);
         this.filter.setTextFilter("eventName", true, true);
-        this.filter.setTextFilter("eventType", true, true);
-        CellFilterComponent<ComboBox<LocationDefinition>> locationFilter = this.filter.setComboBoxFilter("eventLocation", LocationDefinition.class, Lists.newArrayList(locationDefinitionRepository.findAll()));
+        CellFilterComponent<ComboBox<EventType>> eventTypeFilter = this.filter.setComboBoxFilter("eventType", EventType.class, Lists.newArrayList(EventType.values()));
+        CellFilterComponent<ComboBox<LocationDefinition>> locationFilter = this.filter.setComboBoxFilter("location", LocationDefinition.class, Lists.newArrayList(locationDefinitionRepository.findAll()));
 
         this.filter.setTextFilter("eventTrack", true, true);
 
@@ -82,46 +84,84 @@ public class EventGridView extends VerticalLayout implements View {
         this.filter.setTextFilter("eventEndTime", true, true);
 
 
-        // Inline editor
-        eventGrid.getEditor().setEnabled(true);
+        // Inline editor - turning off, way too dangerous
+        // eventGrid.getEditor().setEnabled(true);
 
-        // Extra columns: edit, delete, view documents
-        eventGrid.addColumn(event -> "Edit", new ButtonRenderer(clickEvent -> {
-            //todo navigator
-        }));
-
-        eventGrid.addColumn(event -> "Delete", new ButtonRenderer(clickEvent -> {
-            //todo check if works, switch to id?
-            eventRepository.delete((com.katamlek.nringthymeleaf.domain.Event) clickEvent.getItem());
-        }));
+        // Extra button delete
+        eventGrid.addComponentColumn(this::deleteEventButton);
 
         eventGrid.setSizeFull();
-
-//        filter = new GridCellFilter(paymentGrid);
 
         return eventGrid;
     }
 
-    // Build the buttons' row: Add, Clear filters
+    // Build the buttons row: Add, Clear filters
     public HorizontalLayout buildEventButtons() {
         HorizontalLayout buttonsEventHL = new HorizontalLayout();
 
-        Button addEventBtn = new Button("Add an event"); // add new event
-        addEventBtn.addClickListener(e -> UI.getCurrent().getNavigator().navigateTo("aaa"));
-        //todo add navigator -- see line 86, not navigator, but new form with the given id
+        Button addEventBtn = new Button("Add event"); // add new event
+        addEventBtn.addClickListener(e -> navigationManager.navigateTo(EventForm.class));
+        addEventBtn.addStyleNames(ValoTheme.BUTTON_BORDERLESS_COLORED);
+        addEventBtn.setIcon(VaadinIcons.PLUS);
 
         Button clearAllFilters = new Button("Remove filters", e -> {
             filter.clearAllFilters();
         });
+        clearAllFilters.setStyleName(ValoTheme.BUTTON_BORDERLESS);
+        clearAllFilters.setIcon(VaadinIcons.ERASER);
 
         buttonsEventHL.addComponents(addEventBtn, clearAllFilters);
+
         return buttonsEventHL;
+    }
+
+    // Helpers
+    private Button deleteEventButton(com.katamlek.nringthymeleaf.domain.Event event) {
+        Button deleteEButton = new Button(VaadinIcons.MINUS_CIRCLE);
+        deleteEButton.addStyleNames(ValoTheme.BUTTON_SMALL);
+        deleteEButton.addClickListener(e -> {
+            //Confirmation popup
+            Window window = new Window("Do you really want to delete this event?");
+
+            //Popup contents
+            VerticalLayout confirmationVL = new VerticalLayout();
+            confirmationVL.addComponent(new Label("There's no undo option and your developer won't help you either."));
+
+            // And buttons
+            Button yesButton = new Button("Proceed");
+            yesButton.addClickListener(event1 -> {
+                eventRepository.delete(event);
+                eventGrid.setItems(Lists.newArrayList(eventRepository.findAll()));
+                // todo clear filters ??? MATEUSZ? JONO?
+                window.close();
+            });
+
+            Button noButton = new Button("Give the delete up");
+            noButton.addClickListener(event2 -> {
+                window.close();
+            });
+
+            HorizontalLayout buttonsLayout = new HorizontalLayout(yesButton, noButton);
+            confirmationVL.addComponent(buttonsLayout);
+
+            window.setContent(confirmationVL);
+
+            window.center();
+            UI.getCurrent().addWindow(window);
+
+        });
+
+        return deleteEButton;
     }
 
     // Put all together
     public VerticalLayout buildEventGridView() {
+        Label label = new Label("Event List");
+        label.addStyleNames(ValoTheme.LABEL_NO_MARGIN, ValoTheme.LABEL_LARGE);
+
         VerticalLayout eventGridViewVL = new VerticalLayout();
-        eventGridViewVL.addComponents(buildEventButtons(), buildEventGrid());
+        eventGridViewVL.setMargin(false);
+        eventGridViewVL.addComponents(label, buildEventButtons(), buildEventGrid());
         return eventGridViewVL;
     }
 }

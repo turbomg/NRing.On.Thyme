@@ -1,15 +1,17 @@
 package com.katamlek.nringthymeleaf.frontend.grids;
 
 import com.katamlek.nringthymeleaf.domain.*;
+import com.katamlek.nringthymeleaf.frontend.forms.CarForm;
+import com.katamlek.nringthymeleaf.frontend.navigation.NavigationManager;
 import com.katamlek.nringthymeleaf.repositories.CarRepository;
 import com.katamlek.nringthymeleaf.repositories.LocationDefinitionRepository;
+import com.vaadin.icons.VaadinIcons;
 import com.vaadin.navigator.View;
 import com.vaadin.shared.ui.grid.ColumnResizeMode;
-import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.SpringView;
 import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.*;
-import com.vaadin.ui.renderers.ButtonRenderer;
+import com.vaadin.ui.themes.ValoTheme;
 import org.assertj.core.util.Lists;
 import org.vaadin.gridutil.cell.CellFilterComponent;
 import org.vaadin.gridutil.cell.GridCellFilter;
@@ -21,20 +23,24 @@ import java.util.List;
 @SpringView
 @UIScope
 public class CarGridView extends VerticalLayout implements View {
-    GridCellFilter filter;
+    private GridCellFilter filter;
     private final CarRepository carRepository;
     private final LocationDefinitionRepository locationDefinitionRepository;
+    private NavigationManager navigationManager;
+    private Grid<Car> carGrid;
 
-    public CarGridView(CarRepository carRepository, LocationDefinitionRepository locationDefinitionRepository) {
+    public CarGridView(CarRepository carRepository, LocationDefinitionRepository locationDefinitionRepository, NavigationManager navigationManager) {
         this.carRepository = carRepository;
         this.locationDefinitionRepository = locationDefinitionRepository;
+        this.navigationManager = navigationManager;
         this.addComponent(buildCarGridView());
+        setMargin(false);
     }
 
     // Build the grid with cars
     public Grid<Car> buildCarGrid() {
         // Setting items - full CarRepository
-        Grid<Car> carGrid = new Grid<>(Car.class);
+        carGrid = new Grid<>(Car.class);
         List<Car> carList = Lists.newArrayList(carRepository.findAll());
         carGrid.setItems(carList);
 
@@ -57,9 +63,7 @@ public class CarGridView extends VerticalLayout implements View {
         // Set open car details for editing on double click
         carGrid.addItemClickListener(event -> {
             if (event.getMouseEventDetails().isDoubleClick()) {
-                UI.getCurrent().getNavigator().navigateTo("xxx");
-                // todo set navigator to the selected car
-                // todo NOT A NAVIGATOR ! New carEditForm(Long id);
+                navigationManager.navigateTo(CarForm.class, event.getItem().getId());
             }
         });
 
@@ -89,48 +93,91 @@ public class CarGridView extends VerticalLayout implements View {
 
         this.filter.setBooleanFilter("currentlyInUse");
 
-//todo change all Time types to Date to preserve consistency
+        //todo change all Time types to Date to preserve consistency
 
         // Inline editor
-        carGrid.getEditor().setEnabled(true);
+        // carGrid.getEditor().setEnabled(true);
 
-        // Extra columns: edit, delete
-        carGrid.addColumn(car -> "Edit", new ButtonRenderer(clickEvent -> {
-            //todo navigator
-        }));
-
-        carGrid.addColumn(car -> "Delete", new ButtonRenderer(clickEvent -> {
-            carList.remove(clickEvent.getItem());
-            //todo check if works, switch to id?
-            carRepository.delete((Car) clickEvent.getItem());
-            carGrid.setItems(carList);
-        }));
+        carGrid.addComponentColumn(this::deleteCarButton);
 
         carGrid.setSizeFull();
 
         return carGrid;
     }
 
-    // Build the buttons' row: Add, Clear filters
+    // Build buttons row: Add, Clear filters
     public HorizontalLayout buildCarButtons() {
         HorizontalLayout buttonsCarHL = new HorizontalLayout();
 
-        Button addCarBtn = new Button("Add a car"); // add new car
-        addCarBtn.addClickListener(e -> UI.getCurrent().getNavigator().navigateTo("aaa"));
-        //todo add navigator -- see line 86, not navigator, but new form with the given id
+        Button addCarBtn = new Button("Add car"); // add new car
+        addCarBtn.addClickListener(e -> navigationManager.navigateTo(CarForm.class));
+        addCarBtn.addStyleNames(ValoTheme.BUTTON_BORDERLESS_COLORED);
+        addCarBtn.setIcon(VaadinIcons.PLUS);
 
         Button clearAllFilters = new Button("Remove filters", e -> {
             filter.clearAllFilters();
         });
+        clearAllFilters.setStyleName(ValoTheme.BUTTON_BORDERLESS);
+        clearAllFilters.setIcon(VaadinIcons.ERASER);
 
         buttonsCarHL.addComponents(addCarBtn, clearAllFilters);
+
         return buttonsCarHL;
     }
 
     // Put all together
     public VerticalLayout buildCarGridView() {
+        Label label = new Label("Car List");
+        label.addStyleNames(ValoTheme.LABEL_NO_MARGIN, ValoTheme.LABEL_LARGE);
+
         VerticalLayout carGridViewVL = new VerticalLayout();
-        carGridViewVL.addComponents(buildCarButtons(), buildCarGrid());
+        carGridViewVL.setMargin(false);
+        carGridViewVL.addComponents(label, buildCarButtons(), buildCarGrid());
         return carGridViewVL;
+    }
+
+    // Helpers
+    private Button deleteCarButton(Car car) {
+        Button deleteCButton = new Button(VaadinIcons.MINUS_CIRCLE);
+        deleteCButton.addStyleNames(ValoTheme.BUTTON_SMALL);
+        deleteCButton.addClickListener(e -> {
+
+            if (car.isUnderEditing()) {
+                Notification.show("I can't delete this car now, as someone is working on it.");
+            } else {
+
+                //Confirmation popup
+                Window window = new Window("Do you really want to delete this car?");
+
+                //Popup contents
+                VerticalLayout confirmationVL = new VerticalLayout();
+                confirmationVL.addComponent(new Label("There's no undo option and your developer won't help you either."));
+
+                // And buttons
+                Button yesButton = new Button("Proceed");
+                yesButton.addClickListener(event1 -> {
+                    carRepository.delete(car);
+                    carGrid.setItems(Lists.newArrayList(carRepository.findAll()));
+                    // todo clear filters ??? MATEUSZ? JONO?
+                    window.close();
+                });
+
+                Button noButton = new Button("Give the delete up");
+                noButton.addClickListener(event2 -> {
+                    window.close();
+                });
+
+                HorizontalLayout buttonsLayout = new HorizontalLayout(yesButton, noButton);
+                confirmationVL.addComponent(buttonsLayout);
+
+                window.setContent(confirmationVL);
+
+                window.center();
+                UI.getCurrent().addWindow(window);
+
+            }
+        });
+
+        return deleteCButton;
     }
 }

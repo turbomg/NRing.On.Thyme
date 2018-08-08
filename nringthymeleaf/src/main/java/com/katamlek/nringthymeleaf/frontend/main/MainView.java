@@ -1,11 +1,9 @@
 package com.katamlek.nringthymeleaf.frontend.main;
 
+import com.katamlek.nringthymeleaf.domain.PriceList;
 import com.katamlek.nringthymeleaf.frontend.forms.BookingForm;
 import com.katamlek.nringthymeleaf.frontend.forms.EventForm;
-import com.katamlek.nringthymeleaf.frontend.grids.BookingGridView;
-import com.katamlek.nringthymeleaf.frontend.grids.CarGridView;
-import com.katamlek.nringthymeleaf.frontend.grids.EventGridView;
-import com.katamlek.nringthymeleaf.frontend.grids.UserGridView;
+import com.katamlek.nringthymeleaf.frontend.grids.*;
 import com.katamlek.nringthymeleaf.frontend.navigation.NavigationManager;
 import com.katamlek.nringthymeleaf.frontend.views.*;
 import com.vaadin.icons.VaadinIcons;
@@ -47,6 +45,7 @@ public class MainView extends VerticalLayout implements ViewDisplay {
     private Button fleet;
     private Button systemUsers;
     private Button reports;
+    private Button pricelist;
     private Button setup;
     private Button logOut;
     private VerticalLayout displayArea;
@@ -62,12 +61,13 @@ public class MainView extends VerticalLayout implements ViewDisplay {
         attachNavigation(dashboard, WelcomeView.class);
         attachNavigation(myAccount, MyAccountView.class);
         attachNavigation(calendar, CalendarView.class);
-        attachNavigation(bookings, BookingGridView.class); //todo change to grid later on when done with the form
-        attachNavigation(events, EventForm.class); //todo change to grid when done with event form
+        attachNavigation(bookings, BookingGridView.class);
+        attachNavigation(events, EventGridView.class);
         attachNavigation(customers, CustomerGridView.class);
         attachNavigation(fleet, CarGridView.class);
         attachNavigation(systemUsers, UserGridView.class);
         attachNavigation(reports, ReportsView.class);
+        attachNavigation(pricelist, PriceListView.class);
         attachNavigation(setup, SetupView.class);
 
         logOut.addClickListener(e -> logout()); //todo
@@ -181,6 +181,11 @@ public class MainView extends VerticalLayout implements ViewDisplay {
         reports.setIcon(VaadinIcons.PAPERPLANE);
         reports.setDescription("Reports");
 
+        pricelist = new Button("Price list");
+        pricelist.addStyleNames(ValoTheme.BUTTON_BORDERLESS, ValoTheme.BUTTON_ICON_ONLY);
+        pricelist.setIcon(VaadinIcons.DOLLAR);
+        pricelist.setDescription("Reports");
+
         setup = new Button("Setup");
         setup.addStyleNames(ValoTheme.BUTTON_BORDERLESS, ValoTheme.BUTTON_ICON_ONLY);
         setup.setIcon(VaadinIcons.COGS);
@@ -192,7 +197,7 @@ public class MainView extends VerticalLayout implements ViewDisplay {
         logOut.setDescription("Log out");
 
         menu.addComponents(currentUser, dashboard, myAccount, calendar, bookings, events,
-                customers, fleet, systemUsers, reports, setup, logOut);
+                customers, fleet, systemUsers, reports, pricelist, setup, logOut);
 
         menu.setComponentAlignment(currentUser, Alignment.MIDDLE_CENTER);
         menu.setComponentAlignment(dashboard, Alignment.MIDDLE_CENTER);
@@ -204,6 +209,7 @@ public class MainView extends VerticalLayout implements ViewDisplay {
         menu.setComponentAlignment(fleet, Alignment.MIDDLE_CENTER);
         menu.setComponentAlignment(systemUsers, Alignment.MIDDLE_CENTER);
         menu.setComponentAlignment(reports, Alignment.MIDDLE_CENTER);
+        menu.setComponentAlignment(pricelist, Alignment.MIDDLE_CENTER);
         menu.setComponentAlignment(setup, Alignment.MIDDLE_CENTER);
         menu.setComponentAlignment(logOut, Alignment.MIDDLE_CENTER);
 

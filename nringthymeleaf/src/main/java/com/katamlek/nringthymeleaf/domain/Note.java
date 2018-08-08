@@ -4,6 +4,7 @@ import lombok.Data;
 
 import javax.persistence.*;
 import java.util.Calendar;
+import java.util.Date;
 
 /**
  * Note regarding another entity: car note, day note etc.
@@ -21,7 +22,7 @@ public class Note {
     private Long id;
 
     @Temporal(TemporalType.TIMESTAMP)
-    private Calendar enteredOn;
+    private Date enteredOn;
 
     @Lob
     private String text;
@@ -31,5 +32,7 @@ public class Note {
 
     @ManyToOne
     private User user; // entered by
+
+    private boolean isUnderEditing;
 
 }

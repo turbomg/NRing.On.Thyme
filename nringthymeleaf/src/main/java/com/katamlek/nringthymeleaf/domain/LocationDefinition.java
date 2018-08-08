@@ -23,4 +23,7 @@ public class LocationDefinition {
 
     @OneToOne
     private Event event;
+
+    @OneToOne
+    private BookingPackageItem bookingPackageItem;
 }

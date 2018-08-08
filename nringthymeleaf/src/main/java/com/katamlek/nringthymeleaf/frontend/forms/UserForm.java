@@ -116,7 +116,7 @@ public class UserForm extends VerticalLayout implements View {
         Button yesButton = new Button("Proceed");
         yesButton.addClickListener(e -> {
             window.close();
-            UI.getCurrent().getNavigator().navigateTo(UserGridView.VIEW_NAME);
+            //todo navigator
         });
 
         Button noButton = new Button("Take me back");
@@ -147,7 +147,7 @@ public class UserForm extends VerticalLayout implements View {
         Button yesButton = new Button("Proceed");
         yesButton.addClickListener(e -> {
             userRepository.delete(user);
-            UI.getCurrent().getNavigator().navigateTo(UserGridView.VIEW_NAME);
+         // todo navigator
         });
 
         Button noButton = new Button("Take me back");
@@ -177,7 +177,7 @@ public class UserForm extends VerticalLayout implements View {
 
     // Closing form
     private void closeForm() {
-        UI.getCurrent().getNavigator().navigateTo(UserGridView.VIEW_NAME);
+//todo navigator
     }
 
 

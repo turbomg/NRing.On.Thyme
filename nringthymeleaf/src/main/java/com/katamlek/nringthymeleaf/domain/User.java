@@ -54,6 +54,8 @@ public class User {
     @OneToMany(mappedBy = "user")
     private List<UserSalesTarget> userSalesTarget;
 
+    private boolean isUnderEditing;
+
     public User(@NotNull String email, String password) {
         this.email = email;
         this.password = password;

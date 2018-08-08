@@ -4,6 +4,10 @@ import lombok.Data;
 
 import javax.persistence.*;
 
+/**
+ * Concerns cars only.
+ */
+
 @Entity
 @Data
 public class PricingGroup {
@@ -17,11 +21,14 @@ public class PricingGroup {
     private int pricingGroupStartQuantity;
     private int pricingGroupEndQuantity;
     private Long pricingGroupRounding;
+//
+//    @OneToOne
+//    private OthersPricing priceList;
+//
+//    @OneToOne
+//    private CarPricing carPricing;
 
     @OneToOne
-    private OthersPricing priceList;
-
-    @OneToOne
-    private CarPricing carPricing;
+    private PriceListCar priceListCar;
 
 }

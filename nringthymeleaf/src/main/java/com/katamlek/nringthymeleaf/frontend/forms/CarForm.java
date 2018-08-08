@@ -4,7 +4,6 @@ import com.katamlek.nringthymeleaf.domain.*;
 import com.katamlek.nringthymeleaf.frontend.grids.CarGridView;
 import com.katamlek.nringthymeleaf.frontend.navigation.NavigationManager;
 import com.katamlek.nringthymeleaf.repositories.CarNoteRepository;
-import com.katamlek.nringthymeleaf.repositories.CarPricingRepository;
 import com.katamlek.nringthymeleaf.repositories.CarRepository;
 import com.vaadin.data.Binder;
 import com.vaadin.data.provider.DataProvider;
@@ -28,13 +27,13 @@ public class CarForm extends VerticalLayout implements View {
     // The constructor
     private CarRepository carRepository;
     private CarNoteRepository carNoteRepository;
-    private CarPricingRepository carPricingRepository;
+//    private CarPricingRepository carPricingRepository;
     private NavigationManager navigationManager;
 
-    public CarForm(CarRepository carRepository, CarNoteRepository carNoteRepository, CarPricingRepository carPricingRepository, NavigationManager navigationManager) {
+    public CarForm(CarRepository carRepository, CarNoteRepository carNoteRepository, NavigationManager navigationManager) {
         this.carRepository = carRepository;
         this.carNoteRepository = carNoteRepository;
-        this.carPricingRepository = carPricingRepository;
+    //    this.carPricingRepository = carPricingRepository;
         this.navigationManager = navigationManager;
         addComponent(buildCarForm());
     }
@@ -68,7 +67,7 @@ public class CarForm extends VerticalLayout implements View {
     private Button addHistoryNoteB;
 
     // Pricing section
-    private Grid<CarPricing> pricingG;
+//todo    private Grid<CarPricing> pricingG;
     private Button addPricingItemB;
 
     // Binder
@@ -79,7 +78,7 @@ public class CarForm extends VerticalLayout implements View {
     public HorizontalLayout buildDetailsSection() {
 
         modelTF = new TextField("Model");
-        plateTF = new TextField("Plate");
+        plateTF = new TextField("Plate"); //todo remember to check if not already in the db
         carColorCB = new ComboBox<CarColor>();
         carColorCB.setItems(CarColor.values());
         carColorCB.setCaption("Color");
@@ -171,45 +170,45 @@ public class CarForm extends VerticalLayout implements View {
         return historyVL;
     }
 
-    // Pricing
-    public VerticalLayout buildPricingSection() {
-        VerticalLayout pricingVL = new VerticalLayout();
-        pricingG = new Grid<>(CarPricing.class);
-        // todo pass car id to the below method - ask Darek how
-        pricingG.setItems(Lists.newArrayList(carPricingRepository.findByCarId(34343l)));
-        pricingG.setColumns("description", "defaultNote", "startPrice", "startKM", "per10KM", "instruction", "carPricingGroup");
-        pricingG.setColumnOrder("description", "defaultNote", "startPrice", "startKM", "per10KM", "instruction", "carPricingGroup");
-        pricingG.getColumns().forEach(column -> column.setSortable(true));
-        pricingG.setColumnReorderingAllowed(true);
-        pricingG.setColumnResizeMode(ColumnResizeMode.ANIMATED);
-
-        // allow inline editing - of non-history notes only
-        carNoteG.getEditor().setEnabled(true); //todo lock some columns?
-
-        // extra buttons delete, edit - for non-history entries only
-        carNoteG.addColumn(carNote -> "Edit", new ButtonRenderer(clickEvent -> {
-            //todo navigator
-        }));
-
-        carNoteG.addColumn(carNote -> "Delete", new ButtonRenderer(clickEvent -> {
-            //todo check if works, switch to id?
-            carNoteRepository.delete((CarNote) clickEvent.getItem());
-        })); //todo enable delete?
-
-        pricingG.setSizeFull();
-
-        addPricingItemB = new Button("Add pricing item");
-        addPricingItemB.addClickListener(e -> Notification.show("Can't do this yet, sorry")); //todo
-
-        pricingVL.addComponents(pricingG, addPricingItemB);
-        return pricingVL;
-    }
+    // todo Pricing
+//    public VerticalLayout buildPricingSection() {
+//        VerticalLayout pricingVL = new VerticalLayout();
+//        pricingG = new Grid<>(CarPricing.class);
+//        // todo pass car id to the below method - ask Darek how
+//        pricingG.setItems(Lists.newArrayList(carPricingRepository.findByCarId(34343l)));
+//        pricingG.setColumns("description", "defaultNote", "startPrice", "startKM", "per10KM", "instruction", "carPricingGroup");
+//        pricingG.setColumnOrder("description", "defaultNote", "startPrice", "startKM", "per10KM", "instruction", "carPricingGroup");
+//        pricingG.getColumns().forEach(column -> column.setSortable(true));
+//        pricingG.setColumnReorderingAllowed(true);
+//        pricingG.setColumnResizeMode(ColumnResizeMode.ANIMATED);
+//
+//        // allow inline editing - of non-history notes only
+//        carNoteG.getEditor().setEnabled(true); //todo lock some columns?
+//
+//        // extra buttons delete, edit - for non-history entries only
+//        carNoteG.addColumn(carNote -> "Edit", new ButtonRenderer(clickEvent -> {
+//            //todo navigator
+//        }));
+//
+//        carNoteG.addColumn(carNote -> "Delete", new ButtonRenderer(clickEvent -> {
+//            //todo check if works, switch to id?
+//            carNoteRepository.delete((CarNote) clickEvent.getItem());
+//        })); //todo enable delete?
+//
+//        pricingG.setSizeFull();
+//
+//        addPricingItemB = new Button("Add pricing item");
+//        addPricingItemB.addClickListener(e -> Notification.show("Can't do this yet, sorry")); //todo
+//
+//        pricingVL.addComponents(pricingG, addPricingItemB);
+//        return pricingVL;
+//    }
 
     // Put all together
     public VerticalLayout buildCarForm() {
         // todo I guess these methods should receive the car id and work accordingly... ask Darek
         VerticalLayout carForm = new VerticalLayout();
-        carForm.addComponents(carFormL, buildDetailsSection(), buildStatusSection(), buildHistorySection(), buildPricingSection());
+        carForm.addComponents(carFormL, buildDetailsSection(), buildStatusSection(), buildHistorySection());
 
         // The binder
         carBinder = new Binder(Car.class); //todo

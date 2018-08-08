@@ -53,7 +53,10 @@ public class Car {
     private List<CarNote> carHistory;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "car")
-    private List<CarPricing> carPricing;
+    private List<PriceListCar> carPricing;
+
+    @OneToOne
+    private BookingPackageItemCar bookingPackageItemCar;
 
     private boolean isUnderEditing;
 

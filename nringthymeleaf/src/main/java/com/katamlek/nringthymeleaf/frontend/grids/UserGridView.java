@@ -3,14 +3,16 @@ package com.katamlek.nringthymeleaf.frontend.grids;
 import com.katamlek.nringthymeleaf.domain.User;
 import com.katamlek.nringthymeleaf.domain.UserRole;
 import com.katamlek.nringthymeleaf.frontend.forms.UserForm;
+import com.katamlek.nringthymeleaf.frontend.navigation.NavigationManager;
 import com.katamlek.nringthymeleaf.repositories.UserRepository;
+import com.vaadin.event.dd.acceptcriteria.Not;
+import com.vaadin.icons.VaadinIcons;
 import com.vaadin.navigator.View;
 import com.vaadin.shared.ui.grid.ColumnResizeMode;
-import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.SpringView;
 import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.*;
-import com.vaadin.ui.renderers.ButtonRenderer;
+import com.vaadin.ui.themes.ValoTheme;
 import org.assertj.core.util.Lists;
 import org.vaadin.gridutil.cell.CellFilterComponent;
 import org.vaadin.gridutil.cell.GridCellFilter;
@@ -26,22 +28,21 @@ import java.util.Arrays;
 public class UserGridView extends VerticalLayout implements View {
     private UserRepository userRepository;
     private UserForm userForm;
-
+    private NavigationManager navigationManager;
+    private Grid<User> userGrid;
     private GridCellFilter filter;
 
-    public static final String VIEW_NAME = "user-grid-view";
-
-    public UserGridView(UserRepository userRepository, UserForm userForm) {
+    public UserGridView(UserRepository userRepository, UserForm userForm, NavigationManager navigationManager) {
         this.userRepository = userRepository;
         this.userForm = userForm;
+        this.navigationManager = navigationManager;
         addComponent(buildUserGridView());
+        setMargin(false);
     }
 
-    // Build the grid with cars
+    // Build the grid with users
     public Grid<User> buildUserGrid() {
-        // Setting items - only this booking cars, selected by booking id
         Grid<User> userGrid = new Grid<>(User.class);
-        //todo how to pass the booking id parameter?
         userGrid.setItems(Lists.newArrayList(userRepository.findAll()));
 
         // Setting visible colums according to specs
@@ -66,9 +67,7 @@ public class UserGridView extends VerticalLayout implements View {
         // Set open user details for editing on double click
         userGrid.addItemClickListener(event -> {
             if (event.getMouseEventDetails().isDoubleClick()) {
-                UI.getCurrent().getNavigator().navigateTo("xxx");
-                // todo set navigator to the selected user
-                // todo NOT A NAVIGATOR ! New userEditForm(Long id);
+                navigationManager.navigateTo(UserForm.class, event.getItem().getId());
             }
         });
 
@@ -83,34 +82,32 @@ public class UserGridView extends VerticalLayout implements View {
         CellFilterComponent<ComboBox<UserRole>> roleFilter = this.filter.setComboBoxFilter("userRole", UserRole.class, Arrays.asList(UserRole.values()));
 
         // Inline editor
-        userGrid.getEditor().setEnabled(true);
+        // userGrid.getEditor().setEnabled(true);
 
-        // Extra columns: edit, delete
-        userGrid.addColumn(user -> "Edit", new ButtonRenderer(clickEvent -> {
-            userForm.editUser((User) clickEvent.getItem());
-        }));
-
-        userGrid.addColumn(bookingCar -> "Delete", new ButtonRenderer(clickEvent -> {
-            userRepository.delete((User) clickEvent.getItem());
-        }));
+        // Extra columns: delete
+        userGrid.addComponentColumn(this::buildDeleteButton);
 
         userGrid.setSizeFull();
 
         return userGrid;
     }
 
-    // Build the buttons' row: Add, Clear filters
+    // Build the buttons row: Add, Clear filters
     public HorizontalLayout buildUserButtons() {
         HorizontalLayout buttonsUserHL = new HorizontalLayout();
 
         Button addUserBtn = new Button("Add user"); // add new user
+        addUserBtn.addStyleNames(ValoTheme.BUTTON_BORDERLESS_COLORED);
+        addUserBtn.setIcon(VaadinIcons.PLUS);
         addUserBtn.addClickListener(e -> {
-            UI.getCurrent().getNavigator().navigateTo(UserForm.VIEW_NAME);
-                });
+            navigationManager.navigateTo(UserForm.class);
+        });
 
         Button clearAllFilters = new Button("Remove filters", e -> {
             filter.clearAllFilters();
         });
+        clearAllFilters.setStyleName(ValoTheme.BUTTON_BORDERLESS);
+        clearAllFilters.setIcon(VaadinIcons.ERASER);
 
         buttonsUserHL.addComponents(addUserBtn, clearAllFilters);
         return buttonsUserHL;
@@ -118,8 +115,57 @@ public class UserGridView extends VerticalLayout implements View {
 
     // Put all together
     public VerticalLayout buildUserGridView() {
+        Label label = new Label("User List");
+        label.addStyleNames(ValoTheme.LABEL_NO_MARGIN, ValoTheme.LABEL_LARGE);
+
         VerticalLayout userGridViewVL = new VerticalLayout();
-        userGridViewVL.addComponents(buildUserButtons(), buildUserGrid());
+        userGridViewVL.setMargin(false);
+        userGridViewVL.addComponents(label, buildUserButtons(), buildUserGrid());
         return userGridViewVL;
     }
+
+    // Helpers
+    private Button buildDeleteButton(User user) {
+        Button deleteUButton = new Button(VaadinIcons.MINUS_CIRCLE);
+        deleteUButton.addStyleNames(ValoTheme.BUTTON_SMALL);
+        deleteUButton.addClickListener(e -> {
+
+            if (user.isLoggedIn() || user.isUnderEditing()) {
+                Notification.show("The user is currently working or his data is being processed. Won't delete the data now.");
+            } else {
+                //Confirmation popup
+                Window window = new Window("Do you really want to delete this customer?");
+
+                //Popup contents
+                VerticalLayout confirmationVL = new VerticalLayout();
+                confirmationVL.addComponent(new Label("There's no undo option and your developer won't help you either."));
+
+                // And buttons
+                Button yesButton = new Button("Proceed");
+                yesButton.addClickListener(event1 -> {
+                    userRepository.delete(user);
+                    userGrid.setItems(Lists.newArrayList(userRepository.findAll()));
+                    // todo clear filters ??? MATEUSZ? JONO?
+                    window.close();
+                });
+
+                Button noButton = new Button("Give the delete up");
+                noButton.addClickListener(event2 -> {
+                    window.close();
+                });
+
+                HorizontalLayout buttonsLayout = new HorizontalLayout(yesButton, noButton);
+                confirmationVL.addComponent(buttonsLayout);
+
+                window.setContent(confirmationVL);
+
+                window.center();
+                UI.getCurrent().addWindow(window);
+
+            }
+        });
+
+        return deleteUButton;
+    }
+
 }
