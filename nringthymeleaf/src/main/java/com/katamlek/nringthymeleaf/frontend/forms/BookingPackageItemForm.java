@@ -2,7 +2,9 @@ package com.katamlek.nringthymeleaf.frontend.forms;
 
 import com.katamlek.nringthymeleaf.domain.*;
 import com.katamlek.nringthymeleaf.repositories.*;
+import com.vaadin.data.Binder;
 import com.vaadin.navigator.View;
+import com.vaadin.navigator.ViewChangeListener;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.SpringView;
 import com.vaadin.spring.annotation.UIScope;
@@ -25,13 +27,15 @@ public class BookingPackageItemForm extends VerticalLayout implements View {
     private CarRepository carRepository;
     private LocationDefinitionRepository locationDefinitionRepository;
     private PricingGroupRepository pricingGroupRepository;
+    private BookingPackageItemRepository bookingPackageItemRepository;
 
     //todo ??? How do I pick data from price list: from the superclass or children?
 
     public BookingPackageItemForm(PriceListEventRepository priceListEventRepository, PriceListOtherRepository priceListOtherRepository,
                                   PriceListCarRepository priceListCarRepository, PriceListRepository priceListRepository,
                                   EventRepository eventRepository, CarRepository carRepository,
-                                  LocationDefinitionRepository locationDefinitionRepository, PricingGroupRepository pricingGroupRepository) {
+                                  LocationDefinitionRepository locationDefinitionRepository, PricingGroupRepository pricingGroupRepository,
+                                  BookingPackageItemRepository bookingPackageItemRepository) {
         this.priceListEventRepository = priceListEventRepository;
         this.priceListOtherRepository = priceListOtherRepository;
         this.priceListCarRepository = priceListCarRepository;
@@ -40,13 +44,17 @@ public class BookingPackageItemForm extends VerticalLayout implements View {
         this.carRepository = carRepository;
         this.locationDefinitionRepository = locationDefinitionRepository;
         this.pricingGroupRepository = pricingGroupRepository;
+        this.bookingPackageItemRepository = bookingPackageItemRepository;
 
         addComponent(new Label("Package item form"));
         addComponent(buildBookingPackageItemLayout());
         setMargin(false);
     }
 
-    //todo binders, decision where to place it: on the form or on the popup
+    // Binder
+    private Binder itemBinder;
+
+    //todo binding, decision where to place it: on the form or on the popup
 
     // Get the ofConcern, build window layout accordingly:
 
@@ -255,6 +263,48 @@ public class BookingPackageItemForm extends VerticalLayout implements View {
         // if the item count equals 0, set grid visibility to false
 
         return packageItemNoteGrid;
+    }
+
+    // Form open processing (new / edit)
+    @Override
+    public void enter(ViewChangeListener.ViewChangeEvent event) {
+        String packageItemId = event.getParameters();
+        if ("".equals(packageItemId)) {
+            enterView(null);
+        } else {
+            enterView(Long.valueOf(packageItemId));
+        }
+    }
+
+    // Called when user enters view from the list or adding a new document
+    public void enterView(Long id) {
+        BookingPackageItem bookingPackageItem;
+        if (id == null) {
+            // New
+            bookingPackageItem = new BookingPackageItem();
+
+            bookingPackageItem.setUnderEditing(true);
+            // todo more setters
+        } else {
+            bookingPackageItem = bookingPackageItemRepository.findById(id).get();
+            if (bookingPackageItem.isUnderEditing()) {
+                Notification.show("Someone is editing this one now. Come back later.");
+            } else {
+                bookingPackageItem.setUnderEditing(true);
+                if (bookingPackageItem == null) {
+                    showNotFound();
+                    return;
+                }
+            }
+        }
+        itemBinder.setBean(bookingPackageItem);
+        // todo xx.focus();
+    }
+
+    // Won't hopefully happen
+    public void showNotFound() {
+        removeAllComponents();
+        addComponent(new Label("Item not found"));
     }
 
 }

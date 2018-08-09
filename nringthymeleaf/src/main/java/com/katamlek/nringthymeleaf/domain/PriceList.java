@@ -7,11 +7,13 @@ import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 
 /**
- * Holds all the items "on stock".
+ * Holds general data for all the items "on stock".
  */
 
 @Entity
 @Data
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+
 public class PriceList {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

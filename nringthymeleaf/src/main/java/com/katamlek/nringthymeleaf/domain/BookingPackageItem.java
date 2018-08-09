@@ -12,6 +12,7 @@ import java.util.List;
  * for Car, Event and Other.
  */
 
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @Entity
 @Data
 public class BookingPackageItem {
@@ -45,4 +46,7 @@ public class BookingPackageItem {
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "packageItem")
     private List<BookingPackageItemNote> bookingPackageItemNoteList;
+
+    @ManyToOne
+    private Booking booking;
 }

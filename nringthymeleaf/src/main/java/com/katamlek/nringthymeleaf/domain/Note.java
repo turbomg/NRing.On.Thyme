@@ -11,9 +11,7 @@ import java.util.Date;
  * A base type of note.
  */
 
-
-// TODO https://vladmihalcea.com/how-to-inherit-properties-from-a-base-class-entity-using-mappedsuperclass-with-jpa-and-hibernate/
-
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @Entity
 @Data
 public class Note {

@@ -13,7 +13,4 @@ public class BookingPackageItemEvent extends BookingPackageItem {
     @OneToOne
     private PriceListEvent priceListEvent;
 
-    @ManyToOne
-    private Booking booking;
-
 }

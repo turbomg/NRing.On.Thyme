@@ -4,6 +4,7 @@ import lombok.Data;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
+import java.util.List;
 
 @Entity
 @Data
@@ -18,7 +19,6 @@ public class Agent {
     @NotNull
     private String lastName;
 
-    //TODO ASK JONATHAN: one to one or to many?
-    @OneToOne
-    private Customer customer;
+    @OneToMany(mappedBy = "customerAgent")
+    private List<Customer> customerList;
 }

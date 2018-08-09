@@ -2,6 +2,7 @@ package com.katamlek.nringthymeleaf.frontend.forms;
 
 import com.katamlek.nringthymeleaf.domain.BookingPayment;
 import com.katamlek.nringthymeleaf.domain.PaymentDefinition;
+import com.katamlek.nringthymeleaf.frontend.grids.CustomerGridView;
 import com.katamlek.nringthymeleaf.repositories.BookingPaymentRepository;
 import com.katamlek.nringthymeleaf.repositories.PaymentDefinitionRepository;
 import com.vaadin.data.Binder;
@@ -37,10 +38,13 @@ public class PaymentForm extends VerticalLayout implements View {
 
         HorizontalLayout paymentData = new HorizontalLayout();
 
- //       paymentDate = new DateField("Date");
-        //todo manual binding
+        paymentDate = new DateField("Date");
+
         paymentDefinition = new ComboBox<>("Method");
-        paymentDefinition.setItems(Lists.newArrayList(paymentDefinitionRepository.findAll())); //todo render the menthod only
+
+        paymentDefinition.setItems(Lists.newArrayList(paymentDefinitionRepository.findAll()));
+        paymentDefinition.setItemCaptionGenerator(e -> e.getPaymentName());
+
         paymentNote = new TextField("Notes");
         paymentAmount = new TextField("Payment amount");
 
@@ -48,10 +52,11 @@ public class PaymentForm extends VerticalLayout implements View {
 
         // Binder
         Binder<BookingPayment> bookingPaymentBinder = new Binder<>(BookingPayment.class);
- //todo bind manually, convert date type       bookingPaymentBinder.bindInstanceFields(this);
+
+        //todo bind manually? or bookingPaymentBinder.bindInstanceFields(this);
 
         // Save and cancel buttons
-        save = new Button("Save note");
+        save = new Button("Save payment");
         save.addStyleNames(ValoTheme.BUTTON_BORDERLESS_COLORED, ValoTheme.BUTTON_SMALL);
         save.addClickListener(e -> {
             try {
@@ -68,7 +73,34 @@ public class PaymentForm extends VerticalLayout implements View {
         cancel = new Button("Cancel");
         cancel.addStyleNames(ValoTheme.BUTTON_BORDERLESS, ValoTheme.BUTTON_SMALL);
         cancel.addClickListener(e -> {
-            this.setVisible(false);
+
+            //Confirmation popup
+            Window window = new Window("Do you really want to drop the changes this note?");
+
+            //Popup contents
+            VerticalLayout confirmationVL = new VerticalLayout();
+            confirmationVL.addComponent(new Label("There's no undo option and your developer won't help you either."));
+
+            // And buttons
+            Button yesButton = new Button("Drop the form and take me back");
+            yesButton.addClickListener(event1 -> {
+                window.close();
+            // todo where do we navigate? do we just close? set visible-false navigationManager.navigateTo(CustomerGridView.class); // todo or to the previous screen, ie Booking Form
+            });
+
+            Button noButton = new Button("Let's keep on working");
+            noButton.addClickListener(event2 -> {
+                window.close();
+            });
+
+            HorizontalLayout buttonsLayout = new HorizontalLayout(yesButton, noButton);
+            confirmationVL.addComponent(buttonsLayout);
+
+            window.setContent(confirmationVL);
+
+            window.center();
+            UI.getCurrent().addWindow(window);
+
         });
 
         HorizontalLayout buttons = new HorizontalLayout(save, cancel);

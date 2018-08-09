@@ -32,7 +32,7 @@ public class BookingPayment {
     private PaymentDefinition paymentDefinition;
 
     @ManyToOne
-    private BookingPackageItem bookingPackageItem;
+    private Booking booking;
 
     private boolean isUnderEditing;
 

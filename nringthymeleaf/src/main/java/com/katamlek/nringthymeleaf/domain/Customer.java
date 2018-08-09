@@ -36,7 +36,7 @@ public class Customer {
     @Lob
     private String customerGeneralInformation;
 
-    @OneToOne
+    @ManyToOne
     private Agent customerAgent;
 
     private CustomerGroup customerGroup;

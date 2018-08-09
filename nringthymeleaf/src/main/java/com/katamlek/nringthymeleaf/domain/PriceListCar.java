@@ -9,7 +9,7 @@ import java.math.BigDecimal;
 
 @Entity
 @Data
-//todo mappedSuperclass - like in Note
+
 public class PriceListCar extends PriceList {
     private BigDecimal startPrice;
     private Integer startKM;

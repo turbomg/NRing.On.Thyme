@@ -10,7 +10,4 @@ public class BookingPackageItemOther extends BookingPackageItem {
     @OneToOne
     private PriceListOther priceListOther;
 
-    @ManyToOne
-    private Booking booking;
-
 }

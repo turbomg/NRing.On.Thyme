@@ -22,4 +22,6 @@ public class BookingDocument {
 
     @ManyToOne
     Booking booking;
+
+    private boolean isUnderEditing;
 }

@@ -46,13 +46,7 @@ public class Booking {
 //    private List<BookingCar> bookedCarsList;
 //
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "booking")
-    private List<BookingPackageItemCar> packageItemsCar;
-
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "booking")
-    private List<BookingPackageItemEvent> packageItemsEvent;
-
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "booking")
-    private List<BookingPackageItemOther> packageItemsOther;
+    private List<BookingPackageItem> packageItems;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "booking")
     private List<PaymentNote> paymentList;
@@ -61,9 +55,6 @@ public class Booking {
     private List<BookingDocument> bookingDocumentList;
 
     private BookingStatus bookingStatus; // allows for booking write-off when paid and car OK
-
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "booking")
-    private List<BookingCar> bookingCars;
 
     private boolean isUnderEditing;
 }

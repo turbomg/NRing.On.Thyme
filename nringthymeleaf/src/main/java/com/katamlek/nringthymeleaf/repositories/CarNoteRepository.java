@@ -1,15 +1,15 @@
 package com.katamlek.nringthymeleaf.repositories;
 
+import com.katamlek.nringthymeleaf.domain.Car;
 import com.katamlek.nringthymeleaf.domain.CarNote;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
 public interface CarNoteRepository extends CrudRepository<CarNote, Long> {
 
-    //todo check if iterable ok - no NPE; maybe use Optional
-    // find only non-history notes by car id
- //todo   Iterable<CarNote> findByCarIdAndAndHistoryNote(Long aLong, boolean isHistory);
+        public List<CarNote> findDistinctByCarAndHistoryNote(Car car, boolean isHistory);
 }

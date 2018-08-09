@@ -150,7 +150,7 @@ public class CustomerGridView extends VerticalLayout implements View {
         buttonsHL.setMargin(false);
 
         Button addCustomerBtn = new Button("Add customer");
-        addCustomerBtn.addClickListener(e -> Notification.show("Can't do this yet...")); //todo
+        addCustomerBtn.addClickListener(e -> navigationManager.navigateTo(CustomerForm.class));
         addCustomerBtn.addStyleNames(ValoTheme.BUTTON_BORDERLESS_COLORED);
         addCustomerBtn.setIcon(VaadinIcons.PLUS);
 

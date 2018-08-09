@@ -1,10 +1,10 @@
 package com.katamlek.nringthymeleaf.frontend.views;
 
-import com.katamlek.nringthymeleaf.domain.BookingCar;
+import com.katamlek.nringthymeleaf.domain.BookingPackageItem;
+import com.katamlek.nringthymeleaf.domain.BookingPackageItemCar;
 import com.katamlek.nringthymeleaf.domain.Car;
-import com.katamlek.nringthymeleaf.domain.Event;
 import com.katamlek.nringthymeleaf.frontend.forms.BookingForm;
-import com.katamlek.nringthymeleaf.frontend.forms.CustomerForm;
+import com.katamlek.nringthymeleaf.frontend.forms.EventForm;
 import com.katamlek.nringthymeleaf.frontend.navigation.NavigationManager;
 import com.katamlek.nringthymeleaf.repositories.EventRepository;
 import com.katamlek.nringthymeleaf.repositories.UserRepository;
@@ -14,6 +14,7 @@ import com.vaadin.spring.annotation.SpringView;
 import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.*;
 import com.vaadin.ui.themes.ValoTheme;
+import org.apache.commons.lang3.time.DateUtils;
 import org.assertj.core.util.Lists;
 
 import java.text.SimpleDateFormat;
@@ -26,23 +27,22 @@ public class WelcomeView extends VerticalLayout implements View {
     private UserRepository userRepository;
     private EventRepository eventRepository;
     private NavigationManager navigationManager;
-    // private EventGridView eventGridView;
+
     // Set the dates
     private SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
     private final Date today = new Date();
-    private final Date tomorrow = today; //todo import DateUtils, use addDays
+    private final Date tomorrow = DateUtils.addDays(today, 1);
 
 
     public WelcomeView(UserRepository userRepository, EventRepository eventRepository, NavigationManager navigationManager) {
         this.userRepository = userRepository;
         this.eventRepository = eventRepository;
-        //      this.eventGridView = eventGridView;
         this.navigationManager = navigationManager;
         setMargin(false);
         addComponent(buildWelcomeView());
     }
 
-    // Today/ Tomorrow boxes - designed to accept any date
+    // Today/ Tomorrow boxes
     public HorizontalLayout buildDayOverviews() {
         HorizontalLayout dayOverview = new HorizontalLayout();
         dayOverview.setMargin(false);
@@ -53,40 +53,45 @@ public class WelcomeView extends VerticalLayout implements View {
         Grid<com.katamlek.nringthymeleaf.domain.Event> eventsTomorrow = new Grid<>(com.katamlek.nringthymeleaf.domain.Event.class);
         eventsTomorrow.setItems(Lists.newArrayList(eventRepository.findByEventDate(tomorrow)));
 
+        eventsToday.addItemClickListener(event -> {
+            if (event.getMouseEventDetails().isDoubleClick()) {
+                navigationManager.navigateTo(EventForm.class, event.getItem().getId());
+            }
+        });
+
         eventsToday.setHeaderVisible(false);
         eventsToday.setColumns("eventName", "eventDate", "eventStartTime", "eventEndTime");
-//        eventsToday.addColumn(com.katamlek.nringthymeleaf.domain.Event::getEventName);
-//        eventsToday.addColumn(com.katamlek.nringthymeleaf.domain.Event::getEventDate);
-//        eventsToday.addColumn(com.katamlek.nringthymeleaf.domain.Event::getEventStartTime);
-//        eventsToday.addColumn(com.katamlek.nringthymeleaf.domain.Event::getEventEndTime);
         eventsToday.addComponentColumn(this::buildCountTodayColumn);
 
         eventsToday.setHeightByRows(4);
-        eventsToday.setCaption("Today " + today);
+        eventsToday.setCaption("Today " + (dateFormat.format(today)));
 
         eventsTomorrow.setHeaderVisible(false);
         eventsTomorrow.setColumns("eventName", "eventDate", "eventStartTime", "eventEndTime");
-//        eventsTomorrow.addColumn(com.katamlek.nringthymeleaf.domain.Event::getEventName);
-//        eventsTomorrow.addColumn(com.katamlek.nringthymeleaf.domain.Event::getEventDate);
-//        eventsTomorrow.addColumn(com.katamlek.nringthymeleaf.domain.Event::getEventStartTime);
-//        eventsTomorrow.addColumn(com.katamlek.nringthymeleaf.domain.Event::getEventEndTime);
         eventsTomorrow.addComponentColumn(this::buildCountTomorrowColumn);
 
+        eventsTomorrow.addItemClickListener(event -> {
+            if (event.getMouseEventDetails().isDoubleClick()) {
+                navigationManager.navigateTo(EventForm.class, event.getItem().getId());
+            }
+        });
+
         eventsTomorrow.setHeightByRows(4);
-        eventsTomorrow.setCaption("Tomorrow " + tomorrow);
+        eventsTomorrow.setCaption("Tomorrow " + (dateFormat.format(tomorrow)));
 
         // Buttons
         Button goToTodayOverview = new Button("Show overview");
         goToTodayOverview.addStyleNames(ValoTheme.BUTTON_BORDERLESS, ValoTheme.BUTTON_SMALL);
         goToTodayOverview.setIcon(VaadinIcons.ARROW_RIGHT);
         goToTodayOverview.addClickListener(e -> {
-            Notification.show("Not yet"); //todo
+            navigationManager.navigateTo(DayOverview.class); //todo
         });
 
         Button goToTomorrowOverview = new Button("Show overview");
         goToTomorrowOverview.addStyleNames(ValoTheme.BUTTON_BORDERLESS, ValoTheme.BUTTON_SMALL);
         goToTomorrowOverview.setIcon(VaadinIcons.ARROW_RIGHT);
-        goToTomorrowOverview.addClickListener(e -> Notification.show("Not yet")); //todo
+        goToTomorrowOverview.addClickListener(e ->
+                navigationManager.navigateTo(DayOverview.class)); //todo
 
         // Put together
         VerticalLayout todayVL = new VerticalLayout(eventsToday, goToTodayOverview);
@@ -107,27 +112,31 @@ public class WelcomeView extends VerticalLayout implements View {
 
         Button addBookingBtn = new Button("Add booking");
         addBookingBtn.addClickListener(e -> {
-            //todo - fix the problem with saving new entities
             navigationManager.navigateTo(BookingForm.class);
         });
-        addBookingBtn.addStyleNames(ValoTheme.BUTTON_BORDERLESS, ValoTheme.BUTTON_LARGE);
+        addBookingBtn.setIcon(VaadinIcons.OPEN_BOOK);
+        addBookingBtn.addStyleNames(ValoTheme.BUTTON_BORDERLESS, ValoTheme.BUTTON_LARGE, ValoTheme.BUTTON_ICON_ALIGN_TOP);
 
         Button addCustomerBtn = new Button("Add customer");
         addCustomerBtn.addClickListener(e -> Notification.show("Not yet")); //todo
-        addCustomerBtn.addStyleNames(ValoTheme.BUTTON_BORDERLESS, ValoTheme.BUTTON_LARGE);
+        addCustomerBtn.addStyleNames(ValoTheme.BUTTON_BORDERLESS, ValoTheme.BUTTON_LARGE, ValoTheme.BUTTON_ICON_ALIGN_TOP);
+        addCustomerBtn.setIcon(VaadinIcons.USER_STAR);
 
         // todo - all of the below
         Button printIndemnityForm = new Button("Print blank idemnity form");
         printIndemnityForm.addClickListener(e -> Notification.show("Can't do this for you yet."));
-        printIndemnityForm.addStyleNames(ValoTheme.BUTTON_BORDERLESS, ValoTheme.BUTTON_LARGE);
+        printIndemnityForm.addStyleNames(ValoTheme.BUTTON_BORDERLESS, ValoTheme.BUTTON_LARGE, ValoTheme.BUTTON_ICON_ALIGN_TOP);
+        printIndemnityForm.setIcon(VaadinIcons.PRINT);
 
         Button printMileageSheet = new Button("Print mileage sheet");
         printMileageSheet.addClickListener(e -> Notification.show("Can't do this for you yet."));
-        printMileageSheet.addStyleNames(ValoTheme.BUTTON_BORDERLESS, ValoTheme.BUTTON_LARGE);
+        printMileageSheet.addStyleNames(ValoTheme.BUTTON_BORDERLESS, ValoTheme.BUTTON_LARGE, ValoTheme.BUTTON_ICON_ALIGN_TOP);
+        printMileageSheet.setIcon(VaadinIcons.CALC);
 
         Button printCarChecklist = new Button("Print car checklist");
         printCarChecklist.addClickListener(e -> Notification.show("Can't do this for you yet."));
-        printCarChecklist.addStyleNames(ValoTheme.BUTTON_BORDERLESS, ValoTheme.BUTTON_LARGE);
+        printCarChecklist.addStyleNames(ValoTheme.BUTTON_BORDERLESS, ValoTheme.BUTTON_LARGE, ValoTheme.BUTTON_ICON_ALIGN_TOP);
+        printCarChecklist.setIcon(VaadinIcons.CHECK_CIRCLE);
 
         buttonsRowHL.addComponents(addBookingBtn, addCustomerBtn, printIndemnityForm, printMileageSheet, printCarChecklist);
 
@@ -168,7 +177,12 @@ public class WelcomeView extends VerticalLayout implements View {
         bookingsProgress.addComponent(thisMonthB, 0, 1);
         bookingsProgress.addComponent(ytdB, 0, 2);
 
-        bookingsProgress.addComponent(new Label("PLACEHOLDER"), 2, 1);
+        bookingsProgress.addComponent(new Label("100"), 1, 1);
+        bookingsProgress.addComponent(new Label("200"), 2, 1);
+        bookingsProgress.addComponent(new Label("300"), 3, 1);
+        bookingsProgress.addComponent(new Label("400"), 1, 2);
+        bookingsProgress.addComponent(new Label("500"), 2, 2);
+        bookingsProgress.addComponent(new Label("600"), 3, 2);
 
         bookingsProgress.setSpacing(true);
 
@@ -195,7 +209,13 @@ public class WelcomeView extends VerticalLayout implements View {
         turnoverProgress.addComponent(bookedL, 2, 0);
         turnoverProgress.addComponent(paidL, 3, 0);
 
-        turnoverProgress.addComponent(new Label("PLACEHOLDER"), 2, 1);
+        turnoverProgress.addComponent(new Label("100"), 1, 1);
+        turnoverProgress.addComponent(new Label("200"), 2, 1);
+        turnoverProgress.addComponent(new Label("300"), 3, 1);
+        turnoverProgress.addComponent(new Label("400"), 1, 2);
+        turnoverProgress.addComponent(new Label("500"), 2, 2);
+        turnoverProgress.addComponent(new Label("600"), 3, 2);
+
         turnoverProgress.setSpacing(true);
 
         VerticalLayout bookingsVL = new VerticalLayout();
@@ -203,7 +223,7 @@ public class WelcomeView extends VerticalLayout implements View {
         Button allBookingsBtn = new Button("View all bookings");
         allBookingsBtn.addStyleNames(ValoTheme.BUTTON_BORDERLESS, ValoTheme.BUTTON_SMALL);
         allBookingsBtn.setIcon(VaadinIcons.ARROW_RIGHT);
-        allBookingsBtn.addClickListener(e -> Notification.show("Can't do this yet."));
+        allBookingsBtn.addClickListener(e -> Notification.show("As I don't keep your name in memory yet, I can't do this."));
         bookingsVL.addComponents(bookingsProgress, allBookingsBtn);
 
         VerticalLayout progressVL = new VerticalLayout();
@@ -211,7 +231,7 @@ public class WelcomeView extends VerticalLayout implements View {
         Button overviewBtn = new Button("View details");
         overviewBtn.addStyleNames(ValoTheme.BUTTON_BORDERLESS, ValoTheme.BUTTON_SMALL);
         overviewBtn.setIcon(VaadinIcons.ARROW_RIGHT);
-        overviewBtn.addClickListener(e -> Notification.show("Can't do this yet."));
+        overviewBtn.addClickListener(e -> Notification.show("As I don't keep your name in memory yet, I can't do this."));
         progressVL.addComponents(turnoverProgress, overviewBtn);
 
         progressHL.addComponent(bookingsVL);
@@ -226,22 +246,28 @@ public class WelcomeView extends VerticalLayout implements View {
         return progressHL;
     }
 
-    public VerticalLayout buildCarsToCheckList() {
-        VerticalLayout carsToCheck = new VerticalLayout();
+    public HorizontalLayout buildCarsToCheckList() {
+        HorizontalLayout carsToCheck = new HorizontalLayout();
+        carsToCheck.setMargin(false);
 
         // Today grid
-        Grid<BookingCar> todayCarGrid = new Grid<>(BookingCar.class);
+        Grid<BookingPackageItemCar> todayCarGrid = new Grid<>(BookingPackageItemCar.class);
         todayCarGrid.setCaption("Cars to check today");
         todayCarGrid.setHeightByRows(4);
-        todayCarGrid.setColumns("model", "plate", "remarks");
-//todo        todayCarGrid.setItems();
+        // todayCarGrid.setColumns("model", "plate", "remarks");
+        // select car from carRepo where ids of a car and a booking match
+        // and booking contains packageItemCar match and date in packageItemCar is today
+        todayCarGrid.setItems();
+        //todo todayCarGrid.setItems();
+     //   todayCarGrid.setItems();
+        // todo set colums with single table mode
 
         // Tommorow grid
-        Grid<BookingCar> tomorrowCarGrid = new Grid<>(BookingCar.class);
+        Grid<BookingPackageItemCar> tomorrowCarGrid = new Grid<>(BookingPackageItemCar.class);
         tomorrowCarGrid.setCaption("Cars to check tomorrow");
         tomorrowCarGrid.setHeightByRows(4);
-        tomorrowCarGrid.setColumns("model", "plate", "remarks");
-//todo setItems()
+     //   tomorrowCarGrid.setColumns("model", "plate", "remarks");
+        //todo setItems()
 
         carsToCheck.addComponents(todayCarGrid, tomorrowCarGrid);
 

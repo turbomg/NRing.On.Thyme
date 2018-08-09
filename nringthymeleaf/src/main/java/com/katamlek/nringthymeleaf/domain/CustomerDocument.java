@@ -19,6 +19,7 @@ public class CustomerDocument {
     private User user; // document entered by user xyz
 
     private String documentType;
+    private boolean isUnderEditing;
 
     @ManyToOne
     private Customer customer;

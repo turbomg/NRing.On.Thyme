@@ -2,7 +2,6 @@ package com.katamlek.nringthymeleaf.frontend.windows;
 
 import com.katamlek.nringthymeleaf.domain.BookingNote;
 import com.katamlek.nringthymeleaf.domain.NoteStatus;
-import com.katamlek.nringthymeleaf.domain.User;
 import com.katamlek.nringthymeleaf.repositories.BookingNoteRepository;
 import com.vaadin.data.Binder;
 import com.vaadin.navigator.View;
@@ -12,17 +11,14 @@ import com.vaadin.ui.*;
 import com.vaadin.ui.themes.ValoTheme;
 
 import java.util.Arrays;
-import java.util.Date;
 
 @SpringComponent
 public class BookingNoteWindow extends Window implements View {
 
     private BookingNoteRepository bookingNoteRepository;
-    //  private ConfirmationWindow confirmationWindow;
 
     public BookingNoteWindow(BookingNoteRepository bookingNoteRepository) {
         this.bookingNoteRepository = bookingNoteRepository;
-        //   this.confirmationWindow = confirmationWindow;
         this.setContent(buildBookingNoteWindow());
         this.setCaption("Booking note");
         this.setClosable(true);
@@ -41,8 +37,7 @@ public class BookingNoteWindow extends Window implements View {
     private VerticalLayout buildBookingNoteWindow() {
         VerticalLayout bookingNoteForm = new VerticalLayout();
         textTF = new TextField("Note text");
-        textTF.setHeight("200px");
-        textTF.setWidth("400px");
+        textTF.setSizeFull();
         textTF.setResponsive(true); //todo text wrap looks like crap
         noteStatusCB = new ComboBox<NoteStatus>("Note status");
         noteStatusCB.setItems(Arrays.asList(NoteStatus.values()));
@@ -60,7 +55,7 @@ public class BookingNoteWindow extends Window implements View {
                 e1.printStackTrace();
             } finally {
                 bookingNoteBinder.getBean().setUnderEditing(false);
-                Notification.show("Your data was saved");
+                Notification.show("Your data was saved.");
                 this.close();
             }
         });
@@ -96,16 +91,12 @@ public class BookingNoteWindow extends Window implements View {
             // New
             bookingNote = new BookingNote();
 
-            bookingNote.setEnteredOn(new Date()); // todo the app doesn't know I entered the window. will probably need to extend Vertical here and call window with setContent in the BookingForm
-            bookingNote.setHistoryNote(false);
             bookingNote.setNoteStatus(NoteStatus.VALID);
-            bookingNote.setUser(new User()); // todo get user from session
-
             bookingNote.setUnderEditing(true);
         } else {
             bookingNote = bookingNoteRepository.findById(id).get();
             if (bookingNote.isUnderEditing()) {
-                Notification.show("Someone is editing this note now. Please try again in a moment.");
+                Notification.show("Someone is editing this one now. Try later."); //todo navigateTo
             } else {
                 bookingNote.setUnderEditing(true);
                 if (bookingNote == null) {
@@ -116,6 +107,5 @@ public class BookingNoteWindow extends Window implements View {
         }
         bookingNoteBinder.setBean(bookingNote);
         textTF.focus();
-
     }
 }

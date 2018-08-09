@@ -1,12 +1,15 @@
 package com.katamlek.nringthymeleaf.frontend.forms;
 
 import com.katamlek.nringthymeleaf.domain.*;
+import com.katamlek.nringthymeleaf.frontend.grids.BookingGridView;
 import com.katamlek.nringthymeleaf.frontend.grids.CarGridView;
 import com.katamlek.nringthymeleaf.frontend.navigation.NavigationManager;
 import com.katamlek.nringthymeleaf.repositories.CarNoteRepository;
 import com.katamlek.nringthymeleaf.repositories.CarRepository;
+import com.katamlek.nringthymeleaf.repositories.PriceListCarRepository;
 import com.vaadin.data.Binder;
 import com.vaadin.data.provider.DataProvider;
+import com.vaadin.icons.VaadinIcons;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener;
 import com.vaadin.shared.ui.grid.ColumnResizeMode;
@@ -14,6 +17,7 @@ import com.vaadin.spring.annotation.SpringView;
 import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.*;
 import com.vaadin.ui.renderers.ButtonRenderer;
+import com.vaadin.ui.themes.ValoTheme;
 import org.assertj.core.util.Lists;
 
 /**
@@ -27,13 +31,13 @@ public class CarForm extends VerticalLayout implements View {
     // The constructor
     private CarRepository carRepository;
     private CarNoteRepository carNoteRepository;
-//    private CarPricingRepository carPricingRepository;
+    private PriceListCarRepository priceListCarRepository;
     private NavigationManager navigationManager;
 
-    public CarForm(CarRepository carRepository, CarNoteRepository carNoteRepository, NavigationManager navigationManager) {
+    public CarForm(CarRepository carRepository, CarNoteRepository carNoteRepository, NavigationManager navigationManager, PriceListCarRepository priceListCarRepository) {
         this.carRepository = carRepository;
         this.carNoteRepository = carNoteRepository;
-    //    this.carPricingRepository = carPricingRepository;
+        this.priceListCarRepository = priceListCarRepository;
         this.navigationManager = navigationManager;
         addComponent(buildCarForm());
     }
@@ -67,7 +71,7 @@ public class CarForm extends VerticalLayout implements View {
     private Button addHistoryNoteB;
 
     // Pricing section
-//todo    private Grid<CarPricing> pricingG;
+    private Grid<PriceListCar> pricingG;
     private Button addPricingItemB;
 
     // Binder
@@ -78,7 +82,7 @@ public class CarForm extends VerticalLayout implements View {
     public HorizontalLayout buildDetailsSection() {
 
         modelTF = new TextField("Model");
-        plateTF = new TextField("Plate"); //todo remember to check if not already in the db
+        plateTF = new TextField("Plate");
         carColorCB = new ComboBox<CarColor>();
         carColorCB.setItems(CarColor.values());
         carColorCB.setCaption("Color");
@@ -113,9 +117,8 @@ public class CarForm extends VerticalLayout implements View {
         locationTF = new TextField("Location"); //todo ask Jono if this should be LocationDefinition
 
         carNoteG = new Grid<>(CarNote.class);
-        //todo get the id parametr and pass to the method -- not sure how :)
-// todo         carNoteG.setItems(Lists.newArrayList(carNoteRepository.findByCarIdAndAndHistoryNote(1l, false)));
 
+        carNoteG.setItems(carNoteRepository.findDistinctByCarAndHistoryNote(carBinder.getBean(), false));
 
         carNoteG.setColumns("user", "enteredOn", "text");
         carNoteG.setColumnOrder("user", "enteredOn", "text");
@@ -124,17 +127,11 @@ public class CarForm extends VerticalLayout implements View {
         carNoteG.setColumnResizeMode(ColumnResizeMode.ANIMATED);
 
         // allow inline editing - of non-history notes only
-        carNoteG.getEditor().setEnabled(true); //todo lock user and enteredOn?
+        // carNoteG.getEditor().setEnabled(true);
 
-        // extra buttons delete, edit - for non-history entries only
-        carNoteG.addColumn(carNote -> "Edit", new ButtonRenderer(clickEvent -> {
-            //todo navigator
-        }));
+        // extra button delete for non-history entries only
 
-        carNoteG.addColumn(carNote -> "Delete", new ButtonRenderer(clickEvent -> {
-            //todo check if works, switch to id?
-            carNoteRepository.delete((CarNote) clickEvent.getItem());
-        }));
+        carNoteG.addComponentColumn(this::deleteCarNote);
 
         carNoteG.setSizeFull();
 
@@ -149,8 +146,7 @@ public class CarForm extends VerticalLayout implements View {
         VerticalLayout historyVL = new VerticalLayout();
 
         carHistoryNoteG = new Grid<>(CarNote.class);
-        //todo get the id parametr and pass to the method -- not sure how :)
-     //todo   carHistoryNoteG.setItems(Lists.newArrayList(carNoteRepository.findByCarIdAndAndHistoryNote(1l, true)));
+        carHistoryNoteG.setItems(carNoteRepository.findDistinctByCarAndHistoryNote(carBinder.getBean(), true));
 
         carHistoryNoteG.setColumns("user", "enteredOn", "text", "carMileageOut", "carMileageIn", "carMileageTotalKM", "carMileageTotalMIL");
         carHistoryNoteG.setColumnOrder("user", "enteredOn", "text", "carMileageOut", "carMileageIn", "carMileageTotalKM", "carMileageTotalMIL");
@@ -170,54 +166,83 @@ public class CarForm extends VerticalLayout implements View {
         return historyVL;
     }
 
-    // todo Pricing
-//    public VerticalLayout buildPricingSection() {
-//        VerticalLayout pricingVL = new VerticalLayout();
-//        pricingG = new Grid<>(CarPricing.class);
-//        // todo pass car id to the below method - ask Darek how
-//        pricingG.setItems(Lists.newArrayList(carPricingRepository.findByCarId(34343l)));
-//        pricingG.setColumns("description", "defaultNote", "startPrice", "startKM", "per10KM", "instruction", "carPricingGroup");
-//        pricingG.setColumnOrder("description", "defaultNote", "startPrice", "startKM", "per10KM", "instruction", "carPricingGroup");
-//        pricingG.getColumns().forEach(column -> column.setSortable(true));
-//        pricingG.setColumnReorderingAllowed(true);
-//        pricingG.setColumnResizeMode(ColumnResizeMode.ANIMATED);
-//
-//        // allow inline editing - of non-history notes only
-//        carNoteG.getEditor().setEnabled(true); //todo lock some columns?
-//
-//        // extra buttons delete, edit - for non-history entries only
-//        carNoteG.addColumn(carNote -> "Edit", new ButtonRenderer(clickEvent -> {
-//            //todo navigator
-//        }));
-//
-//        carNoteG.addColumn(carNote -> "Delete", new ButtonRenderer(clickEvent -> {
-//            //todo check if works, switch to id?
-//            carNoteRepository.delete((CarNote) clickEvent.getItem());
-//        })); //todo enable delete?
-//
-//        pricingG.setSizeFull();
-//
-//        addPricingItemB = new Button("Add pricing item");
-//        addPricingItemB.addClickListener(e -> Notification.show("Can't do this yet, sorry")); //todo
-//
-//        pricingVL.addComponents(pricingG, addPricingItemB);
-//        return pricingVL;
-//    }
+    public VerticalLayout buildPricingSection() {
+        VerticalLayout pricingVL = new VerticalLayout();
+        pricingG = new Grid<>(PriceListCar.class);
+
+        pricingG.setItems(priceListCarRepository.findDistinctByCar(carBinder.getBean()));
+
+        pricingG.setColumns("description", "defaultNote", "startPrice", "startKM", "per10KM", "instruction", "carPricingGroup");
+        pricingG.setColumnOrder("description", "defaultNote", "startPrice", "startKM", "per10KM", "instruction", "carPricingGroup");
+        pricingG.getColumns().forEach(column -> column.setSortable(true));
+        pricingG.setColumnReorderingAllowed(true);
+        pricingG.setColumnResizeMode(ColumnResizeMode.ANIMATED);
+
+        // allow inline editing
+        // carNoteG.getEditor().setEnabled(true);
+
+        // extra button delete--nope, this is price list, sorry
+
+        pricingG.addItemClickListener(event -> {
+            if (event.getMouseEventDetails().isDoubleClick()) {
+                Notification.show("Please be patient, will open the form soon.");
+                // todo goto priceList form(car) when the form is ready;
+            }
+        });
+
+        pricingG.setSizeFull();
+
+        addPricingItemB = new Button("Add pricing item");
+        addPricingItemB.addClickListener(e -> Notification.show("Can't do this yet, sorry")); //todo
+
+        pricingVL.addComponents(pricingG, addPricingItemB);
+        return pricingVL;
+    }
 
     // Put all together
     public VerticalLayout buildCarForm() {
-        // todo I guess these methods should receive the car id and work accordingly... ask Darek
         VerticalLayout carForm = new VerticalLayout();
         carForm.addComponents(carFormL, buildDetailsSection(), buildStatusSection(), buildHistorySection());
 
         // The binder
-        carBinder = new Binder(Car.class); //todo
+        carBinder = new Binder(Car.class); //todo define fields
 
         // Form buttons
         HorizontalLayout buttonsHL = new HorizontalLayout();
 
         cancelB = new Button("Cancel");
-        cancelB.addClickListener(e -> navigationManager.navigateTo(CarGridView.class));
+        cancelB.setDescription("Caution! Your data will be lost!");
+        cancelB.addStyleNames(ValoTheme.BUTTON_BORDERLESS);
+        cancelB.setIcon(VaadinIcons.ERASER);
+        cancelB.addClickListener(e -> {
+            //Confirmation popup
+            Window window = new Window("Do you really want to drop the changes?");
+
+            //Popup contents
+            VerticalLayout confirmationVL = new VerticalLayout();
+            confirmationVL.addComponent(new Label("There's no undo option and your developer won't help you either."));
+
+            // And buttons
+            Button yesButton = new Button("Drop the form and take me back");
+            yesButton.addClickListener(event1 -> {
+                window.close();
+                navigationManager.navigateTo(BookingGridView.class);
+            });
+
+            Button noButton = new Button("Let's keep on working");
+            noButton.addClickListener(event2 -> {
+                window.close();
+            });
+
+            HorizontalLayout buttonsLayout = new HorizontalLayout(yesButton, noButton);
+            confirmationVL.addComponent(buttonsLayout);
+
+            window.setContent(confirmationVL);
+
+            window.center();
+            UI.getCurrent().addWindow(window);
+
+        });
 
         saveB = new Button("Save");
 
@@ -228,7 +253,8 @@ public class CarForm extends VerticalLayout implements View {
                 e1.printStackTrace();
             } finally {
                 carBinder.getBean().setUnderEditing(false);
-                Notification.show("Got it"); //for testing purposes
+
+                Notification.show("I saved your data.");
             }
         });
 
@@ -237,10 +263,7 @@ public class CarForm extends VerticalLayout implements View {
     }
 
 
-    // enter and on Enter
-
     // Form open processing (new / edit)
-    // todo I should pass the id here I guess...
     @Override
     public void enter(ViewChangeListener.ViewChangeEvent event) {
         String carId = event.getParameters();
@@ -251,33 +274,78 @@ public class CarForm extends VerticalLayout implements View {
         }
     }
 
-    // Called when user enters view from the list or adding a new event
-    //todo set underEditing flag: true - the form won't open, false - let's go;; after save() set it to false;; update the domain
+    // Called when user enters view from the list or adding a new car
     public void enterView(Long id) {
         Car car;
         if (id == null) {
             // New
             car = new Car();
-            // todo setters
-        } else {
-            //todo check if not under editing -- guess need to save the flag in the DB ?
-            //todo checked the flags on related data like internal info etc
-            car = carRepository.findById(id).get();
+
             car.setUnderEditing(true);
-            if (car == null) {
-                showNotFound();
-                return;
+            // todo more setters
+        } else {
+            car = carRepository.findById(id).get();
+            if (car.isUnderEditing()) {
+                Notification.show("Someone is editing this one now. Come back later.");
+                navigationManager.navigateTo(CarGridView.class); //todo navigate to the previous view? are there more entry points?
+            } else {
+                car.setUnderEditing(true);
+                if (car == null) {
+                    showNotFound();
+                    return;
+                }
             }
         }
-//todo         eventBinder.setBean(event);
-//        eventNameTF.focus();
-
+        carBinder.setBean(car);
+        // todo ??.focus();
     }
 
     // Won't hopefully happen
     public void showNotFound() {
         removeAllComponents();
-        addComponent(new Label("Order not found"));
+        addComponent(new Label("Car not found"));
+    }
+
+    // Helpers
+
+    private Button deleteCarNote(CarNote carNote) {
+        Button deleteCNButton = new Button(VaadinIcons.MINUS_CIRCLE);
+        deleteCNButton.addStyleNames(ValoTheme.BUTTON_SMALL);
+        deleteCNButton.addClickListener(e -> {
+            if (carNote.isUnderEditing()) {
+                Notification.show("Someone's working with this note. I can't delete it now.");
+            } else {
+
+                //Confirmation popup
+                Window window = new Window("Do you really want to delete this note?");
+
+                //Popup contents
+                VerticalLayout confirmationVL = new VerticalLayout();
+                confirmationVL.addComponent(new Label("There's no undo option and your developer won't help you either."));
+
+                // And buttons
+                Button yesButton = new Button("Proceed");
+                yesButton.addClickListener(event1 -> {
+                    carNoteRepository.delete(carNote);
+                    carNoteG.setItems(carNoteRepository.findDistinctByCarAndHistoryNote(carBinder.getBean(), false));
+                    window.close();
+                });
+
+                Button noButton = new Button("Give the delete up");
+                noButton.addClickListener(event2 -> {
+                    window.close();
+                });
+
+                HorizontalLayout buttonsLayout = new HorizontalLayout(yesButton, noButton);
+                confirmationVL.addComponent(buttonsLayout);
+
+                window.setContent(confirmationVL);
+
+                window.center();
+                UI.getCurrent().addWindow(window);
+            }
+        });
+        return deleteCNButton;
     }
 
 }

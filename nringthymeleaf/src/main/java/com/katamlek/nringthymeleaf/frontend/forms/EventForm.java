@@ -28,10 +28,6 @@ import java.util.Date;
 @SpringView
 @UIScope
 public class EventForm extends VerticalLayout implements View {
-
-    //todo check the grids and fix the code to be more readable and sensible :)
-    //todo change variable and properties names as shown in CarForm
-
     private EventRepository eventRepository;
     private UserRepository userRepository;
     private EventInternalInfoRepository internalInfoRepository;
@@ -315,7 +311,37 @@ public class EventForm extends VerticalLayout implements View {
         // Buttons
         HorizontalLayout buttonsHL = new HorizontalLayout();
         Button cancelBTN = new Button("Cancel");
-        cancelBTN.addClickListener(e -> navigationManager.navigateTo(EventGridView.class));
+        cancelBTN.setDescription("Be careful, your data may evaporate!");
+        cancelBTN.addClickListener(e -> {
+            //Confirmation popup
+            Window window = new Window("Do you really want to drop the changes?");
+
+            //Popup contents
+            VerticalLayout confirmationVL = new VerticalLayout();
+            confirmationVL.addComponent(new Label("There's no undo option and your developer won't help you either."));
+
+            // And buttons
+            Button yesButton = new Button("Drop the form and take me back");
+            yesButton.addClickListener(event1 -> {
+                window.close();
+                navigationManager.navigateTo(EventGridView.class);
+            });
+
+            Button noButton = new Button("Let's keep on working");
+            noButton.addClickListener(event2 -> {
+                window.close();
+            });
+
+            HorizontalLayout buttonsLayout = new HorizontalLayout(yesButton, noButton);
+            confirmationVL.addComponent(buttonsLayout);
+
+            window.setContent(confirmationVL);
+
+            window.center();
+            UI.getCurrent().addWindow(window);
+
+        });
+
         Button saveEventBTN = new Button("Save");
 
         saveEventBTN.addClickListener(e -> {
@@ -325,11 +351,9 @@ public class EventForm extends VerticalLayout implements View {
                 e1.printStackTrace();
             } finally {
                 eventBinder.getBean().setUnderEditing(false);
-                Notification.show("Got it");
+
+                Notification.show("I saved your data.");
             }
-            //        internalInfoRepository.save(internalInfoBinder.getBean());
-
-
         });
 
         buttonsHL.addComponents(cancelBTN, saveEventBTN);
@@ -353,7 +377,6 @@ public class EventForm extends VerticalLayout implements View {
     }
 
     // Called when user enters view from the list or adding a new event
-    //todo underEditing flag after save() set it to false;
     public void enterView(Long id) {
         com.katamlek.nringthymeleaf.domain.Event event;
         if (id == null) {
@@ -369,7 +392,6 @@ public class EventForm extends VerticalLayout implements View {
             event = eventRepository.findById(id).get();
             if (event.isUnderEditing()) {
                 Notification.show("Someone is editing this one now. Come back later.");
-                navigationManager.navigateTo(EventGridView.class);
             } else {
                 event.setUnderEditing(true);
                 if (event == null) {
