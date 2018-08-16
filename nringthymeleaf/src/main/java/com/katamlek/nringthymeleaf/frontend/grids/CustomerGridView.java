@@ -34,9 +34,11 @@ public class CustomerGridView extends VerticalLayout implements View {
     private GridCellFilter filter;
     private Grid<Customer> customerGrid;
 
-    public CustomerGridView(CustomerRepository customerRepository, CustomerNoteRepository customerNoteRepository) {
+    public CustomerGridView(CustomerRepository customerRepository, CustomerNoteRepository customerNoteRepository,
+                            NavigationManager navigationManager) {
         this.customerRepository = customerRepository;
         this.customerNoteRepository = customerNoteRepository;
+        this.navigationManager = navigationManager;
         this.addComponent(buildCustomerGridView());
         setMargin(false);
     }
@@ -153,7 +155,6 @@ public class CustomerGridView extends VerticalLayout implements View {
         addCustomerBtn.addClickListener(e -> navigationManager.navigateTo(CustomerForm.class));
         addCustomerBtn.addStyleNames(ValoTheme.BUTTON_BORDERLESS_COLORED);
         addCustomerBtn.setIcon(VaadinIcons.PLUS);
-
 
         Button clearAllFilters = new Button("Remove filters", e -> {
             filter.clearAllFilters();

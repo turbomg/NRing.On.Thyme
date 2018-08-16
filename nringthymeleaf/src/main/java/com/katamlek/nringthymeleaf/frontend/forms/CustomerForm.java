@@ -105,7 +105,7 @@ public class CustomerForm extends VerticalLayout implements View {
         customerNoteG = new Grid<>(CustomerNote.class);
 
         customerNoteG.setColumns("enteredOn", "text");
-        customerNoteG.setItems(customerNoteRepository.findDistinctByCustomerAndHistoryNote(customerBinder.getBean(), false));
+        //todo set the binder and...      customerNoteG.setItems(customerNoteRepository.findCustomerNoteByCustomerAndHistoryNote(customerBinder.getBean(), false));
 
         customerNoteG.setColumnOrder("enteredOn", "text");
 
@@ -170,7 +170,7 @@ public class CustomerForm extends VerticalLayout implements View {
         customerDocumentG.setColumns("documentedEnteredOn", "user", "documentType");
         customerDocumentG.setColumnOrder("documentedEnteredOn", "user", "documentType");
 
-        customerDocumentG.setItems(customerDocumentRepository.findDistinctByCustomer(customerBinder.getBean()));
+//        customerDocumentG.setItems(customerDocumentRepository.findDistinctByCustomer(customerBinder.getBean()));
 
         customerDocumentG.getColumns().forEach(column -> column.setSortable(true));
         customerDocumentG.setColumnReorderingAllowed(true);
@@ -184,7 +184,7 @@ public class CustomerForm extends VerticalLayout implements View {
 
         customerDocumentG.setHeightByRows(4);
         customerDocumentG.addStyleNames(ValoTheme.TABLE_BORDERLESS, ValoTheme.TABLE_COMPACT);
-        customerDocumentG.setCaption("Customer documents");
+      //  customerDocumentG.setCaption("Customer documents");
 
         customerDocumentG.addItemClickListener(event -> {
             if (event.getMouseEventDetails().isDoubleClick()) {
@@ -208,14 +208,14 @@ public class CustomerForm extends VerticalLayout implements View {
 
     public VerticalLayout buildHistorySection() {
         VerticalLayout historyVL = new VerticalLayout();
-        historyVL.setCaption("Customer details");
+        historyVL.setCaption("Customer history");
         historyVL.setMargin(false);
 
         historyG = new Grid<>(CustomerNote.class);
         historyG.setColumns("enteredOn", "text", "value");
         historyG.setColumnOrder("enteredOn", "text", "value");
 
-        historyG.setItems(customerNoteRepository.findDistinctByCustomerAndHistoryNote(customerBinder.getBean(), false));
+        //todo set the binder and... IN ENTER VIEW!!!   historyG.setItems(customerNoteRepository.findCustomerNoteByCustomerAndHistoryNote(customerBinder.getBean(), true));
 
         historyG.getColumns().forEach(column -> column.setSortable(true));
         historyG.setColumnReorderingAllowed(true);
@@ -229,7 +229,7 @@ public class CustomerForm extends VerticalLayout implements View {
 
         historyG.setHeightByRows(4);
         historyG.addStyleNames(ValoTheme.TABLE_BORDERLESS, ValoTheme.TABLE_COMPACT);
-        historyG.setCaption("Customer history");
+    //    historyG.setCaption("Customer history");
 
         historyG.addItemClickListener(event -> {
             if (event.getMouseEventDetails().isDoubleClick()) {
@@ -255,25 +255,46 @@ public class CustomerForm extends VerticalLayout implements View {
     // Put it all together
     public VerticalLayout buildCustomerForm() {
         VerticalLayout customerForm = new VerticalLayout();
-        customerForm.setMargin(false);
+        customerForm.addComponent(customerFormL);
 
-        customerFormL.addStyleNames(ValoTheme.LABEL_NO_MARGIN, ValoTheme.LABEL_LARGE);
+        customerForm.addComponents(buildDetailsSection());
+        customerForm.addComponents(buildEmergencyContactSection());
+        customerForm.addComponents(buildDocumentsSection());
+        customerForm.addComponents(buildHistorySection());
+
+        customerBinder = new com.vaadin.data.Binder<>(Customer.class);
+
+        // Binder
+        customerBinder.bind(firstNameTF, "customerFirstName");
+        customerBinder.bind(lastNameTF, "customerLastName");
+        customerBinder.bind(addressTF, "customerAddress");
+        customerBinder.bind(phoneTF, "customerPhoneNumber");
+        customerBinder.bind(emailTF, "customerEmail");
+        customerBinder.bind(newsletterCB, "customerNewsletter");
+        customerBinder.bind(agentCB, "customerAgent");
+        customerBinder.bind(customerGroupCB, "customerGroup");
+        customerBinder.bind(generalNoteTF, "customerGeneralInformation");
+
+        //Emergency contact section
+        customerBinder.bind(emergencyFirstNameTF, "customerEmergencyFirstName");
+        customerBinder.bind(emergencyLastNameTF, "customerEmergencyLastName");
+        customerBinder.bind(emergencyPhoneTF, "customerEmergencyPhoneNumber");
+        customerBinder.bind(emergencyEmailTF, "customerEmergcencyEmail");
 
         // Form buttons
         saveAll = new Button("Save");
         saveAll.addStyleNames(ValoTheme.BUTTON_BORDERLESS, ValoTheme.BUTTON_BORDERLESS_COLORED);
         saveAll.setIcon(VaadinIcons.PENCIL);
         saveAll.addClickListener(e -> {
-                    try {
-                        customerRepository.save(customerBinder.getBean());
-                    } catch (Exception e1) {
-                        e1.printStackTrace();
-                    } finally {
-                        customerBinder.getBean().setUnderEditing(false);
-                        Notification.show("I saved your data.");
-                    }
-                }
-                );
+            try {
+                customerRepository.save(customerBinder.getBean());
+            } catch (Exception e1) {
+                e1.printStackTrace();
+            } finally {
+                customerBinder.getBean().setUnderEditing(false);
+                Notification.show("I saved your data.");
+            }
+        });
 
         cancelAll = new Button("Cancel");
         cancelAll.setDescription("Caution! Your data will be lost!");
@@ -317,7 +338,7 @@ public class CustomerForm extends VerticalLayout implements View {
 
         HorizontalLayout buttonsHL = new HorizontalLayout(saveAll, cancelAll, backToList);
 
-        customerForm.addComponents(customerFormL, buttonsHL, buildDetailsSection(), buildEmergencyContactSection(), buildDocumentsSection(), buildHistorySection());
+        addComponent(buttonsHL);
 
         customerForm.setMargin(false);
 
@@ -327,11 +348,11 @@ public class CustomerForm extends VerticalLayout implements View {
     // Form open processing (new / edit)
     @Override
     public void enter(ViewChangeListener.ViewChangeEvent event) {
-        String bookingId = event.getParameters();
-        if ("".equals(bookingId)) {
+        String customerId = event.getParameters();
+        if ("".equals(customerId)) {
             enterView(null);
         } else {
-            enterView(Long.valueOf(bookingId));
+            enterView(Long.valueOf(customerId));
         }
     }
 
@@ -351,6 +372,7 @@ public class CustomerForm extends VerticalLayout implements View {
                 navigationManager.navigateTo(CustomerGridView.class); //todo navigate to the previous view!!!
             } else {
                 customer.setUnderEditing(true);
+                customerDocumentG.setItems(customerDocumentRepository.findDistinctByCustomer(customerBinder.getBean()));
                 if (customer == null) {
                     showNotFound();
                     return;
@@ -358,7 +380,7 @@ public class CustomerForm extends VerticalLayout implements View {
             }
         }
         customerBinder.setBean(customer);
-        // todo ??.focus();
+        firstNameTF.focus();
     }
 
     // Won't hopefully happen
@@ -366,6 +388,7 @@ public class CustomerForm extends VerticalLayout implements View {
         removeAllComponents();
         addComponent(new Label("Customer not found"));
     }
+
     // Helpers
     private Button deleteCustomerNoteButton(CustomerNote customerNote) {
         Button deleteCNButton = new Button(VaadinIcons.MINUS_CIRCLE);

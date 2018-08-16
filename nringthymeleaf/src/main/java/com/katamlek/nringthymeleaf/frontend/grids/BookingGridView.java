@@ -44,10 +44,10 @@ public class BookingGridView extends VerticalLayout implements View {
         bookingGrid.setItems(Lists.newArrayList(bookingRepository.findAll()));
 
         // Setting visible colums according to specs
-        bookingGrid.setColumns("createdBy", "createDate", "paymentStatus", "bookingStatus", "signatureStatus", "emailConfirmationSent", "emailReminderSendDate", "emailReminderSent");
+        bookingGrid.setColumns("createDate", "paymentStatus", "bookingStatus", "signatureStatus", "emailConfirmationSent", "emailReminderSendDate", "emailReminderSent");
 
         // Setting column order
-        bookingGrid.setColumnOrder("createdBy", "createDate", "paymentStatus", "bookingStatus", "signatureStatus", "emailConfirmationSent", "emailReminderSendDate", "emailReminderSent");
+        bookingGrid.setColumnOrder("createDate", "paymentStatus", "bookingStatus", "signatureStatus", "emailConfirmationSent", "emailReminderSendDate", "emailReminderSent");
 
         // Set columns hideable, reordering etc.
         bookingGrid.getColumns().forEach(column -> column.setSortable(true));
@@ -62,7 +62,7 @@ public class BookingGridView extends VerticalLayout implements View {
         });
 
         // Inline editor
-        bookingGrid.getEditor().setEnabled(true);
+        // bookingGrid.getEditor().setEnabled(true);
 
         //TODO
         // Extra buttons - cancel booking, duplicate
@@ -73,7 +73,7 @@ public class BookingGridView extends VerticalLayout implements View {
         // Inline filtering
         this.filter = new GridCellFilter(bookingGrid);
 
-        CellFilterComponent<ComboBox<User>> createdByFilter = this.filter.setComboBoxFilter("createdBy", User.class, Arrays.asList(userRepository.findAll())); //todo may not work
+      //  CellFilterComponent<ComboBox<User>> createdByFilter = this.filter.setComboBoxFilter("createdBy", User.class, Arrays.asList(userRepository.findAll())); //todo may not work
         this.filter.setDateFilter("createDate", new SimpleDateFormat("HH:mm:ss dd.MM.yyyy"), true);
         CellFilterComponent<ComboBox<PaymentStatus>> paymentStatusFilter = this.filter.setComboBoxFilter("paymentStatus", PaymentStatus.class, Arrays.asList(PaymentStatus.values()));
         CellFilterComponent<ComboBox<BookingStatus>> bookingStatusFilter = this.filter.setComboBoxFilter("bookingStatus", BookingStatus.class, Arrays.asList(BookingStatus.values()));

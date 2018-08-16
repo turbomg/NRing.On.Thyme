@@ -10,7 +10,4 @@ public class BookingPackageItemEvent extends BookingPackageItem {
     @OneToOne
     private Event event;
 
-    @OneToOne
-    private PriceListEvent priceListEvent;
-
 }

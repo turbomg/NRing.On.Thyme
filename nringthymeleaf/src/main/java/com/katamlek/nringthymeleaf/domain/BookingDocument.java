@@ -12,7 +12,7 @@ public class BookingDocument {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Temporal(TemporalType.DATE)
+  //  @Temporal(TemporalType.DATE)
     private Date date;
 
     private String bookingDocumentDescription;

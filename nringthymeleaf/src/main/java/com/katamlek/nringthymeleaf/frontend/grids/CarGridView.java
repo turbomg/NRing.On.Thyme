@@ -107,8 +107,8 @@ public class CarGridView extends VerticalLayout implements View {
         HorizontalLayout buttonsCarHL = new HorizontalLayout();
 
         Button addCarBtn = new Button("Add car"); // add new car
-        addCarBtn.addClickListener(e -> Notification.show("Let me work on it!")); //todo
-        //   addCarBtn.addClickListener(e -> navigationManager.navigateTo(CarForm.class));
+        //addCarBtn.addClickListener(e -> Notification.show("Let me work on it!")); //todo
+           addCarBtn.addClickListener(e -> navigationManager.navigateTo(CarForm.class));
         addCarBtn.addStyleNames(ValoTheme.BUTTON_BORDERLESS_COLORED);
         addCarBtn.setIcon(VaadinIcons.PLUS);
 

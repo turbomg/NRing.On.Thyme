@@ -99,10 +99,7 @@
 ////        Grid<BookingPayment> paymentGrid = new Grid<>(BookingPayment.class);
 ////        paymentGrid.setItems(Lists.newArrayList(bookingPaymentRepository.findAll()));
 ////        paymentGrid.setColumns("id");
-////        paymentGrid.addColumn(bookingPayment -> {
-////            String account = bookingPayment.getPaymentDefinition().getAccountDefinition().getAccountCode();
-////            return account;
-////        });
+
 //
 //        setContent(packageGridView);
 //    }

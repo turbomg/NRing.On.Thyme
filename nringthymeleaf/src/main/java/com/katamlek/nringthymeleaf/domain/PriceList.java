@@ -13,7 +13,6 @@ import java.math.BigDecimal;
 @Entity
 @Data
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
-
 public class PriceList {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -16,19 +17,19 @@ import java.util.List;
 @NoArgsConstructor
 public class User {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
     //    private String login; -- obsolete, will use e-mail
     private String password;
     private String name;
     private String surname;
 
-    @NotNull
+    //todo reapply notNull
+
     private String initials;
 
     private String phoneNumber;
 
-    @NotNull
     private String email;
     private UserBranding branding;
 
@@ -56,8 +57,19 @@ public class User {
 
     private boolean isUnderEditing;
 
-    public User(@NotNull String email, String password) {
-        this.email = email;
-        this.password = password;
+    public List<Booking> getBookings() {
+        if (bookings == null) {
+            bookings = new ArrayList<>();
+        }
+        return bookings;
+    }
+
+    public void setBookings(List<Booking> bookings) {
+        this.bookings = bookings;
+    }
+
+    @Override
+    public String toString() {
+        return "User{" + "email='" + email + '\'' + '}';
     }
 }

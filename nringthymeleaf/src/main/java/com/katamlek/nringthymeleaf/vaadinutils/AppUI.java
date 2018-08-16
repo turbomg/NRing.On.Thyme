@@ -13,7 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 @Theme("valo")
 @SpringUI
-@Viewport("width=device-width,initial-scale=1.0,user-scalable=no")
+//@Viewport("width=device-width,initial-scale=1.0,user-scalable=no")
 @Title("Booking Management System")
 public class AppUI extends UI implements HasLogger {
 

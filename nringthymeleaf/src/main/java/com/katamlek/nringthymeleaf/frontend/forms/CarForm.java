@@ -206,6 +206,7 @@ public class CarForm extends VerticalLayout implements View {
 
         // The binder
         carBinder = new Binder(Car.class); //todo define fields
+        carBinder.bind(plateTF, "plate");
 
         // Form buttons
         HorizontalLayout buttonsHL = new HorizontalLayout();

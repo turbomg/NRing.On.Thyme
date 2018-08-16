@@ -15,6 +15,8 @@ public class Customer {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    private String documentId;
+
     @Temporal(TemporalType.DATE)
     private Calendar customerCreateDate; // = Customer since
 
@@ -44,9 +46,9 @@ public class Customer {
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "customer")
     private List<CustomerNote> customerNotes;
 
-    @ManyToMany
-    @JoinTable(name = "customer_customeremergencycontact", joinColumns = @JoinColumn(name = "customer_id"), inverseJoinColumns = @JoinColumn(name = "customeremergencycontact_id"))
-    private List<CustomerEmergencyContact> customerEmergencyContacts;
+//    @ManyToMany
+//    @JoinTable(name = "customer_customeremergencycontact", joinColumns = @JoinColumn(name = "customer_id"), inverseJoinColumns = @JoinColumn(name = "customeremergencycontact_id"))
+//    private List<CustomerEmergencyContact> customerEmergencyContacts;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "customer")
     private List<CustomerDocument> customerDocuments;
@@ -61,4 +63,16 @@ public class Customer {
     private List<Booking> bookings;
 
     private boolean isUnderEditing;
+
+    // Emergency contact
+
+    //    @NotNull
+    private String customerEmergencyFirstName;
+
+    private String customerEmergencyLastName;
+    private String customerEmergencyPhoneNumber;
+
+    //    @Email
+    private String customerEmergcencyEmail;
+
 }

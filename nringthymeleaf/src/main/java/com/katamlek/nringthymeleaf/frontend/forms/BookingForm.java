@@ -4,9 +4,12 @@ import com.katamlek.nringthymeleaf.domain.*;
 import com.katamlek.nringthymeleaf.frontend.grids.BookingGridView;
 import com.katamlek.nringthymeleaf.frontend.grids.CustomerGridView;
 import com.katamlek.nringthymeleaf.frontend.navigation.NavigationManager;
-import com.katamlek.nringthymeleaf.frontend.windows.BookingNoteWindow;
 import com.katamlek.nringthymeleaf.repositories.*;
+import com.katamlek.nringthymeleaf.vaadinutils.CustomStringToBigDecimalConverter;
+import com.katamlek.nringthymeleaf.vaadinutils.CustomStringToIntegerConverter;
 import com.vaadin.data.Binder;
+import com.vaadin.data.HasValue;
+import com.vaadin.data.converter.LocalDateToDateConverter;
 import com.vaadin.icons.VaadinIcons;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener;
@@ -15,6 +18,7 @@ import com.vaadin.spring.annotation.SpringView;
 import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.*;
 import com.vaadin.ui.themes.ValoTheme;
+import org.assertj.core.util.Lists;
 import org.springframework.beans.BeanUtils;
 
 import java.math.BigDecimal;
@@ -28,32 +32,29 @@ import java.util.Arrays;
 @UIScope
 @SpringView
 public class BookingForm extends VerticalLayout implements View {
-
-    // TODO define the binding
-
     // The constructor
     private BookingRepository bookingRepository;
     private CustomerRepository customerRepository;
+    private UserRepository userRepository;
     private NavigationManager navigationManager;
     private BookingPackageItemRepository bookingPackageItemRepository;
     private BookingPaymentRepository bookingPaymentRepository;
     private BookingDocumentRepository bookingDocumentRepository;
-    private BookingNoteWindow bookingNoteWindow;
-    private PaymentForm paymentForm;
     private BookingNoteRepository bookingNoteRepository;
     private BookingPackageItemCarRepository bookingPackageItemCarRepository;
+    private TemporaryPackageItemRepository temporaryPackageItemRepository;
 
-    public BookingForm(BookingRepository bookingRepository, NavigationManager navigationManager, BookingPackageItemRepository bookingPackageItemRepository, BookingPaymentRepository bookingPaymentRepository, BookingDocumentRepository bookingDocumentRepository, BookingNoteWindow bookingNoteWindow, PaymentForm paymentForm, BookingNoteRepository bookingNoteRepository, BookingPackageItemCarRepository bookingPackageItemCarRepository, CustomerRepository customerRepository) {
+    public BookingForm(BookingRepository bookingRepository, NavigationManager navigationManager, BookingPackageItemRepository bookingPackageItemRepository, BookingPaymentRepository bookingPaymentRepository, BookingDocumentRepository bookingDocumentRepository, BookingNoteRepository bookingNoteRepository, BookingPackageItemCarRepository bookingPackageItemCarRepository, CustomerRepository customerRepository, UserRepository userRepository, TemporaryPackageItemRepository temporaryPackageItemRepository) {
         this.bookingRepository = bookingRepository;
+        this.userRepository = userRepository;
         this.navigationManager = navigationManager;
         this.bookingPackageItemRepository = bookingPackageItemRepository;
         this.bookingPaymentRepository = bookingPaymentRepository;
         this.bookingDocumentRepository = bookingDocumentRepository;
-        this.bookingNoteWindow = bookingNoteWindow;
-        this.paymentForm = paymentForm;
         this.bookingNoteRepository = bookingNoteRepository;
         this.bookingPackageItemCarRepository = bookingPackageItemCarRepository;
         this.customerRepository = customerRepository;
+        this.temporaryPackageItemRepository = temporaryPackageItemRepository;
         addComponent(buildBookingForm());
         setMargin(false);
     }
@@ -71,24 +72,26 @@ public class BookingForm extends VerticalLayout implements View {
 
     // Section properties
     // Details
-    private TextField bookedByTF;
+    private ComboBox<User> bookedByCB;
     private DateField bookedAtDF;
     private Grid<BookingNote> noteG;
     private Button cancelB;
     private Button addBookingNoteB;
     private ComboBox<SignatureStatus> signatureStatusCB;
     private ComboBox<PaymentStatus> paymentStatusCB;
-    private ComboBox<String> emailConfirmationCB;
-    private ComboBox<String> emailReminderCB;
+    private CheckBox emailConfirmationCB;
+    private CheckBox emailReminderCB;
     private DateField emailReminderDateDF;
+    private ComboBox<BookingStatus> bookingStatusCB;
 
     // Drivers
+
     private Grid<Customer> driverG;
     private Button findDriverB;
     private Button addNewDriverB;
 
     // Package
-    private Grid<BookingPackageItem> packageG;
+    private Grid<TemporaryPackageItem> packageG;
     private Button addPackageItemB;
 
     // Payments
@@ -103,6 +106,45 @@ public class BookingForm extends VerticalLayout implements View {
     private Grid<BookingPackageItemCar> bookingCarsG;
     private Button addBookingCarB;
 
+    // Sub - forms
+    // booking note
+    private VerticalLayout bookingNoteVL = buildBookingNoteForm();
+    private DateField noteDateDF;
+    private TextField noteTF;
+
+    // payment
+    private VerticalLayout bookingPaymentVL = buildBookingPaymentForm();
+    private DateField paymentDateDF;
+    private TextField paymentAmountTF;
+    private TextField paymentRemarksTF;
+
+    // customer
+    private VerticalLayout customersVL = buildCustomerForm();
+    private ComboBox<Customer> customerPickCB;
+    private TextField customerId;
+    private TextField customerName;
+    private TextField customerSurname;
+    private TextField customerGroup;
+    private TextField customerGeneralInformation;
+
+    private Binder<Customer> customerBinder; // just sets the relationship between booking and customer
+
+    // package item // todo exchange temp solution to target one
+    private VerticalLayout tempPackageItemVL = buildTempPackageItemForm();
+    private DateField itemDateDF;
+    private TextField itemTimeTF;
+    private TextField itemDescriptionTF;
+    private TextField itemPriceTF;
+    private TextField itemQuantityTF;
+    private TextField itemTotalTF;
+    private CheckBox isItemCancelledCB;
+
+    // booking document
+    private VerticalLayout bookingDocumentVL = buildBookingDocumentForm();
+    private DateField bookingDocumentDateDF;
+    private TextField bookingDocumentDescriptionTF;
+    private TextField bookingDocumentInfoTF;
+
     // Binder
     private Binder<Booking> bookingBinder;
 
@@ -112,7 +154,9 @@ public class BookingForm extends VerticalLayout implements View {
         VerticalLayout detailsVL = new VerticalLayout();
         detailsVL.setMargin(false);
 
-        bookedByTF = new TextField("Booked by");
+        bookedByCB = new ComboBox<>("Booked by");
+        bookedByCB.setItems(Lists.newArrayList(userRepository.findAll()));
+
         bookedAtDF = new DateField("Booked on");
 
         signatureStatusCB = new ComboBox<SignatureStatus>("Signature status");
@@ -121,12 +165,14 @@ public class BookingForm extends VerticalLayout implements View {
         paymentStatusCB = new ComboBox<PaymentStatus>("Payment status");
         paymentStatusCB.setItems(Arrays.asList(PaymentStatus.values()));
 
-        emailConfirmationCB = new ComboBox<>("E-mail confirmation");
-        emailConfirmationCB.setItems("Sent", "Not sent", "Not required");
-        emailReminderCB = new ComboBox<>("E-mail reminder");
-        emailReminderCB.setItems("Sent", "Not sent", "Not required");
+        emailConfirmationCB = new CheckBox("E-mail confirmation");
+        // emailConfirmationCB.setItems("Sent", "Not sent", "Not required");
+        emailReminderCB = new CheckBox("E-mail reminder");
+        // emailReminderCB.setItems("Sent", "Not sent", "Not required");
         emailReminderDateDF = new DateField();
         emailReminderDateDF.setDefaultValue(LocalDate.now());
+        bookingStatusCB = new ComboBox<>("Booking status");
+        bookingStatusCB.setItems(BookingStatus.values());
 
         noteG = new Grid<>(BookingNote.class);
         noteG.setColumns("enteredOn", "text");
@@ -136,7 +182,7 @@ public class BookingForm extends VerticalLayout implements View {
         //todo all notes here - set items, check if done
 
         noteG.setColumnOrder("enteredOn", "text");
-        noteG.setItems(bookingNoteRepository.findByBooking(bookingBinder.getBean()));
+//        noteG.setItems(bookingNoteRepository.findByBooking(bookingBinder.getBean()));
 
         noteG.getColumns().forEach(column -> column.setSortable(true));
         noteG.setColumnReorderingAllowed(true);
@@ -146,24 +192,27 @@ public class BookingForm extends VerticalLayout implements View {
         // noteG.getEditor().setEnabled(true);
 
         // Extra button delete
-        noteG.addComponentColumn(this::deleteBookingNoteButton);
+// Deliberately commented out
+        // noteG.addComponentColumn(this::deleteBookingNoteButton);
 
         noteG.setHeightByRows(4);
         noteG.addStyleNames(ValoTheme.TABLE_BORDERLESS, ValoTheme.TABLE_COMPACT);
         noteG.setCaption("Booking notes");
 
-        noteG.addItemClickListener(event -> {
-            if (event.getMouseEventDetails().isDoubleClick()) {
-                Notification.show("Please be patient, will open the form soon.");
-                // todo goto bookingNote(Long id) when the form is ready;
-            }
-        });
+// Deliberately turning this option off
+//        noteG.addItemClickListener(event -> {
+//            if (event.getMouseEventDetails().isDoubleClick()) {
+//                Notification.show("Please be patient, will open the form soon.");
+//                // todo goto bookingNote(Long id) when the form is ready;
+//            }
+//        });
 
         addBookingNoteB = new Button("Add booking note");
         addBookingNoteB.addStyleNames(ValoTheme.BUTTON_BORDERLESS_COLORED, ValoTheme.BUTTON_SMALL);
         addBookingNoteB.setIcon(VaadinIcons.PLUS);
         addBookingNoteB.addClickListener(e -> {
-            UI.getCurrent().addWindow(bookingNoteWindow);
+            bookingNoteVL.setVisible(true);
+            addBookingNoteB.setVisible(false);
         });
 
         printBookingFormB = new Button("Print\nbooking\nform");
@@ -196,13 +245,13 @@ public class BookingForm extends VerticalLayout implements View {
         });
 
         // HL with user and date and something else
-        HorizontalLayout userDateHL = new HorizontalLayout(bookedByTF, bookedAtDF, signatureStatusCB, paymentStatusCB);
+        HorizontalLayout userDateHL = new HorizontalLayout(bookedByCB, bookedAtDF, signatureStatusCB, paymentStatusCB);
         // HL with statuses - other combos
-        HorizontalLayout combosHL = new HorizontalLayout(emailConfirmationCB, emailReminderCB, emailReminderDateDF); // todo align the damned date field!
+        HorizontalLayout combosHL = new HorizontalLayout(emailConfirmationCB, emailReminderCB, emailReminderDateDF, bookingStatusCB); // todo align the damned date field!
         // HL with print buttons
         HorizontalLayout buttonsHL = new HorizontalLayout(printBookingFormB, printReturnFormB, cancelB, duplicateB);
 
-        detailsVL.addComponents(userDateHL, combosHL, buttonsHL, noteG, addBookingNoteB);
+        detailsVL.addComponents(userDateHL, combosHL, buttonsHL, noteG, addBookingNoteB, bookingNoteVL);
         detailsVL.setCaption("Booking details");
         return detailsVL;
     }
@@ -213,10 +262,10 @@ public class BookingForm extends VerticalLayout implements View {
         driversVL.setMargin(false);
 
         driverG = new Grid<>(Customer.class);
-        driverG.setColumns("id", "customerFirstName", "customerLastName", "customerGroup", "customerGeneralInformation");
-        driverG.setColumnOrder("id", "customerFirstName", "customerLastName", "customerGroup", "customerGeneralInformation");
+        driverG.setColumns("documentId", "customerFirstName", "customerLastName", "customerGroup", "customerGeneralInformation");
+        driverG.setColumnOrder("documentId", "customerFirstName", "customerLastName", "customerGroup", "customerGeneralInformation");
 
-        driverG.setItems(customerRepository.findDistinctByBookings(bookingBinder.getBean()));
+//        driverG.setItems(customerRepository.findDistinctByBookings(bookingBinder.getBean()));
 
         driverG.getColumns().forEach(column -> column.setSortable(true));
         driverG.setColumnReorderingAllowed(true);
@@ -233,7 +282,7 @@ public class BookingForm extends VerticalLayout implements View {
 
         // extra button delete
         driverG.addComponentColumn(this::deleteDriverButton);
-        //todo remove from grid, not database - ask MARCIN
+        //todo remove from grid, not database - remove from collection, save
 
         driverG.setHeightByRows(4);
 
@@ -246,8 +295,11 @@ public class BookingForm extends VerticalLayout implements View {
 
         addNewDriverB = new Button("Add driver");
 
-        addNewDriverB.addClickListener(e -> navigationManager.navigateTo(CustomerForm.class));
-        //todo when done with adding new customer move data to this form
+        addNewDriverB.addClickListener(e -> {
+            customersVL.setVisible(true);
+            addNewDriverB.setVisible(false);
+        });
+
         addNewDriverB.addStyleNames(ValoTheme.BUTTON_BORDERLESS_COLORED, ValoTheme.BUTTON_SMALL);
         addNewDriverB.setIcon(VaadinIcons.PLUS);
 
@@ -263,16 +315,10 @@ public class BookingForm extends VerticalLayout implements View {
         VerticalLayout packageVL = new VerticalLayout();
         packageVL.setMargin(false);
 
-        packageG = new Grid<>(BookingPackageItem.class);
-        packageG.setColumns("date", "startTime", "description", "unitPrice", "quantity", "cancelled");
+        packageG = new Grid<>(TemporaryPackageItem.class);
+        packageG.setColumns("itemDate", "startTime", "itemDescription", "itemUnitPrice", "itemQuantity", "itemTotal", "cancelled");
 
-        packageG.setItems(bookingPackageItemRepository.findDistinctByBooking(bookingBinder.getBean()));
-
-        packageG.addColumn(packageItem -> {
-            BigDecimal total = packageItem.getQuantity().multiply(packageItem.getUnitPrice());
-            return total;
-        }).setCaption("Total").setId("total");
-
+//        packageG.setItems(bookingPackageItemRepository.findDistinctByBooking(bookingBinder.getBean()));
 
         packageG.getColumns().forEach(column -> column.setSortable(true));
         packageG.setColumnReorderingAllowed(true);
@@ -292,15 +338,21 @@ public class BookingForm extends VerticalLayout implements View {
 
         packageG.setHeightByRows(4);
 
-        packageG.setColumnOrder("date", "startTime", "description", "unitPrice", "quantity", "total", "cancelled");
+        packageG.setColumnOrder("itemDate", "startTime", "itemDescription", "itemUnitPrice", "itemQuantity", "itemTotal", "cancelled");
         packageG.addStyleNames(ValoTheme.TABLE_COMPACT);
 
-        Button addItem = new Button("Add item");
-        addItem.addClickListener(e -> navigationManager.navigateTo(BookingPackageItemForm.class));
-        addItem.addStyleNames(ValoTheme.BUTTON_BORDERLESS_COLORED, ValoTheme.BUTTON_SMALL);
-        addItem.setIcon(VaadinIcons.PLUS);
+//        Button addItem = new Button("Add item");
+//        addItem.addClickListener(e -> navigationManager.navigateTo(BookingPackageItemForm.class));
+//        addItem.addStyleNames(ValoTheme.BUTTON_BORDERLESS_COLORED, ValoTheme.BUTTON_SMALL);
+//        addItem.setIcon(VaadinIcons.PLUS);
 
-        packageVL.addComponents(packageG, addItem);
+        addPackageItemB = new Button("Add item");
+        addPackageItemB.addClickListener(e -> {
+            tempPackageItemVL.setVisible(true);
+            addPackageItemB.setVisible(false);
+        });
+
+        packageVL.addComponents(packageG, addPackageItemB);
         packageVL.setCaption("Package details");
         return packageVL;
     }
@@ -311,9 +363,9 @@ public class BookingForm extends VerticalLayout implements View {
         paymentsVL.setMargin(false);
 
         paymentG = new Grid<>(BookingPayment.class);
-        paymentG.setColumns("paymentDate", "paymentNote", "paymentAmount");
+        paymentG.setColumns("paymentDate", "paymentRemarks", "paymentAmount");
 
-        paymentG.setItems(bookingPaymentRepository.findDistinctByBooking(bookingBinder.getBean()));
+        //      paymentG.setItems(bookingPaymentRepository.findDistinctByBooking(bookingBinder.getBean()));
 
         paymentG.addColumn(bookingPayment -> {
             String method = bookingPayment.getPaymentDefinition().getPaymentName();
@@ -321,14 +373,14 @@ public class BookingForm extends VerticalLayout implements View {
         }).setCaption("Method").setId("method");
 
 
-        paymentG.setColumns("paymentDate", "paymentNote", "method", "paymentAmount");
+        paymentG.setColumns("paymentDate", "paymentRemarks", "method", "paymentAmount");
 
         // extra button delete
         paymentG.addComponentColumn(this::deletePaymentButton);
 
         paymentG.addItemClickListener(event -> {
             if (event.getMouseEventDetails().isDoubleClick()) {
-                navigationManager.navigateTo(PaymentForm.class, event.getItem().getId()); // todo new view or add the sexction to this form?
+ //               navigationManager.navigateTo(PaymentForm.class, event.getItem().getId()); // todo show the payment on VL
             }
         });
 
@@ -337,7 +389,11 @@ public class BookingForm extends VerticalLayout implements View {
         addPaymentB = new Button("Add payment");
         addPaymentB.addStyleNames(ValoTheme.BUTTON_BORDERLESS_COLORED, ValoTheme.BUTTON_SMALL);
         addPaymentB.setIcon(VaadinIcons.PLUS);
-        addPaymentB.addClickListener(e -> paymentsVL.addComponents(paymentForm)); //todo - navigate to new form? add form to this? ask Pawel?
+        //     addPaymentB.addClickListener(e -> paymentsVL.addComponents(paymentForm));
+        addPaymentB.addClickListener(e -> {
+            bookingPaymentVL.setVisible(true);
+            addPaymentB.setVisible(false);
+        });
 
         paymentsVL.addComponents(paymentG, addPaymentB);
         paymentsVL.setCaption("Payments");
@@ -353,7 +409,7 @@ public class BookingForm extends VerticalLayout implements View {
         documentG.setColumns("date", "bookingDocumentDescription", "bookingDocumentAdditionalInfo");
         documentG.setColumnOrder("date", "bookingDocumentDescription", "bookingDocumentAdditionalInfo");
 
-        documentG.setItems(bookingDocumentRepository.findDistinctByBooking(bookingBinder.getBean()));
+//        documentG.setItems(bookingDocumentRepository.findDistinctByBooking(bookingBinder.getBean()));
 
         documentG.getColumns().forEach(column -> column.setSortable(true));
         documentG.setColumnReorderingAllowed(true);
@@ -379,7 +435,12 @@ public class BookingForm extends VerticalLayout implements View {
         addDocumentB = new Button("Add document");
         addDocumentB.addStyleNames(ValoTheme.BUTTON_BORDERLESS_COLORED, ValoTheme.BUTTON_SMALL);
         addDocumentB.setIcon(VaadinIcons.PLUS);
-        addDocumentB.addClickListener(e -> Notification.show("Can't do this yet, see you later.")); //todo
+        // addDocumentB.addClickListener(e -> Notification.show("Can't do this yet, see you later.")); //todo
+
+        addDocumentB.addClickListener(e -> {
+            bookingDocumentVL.setVisible(true);
+            addDocumentB.setVisible(false);
+        });
 
         documentsVL.addComponents(documentG, addDocumentB);
         documentsVL.setCaption("Booking documents");
@@ -492,9 +553,26 @@ public class BookingForm extends VerticalLayout implements View {
 
         HorizontalLayout buttonsHL = new HorizontalLayout(saveAll, cancelAll, backToList);
 
-        bookingForm.addComponents(bookingFormL, buttonsHL, buildDetailsSection(), buildDriversSection(), buildPackageSection(), buildPaymentsSection(), buildDocumentsSection());
+        bookingForm.addComponents(bookingFormL, buttonsHL, buildDetailsSection(), buildDriversSection(), customersVL, buildPackageSection(), tempPackageItemVL, buildPaymentsSection(), bookingPaymentVL, buildDocumentsSection(), bookingDocumentVL);
 
         bookingForm.setMargin(false);
+
+
+        // Data bindings
+        bookingBinder = new Binder<>(Booking.class);
+
+        // Details
+        bookingBinder.forField(bookedAtDF).withConverter(new LocalDateToDateConverter()).bind(Booking::getCreateDate, Booking::setCreateDate);
+
+        bookingBinder.bind(bookedByCB, "createdBy");
+        bookingBinder.bind(signatureStatusCB, "signatureStatus");
+        bookingBinder.bind(paymentStatusCB, "paymentStatus");
+        bookingBinder.bind(emailConfirmationCB, "emailConfirmationSent");
+        bookingBinder.bind(emailReminderCB, "emailReminderSent");
+        bookingBinder.forField(emailReminderDateDF).withConverter(new LocalDateToDateConverter()).bind(Booking::getEmailReminderSendDate, Booking::setEmailReminderSendDate);
+
+        // Booking notes
+        // see buildBookingNoteForm()
 
         return bookingForm;
     }
@@ -520,7 +598,7 @@ public class BookingForm extends VerticalLayout implements View {
                 Button yesButton = new Button("Proceed");
                 yesButton.addClickListener(event1 -> {
                     bookingNoteRepository.delete(bookingNote);
-                    noteG.setItems(bookingNoteRepository.findByBooking(bookingBinder.getBean()));
+                    //          noteG.setItems(bookingNoteRepository.findByBooking(bookingBinder.getBean()));
                     window.close();
                 });
 
@@ -553,11 +631,11 @@ public class BookingForm extends VerticalLayout implements View {
         return deleteDButton;
     }
 
-    private Button deletePackageItemButton(BookingPackageItem packageItem) {
+    private Button deletePackageItemButton(TemporaryPackageItem temporaryPackageItem) {
         Button deletePIButton = new Button(VaadinIcons.MINUS_CIRCLE);
         deletePIButton.addStyleNames(ValoTheme.BUTTON_SMALL);
         deletePIButton.addClickListener(e -> {
-            if (packageItem.isUnderEditing()) {
+            if (temporaryPackageItem.isUnderEditing()) {
                 Notification.show("Someone's working with this item. I can't delete it now.");
             } else {
 
@@ -571,8 +649,8 @@ public class BookingForm extends VerticalLayout implements View {
                 // And buttons
                 Button yesButton = new Button("Proceed");
                 yesButton.addClickListener(event1 -> {
-                    bookingPackageItemRepository.delete(packageItem);
-                    packageG.setItems(bookingPackageItemRepository.findDistinctByBooking(bookingBinder.getBean()));
+                    temporaryPackageItemRepository.delete(temporaryPackageItem);
+                    //     packageG.setItems(bookingPackageItemRepository.findDistinctByBooking(bookingBinder.getBean()));
                     window.close();
                 });
 
@@ -612,7 +690,7 @@ public class BookingForm extends VerticalLayout implements View {
                 Button yesButton = new Button("Proceed");
                 yesButton.addClickListener(event1 -> {
                     bookingPaymentRepository.delete(bookingPayment);
-                    paymentG.setItems(bookingPaymentRepository.findDistinctByBooking(bookingBinder.getBean()));
+                    //        paymentG.setItems(bookingPaymentRepository.findDistinctByBooking(bookingBinder.getBean()));
                     window.close();
                 });
 
@@ -652,7 +730,7 @@ public class BookingForm extends VerticalLayout implements View {
                 Button yesButton = new Button("Proceed");
                 yesButton.addClickListener(event1 -> {
                     bookingDocumentRepository.delete(document);
-                    documentG.setItems(bookingDocumentRepository.findDistinctByBooking(bookingBinder.getBean()));
+                    //        documentG.setItems(bookingDocumentRepository.findDistinctByBooking(bookingBinder.getBean()));
                     window.close();
                 });
 
@@ -733,6 +811,8 @@ public class BookingForm extends VerticalLayout implements View {
             // New
             booking = new Booking();
 
+            //   booking.setCreateDate(new Date());
+            customerPickCB.setItems(Lists.newArrayList(customerRepository.findAll()));
             booking.setUnderEditing(true);
             // todo more setters
         } else {
@@ -742,6 +822,14 @@ public class BookingForm extends VerticalLayout implements View {
                 navigationManager.navigateTo(BookingGridView.class); //todo navigate to the previous view!!!
             } else {
                 booking.setUnderEditing(true);
+                noteG.setItems(bookingNoteRepository.findByBooking(booking));
+                customerPickCB.setItems(Lists.newArrayList(customerRepository.findAll()));
+                paymentG.setItems(bookingPaymentRepository.findByBooking(booking));
+                packageG.setItems(temporaryPackageItemRepository.findByBooking(booking));
+
+                driverG.setItems(customerRepository.findByBookings(Arrays.asList(booking)));
+
+                documentG.setItems(bookingDocumentRepository.findByBooking(booking));
                 if (booking == null) {
                     showNotFound();
                     return;
@@ -749,7 +837,13 @@ public class BookingForm extends VerticalLayout implements View {
             }
         }
         bookingBinder.setBean(booking);
-        // todo ??.focus();
+
+//        // Setting note lists, no way to do it earlier
+//        noteG.setItems(bookingNoteRepository.findByBooking(bookingBinder.getBean()));
+//        paymentG.setItems(bookingPaymentRepository.findByBooking(bookingBinder.getBean()));
+//        documentG.setItems(bookingDocumentRepository.findByBooking(bookingBinder.getBean()));
+
+        bookingStatusCB.focus();
     }
 
     // Won't hopefully happen
@@ -757,5 +851,349 @@ public class BookingForm extends VerticalLayout implements View {
         removeAllComponents();
         addComponent(new Label("Booking not found"));
     }
+
+    // Mini-layouts (visible or not): add booking note, add payment, add booking document, add package item
+    // Booking note
+    public VerticalLayout buildBookingNoteForm() {
+        VerticalLayout bookingNoteVL = new VerticalLayout();
+        bookingNoteVL.setCaption("Enter the note");
+
+        /**
+         * I do not allow to edit notes deliberately - too much a hassle, no real need to do it.
+         * If needed, I can get back to this form and implement editing.
+         */
+
+        // Fields
+        noteDateDF = new DateField("Note date");
+        noteTF = new TextField("Text");
+
+        HorizontalLayout fieldsHL = new HorizontalLayout(noteDateDF, noteTF);
+
+        // Separate binder
+        Binder<BookingNote> bookingNoteBinder = new Binder<>(BookingNote.class);
+
+        bookingNoteBinder.forField(noteDateDF).withConverter(new LocalDateToDateConverter()).bind(BookingNote::getEnteredOn, BookingNote::setEnteredOn);
+
+        bookingNoteBinder.bind(noteTF, "text");
+
+        BookingNote newBookingNote = new BookingNote();
+        bookingNoteBinder.setBean(newBookingNote);
+
+        // Buttons
+        Button cancelNote = new Button("Cancel");
+        cancelNote.setDescription("Your data will be lost!");
+        cancelNote.addClickListener(e -> {
+            this.bookingNoteVL.setVisible(false);
+            this.addBookingNoteB.setVisible(true);
+            noteDateDF.clear();
+            noteTF.clear();
+        });
+
+        Button saveNote = new Button("Save");
+        saveNote.addClickListener(e -> {
+            bookingBinder.getBean().addBookingNote(bookingNoteBinder.getBean());
+
+            this.bookingNoteVL.setVisible(false);
+            this.addBookingNoteB.setVisible(true);
+            bookingRepository.save(bookingBinder.getBean());
+            noteDateDF.clear();
+            noteTF.clear();
+            noteG.setItems(bookingNoteRepository.findByBooking(bookingBinder.getBean()));
+        });
+
+        //todo set items on booking note list
+
+        HorizontalLayout documentButtonsHL = new HorizontalLayout(cancelNote, saveNote);
+
+        bookingNoteVL.addComponents(fieldsHL, documentButtonsHL);
+
+        bookingNoteVL.setVisible(false);
+        return bookingNoteVL;
+    }
+
+    // Customer
+    public VerticalLayout buildCustomerForm() {
+        VerticalLayout customersVL = new VerticalLayout();
+        customersVL.setCaption("Pick the customer");
+
+        // Fields
+        customerPickCB = new ComboBox<>("You can search the list by name and surname");
+        // customerPickCB.setItems(Lists.newArrayList(this.customerRepository.findAll()));
+        customerPickCB.setItemCaptionGenerator(e -> e.getCustomerFirstName() + " " + e.getCustomerLastName());
+        customerPickCB.setEmptySelectionAllowed(false);
+
+        // the fields get filled according to the CB selection
+        customerId = new TextField("Customer id");
+        customerName = new TextField("Customer name");
+        customerSurname = new TextField("Customer surname");
+        customerGroup = new TextField("Customer group");
+        customerGeneralInformation = new TextField("General information");
+
+        // disable the fields - no editing here
+        customerId.setEnabled(false);
+        customerName.setEnabled(false);
+        customerSurname.setEnabled(false);
+        customerGroup.setEnabled(false);
+        customerGeneralInformation.setEnabled(false);
+
+
+        // The user doesn't have to delete data from the above fields, they change on the fly - see the listener method
+
+        // what happens when the user picks as item from the combo
+        customerPickCB.addValueChangeListener(new HasValue.ValueChangeListener<Customer>() {
+            @Override
+            public void valueChange(HasValue.ValueChangeEvent<Customer> valueChangeEvent) {
+                customerId.setValue(String.valueOf(valueChangeEvent.getValue().getDocumentId()));
+                customerName.setValue(valueChangeEvent.getValue().getCustomerFirstName());
+                customerSurname.setValue(valueChangeEvent.getValue().getCustomerLastName());
+                customerGroup.setValue(String.valueOf(valueChangeEvent.getValue().getCustomerGroup()));
+                customerGeneralInformation.setValue(valueChangeEvent.getValue().getCustomerGeneralInformation());
+            }
+        });
+
+        HorizontalLayout fieldsHL = new HorizontalLayout(customerPickCB);
+        HorizontalLayout customerData = new HorizontalLayout(customerId, customerName, customerSurname, customerGroup, customerGeneralInformation);
+
+        // Separate binder >>>>> bind ID only
+
+        Binder<Customer> driverBinder = new Binder<>(Customer.class);
+        driverBinder.setBean(customerPickCB.getValue());
+
+        // Buttons
+        Button cancelEntry = new Button("Cancel");
+        cancelEntry.setDescription("Your data will be lost!");
+        cancelEntry.addClickListener(e -> {
+            this.customersVL.setVisible(false);
+            this.addNewDriverB.setVisible(true);
+            customerId.clear();
+            customerName.clear();
+            customerSurname.clear();
+            customerGroup.clear();
+            customerGeneralInformation.clear();
+        });
+
+        Button saveEntry = new Button("Save");
+        saveEntry.addClickListener(e -> {
+            //todo Marcin manytomany
+//            driverBinder.getBean().addBookingPayment(bookingPaymentBinder.getBean());
+//
+//            this.bookingPaymentVL.setVisible(false);
+//            this.addPaymentB.setVisible(true);
+//            bookingRepository.save(bookingBinder.getBean());
+//            paymentDateDF.clear();
+//            paymentAmountTF.clear();
+//            paymentRemarksTF.clear();
+//            paymentG.setItems(bookingPaymentRepository.findByBooking(bookingBinder.getBean()));
+        });
+
+        HorizontalLayout driverButtonsHL = new HorizontalLayout(cancelEntry, saveEntry);
+
+        customersVL.addComponents(fieldsHL, customerData, driverButtonsHL);
+
+        customersVL.setVisible(false);
+
+        return customersVL;
+
+    }
+
+    // Temporary package item
+    public VerticalLayout buildTempPackageItemForm() {
+        VerticalLayout tempItemVL = new VerticalLayout();
+        tempItemVL.setCaption("Enter the package item");
+
+        // Fields
+        itemDateDF = new DateField("Date");
+        itemTimeTF = new TextField("Start time");
+        itemDescriptionTF = new TextField("Description");
+        itemPriceTF = new TextField("Unit price");
+        itemQuantityTF = new TextField("Quantity");
+        itemTotalTF = new TextField("Total");
+        itemTotalTF.setEnabled(false);
+        isItemCancelledCB = new CheckBox("Cancelled");
+
+        HorizontalLayout fieldsHL = new HorizontalLayout(itemDateDF, itemTimeTF, itemDescriptionTF, itemPriceTF, itemQuantityTF, itemTotalTF, isItemCancelledCB);
+
+        // Separate binder
+        Binder<TemporaryPackageItem> temporaryPackageItemBinder = new Binder<>(TemporaryPackageItem.class);
+
+        temporaryPackageItemBinder.forField(itemDateDF)
+                .withConverter(new LocalDateToDateConverter())
+                .bind(TemporaryPackageItem::getItemDate, TemporaryPackageItem::setItemDate);
+
+        temporaryPackageItemBinder.bind(itemTimeTF, "startTime");
+        temporaryPackageItemBinder.bind(itemDescriptionTF, "itemDescription");
+        temporaryPackageItemBinder.forField(itemPriceTF)
+                .withConverter(new CustomStringToBigDecimalConverter("Enter a number!"))
+                .bind(TemporaryPackageItem::getItemUnitPrice, TemporaryPackageItem::setItemUnitPrice);
+
+        temporaryPackageItemBinder.forField(itemQuantityTF)
+                .withConverter(new CustomStringToIntegerConverter("Enter a number!"))
+                .bind(TemporaryPackageItem::getItemQuantity, TemporaryPackageItem::setItemQuantity);
+
+        temporaryPackageItemBinder.bind(isItemCancelledCB, "cancelled");
+
+        TemporaryPackageItem newTemporaryPackageItem = new TemporaryPackageItem();
+        temporaryPackageItemBinder.setBean(newTemporaryPackageItem);
+
+        //todo fix this damned conversion
+//        BigDecimal convertedPrice = new BigDecimal(itemPriceTF.getValue());
+//        BigDecimal convertedUnit = new BigDecimal(itemQuantityTF.getValue());
+//        BigDecimal total = convertedPrice.multiply(convertedUnit);
+//        total.setScale(2, BigDecimal.ROUND_HALF_UP);
+//        String totalConverted = total.toString();
+//        itemTotalTF.setValue(totalConverted);
+
+        // Buttons
+        Button cancelItem = new Button("Cancel");
+        cancelItem.setDescription("Your data will be lost!");
+        cancelItem.addClickListener(e -> {
+            this.tempPackageItemVL.setVisible(false);
+            this.addPackageItemB.setVisible(true);
+            itemDateDF.clear();
+            itemTimeTF.clear();
+            itemDescriptionTF.clear();
+            itemPriceTF.clear();
+            itemQuantityTF.clear();
+            itemTotalTF.clear();
+            isItemCancelledCB.clear();
+        });
+
+        Button saveItem = new Button("Save");
+        saveItem.addClickListener(e -> {
+            bookingBinder.getBean().addTemporaryPackageItem(temporaryPackageItemBinder.getBean());
+
+            this.tempPackageItemVL.setVisible(false);
+            this.addPackageItemB.setVisible(true);
+            temporaryPackageItemRepository.save(temporaryPackageItemBinder.getBean());
+            itemDateDF.clear();
+            itemTimeTF.clear();
+            itemDescriptionTF.clear();
+            itemPriceTF.clear();
+            itemQuantityTF.clear();
+            itemTotalTF.clear();
+            isItemCancelledCB.clear();
+            packageG.setItems(temporaryPackageItemRepository.findByBooking(bookingBinder.getBean()));
+        });
+
+        HorizontalLayout packageButtonsHL = new HorizontalLayout(cancelItem, saveItem);
+
+        tempItemVL.addComponents(fieldsHL, packageButtonsHL);
+
+        tempItemVL.setVisible(false);
+        return tempItemVL;
+    }
+
+
+    // Booking payment
+    public VerticalLayout buildBookingPaymentForm() {
+        VerticalLayout bookingPaymentVL = new VerticalLayout();
+        bookingPaymentVL.setCaption("Enter the payment");
+
+        // Fields
+        paymentDateDF = new DateField("Payment date");
+        paymentAmountTF = new TextField("Amount");
+        paymentRemarksTF = new TextField("Remarks");
+
+        HorizontalLayout fieldsHL = new HorizontalLayout(paymentDateDF, paymentAmountTF, paymentRemarksTF);
+
+        // Separate binder
+        Binder<BookingPayment> bookingPaymentBinder = new Binder<>(BookingPayment.class);
+
+        bookingPaymentBinder.forField(paymentDateDF).withConverter(new LocalDateToDateConverter()).bind(BookingPayment::getPaymentDate, BookingPayment::setPaymentDate);
+
+        bookingPaymentBinder.bind(paymentRemarksTF, "paymentRemarks");
+
+        bookingPaymentBinder.forField(paymentAmountTF).withConverter(new CustomStringToBigDecimalConverter("Enter a number please!")).bind(BookingPayment::getPaymentAmount, BookingPayment::setPaymentAmount);
+
+        BookingPayment newBookingPayment = new BookingPayment();
+        bookingPaymentBinder.setBean(newBookingPayment);
+
+        // Buttons
+        Button cancelPayment = new Button("Cancel");
+        cancelPayment.setDescription("Your data will be lost!");
+        cancelPayment.addClickListener(e -> {
+            this.bookingPaymentVL.setVisible(false);
+            this.addPaymentB.setVisible(true);
+            paymentDateDF.clear();
+            paymentAmountTF.clear();
+            paymentRemarksTF.clear();
+        });
+
+        Button savePayment = new Button("Save");
+        savePayment.addClickListener(e -> {
+            bookingBinder.getBean().addBookingPayment(bookingPaymentBinder.getBean());
+
+            this.bookingPaymentVL.setVisible(false);
+            this.addPaymentB.setVisible(true);
+            bookingRepository.save(bookingBinder.getBean());
+            paymentDateDF.clear();
+            paymentAmountTF.clear();
+            paymentRemarksTF.clear();
+            paymentG.setItems(bookingPaymentRepository.findByBooking(bookingBinder.getBean()));
+        });
+
+        HorizontalLayout documentButtonsHL = new HorizontalLayout(cancelPayment, savePayment);
+
+        bookingPaymentVL.addComponents(fieldsHL, documentButtonsHL);
+
+        bookingPaymentVL.setVisible(false);
+        return bookingPaymentVL;
+    }
+
+    // Booking document
+    public VerticalLayout buildBookingDocumentForm() {
+        VerticalLayout bookingDocumentVL = new VerticalLayout();
+        bookingDocumentVL.setCaption("Enter the document");
+
+        // Fields
+        bookingDocumentDateDF = new DateField("Document date");
+        bookingDocumentDescriptionTF = new TextField("Document description");
+        bookingDocumentInfoTF = new TextField("Additional information");
+
+        HorizontalLayout fieldsHL = new HorizontalLayout(bookingDocumentDateDF, bookingDocumentDescriptionTF, bookingDocumentInfoTF);
+
+        // Separate binder
+        Binder<BookingDocument> bookingDocumentBinder = new Binder<>(BookingDocument.class);
+
+        bookingDocumentBinder.forField(bookingDocumentDateDF).withConverter(new LocalDateToDateConverter()).bind(BookingDocument::getDate, BookingDocument::setDate);
+
+        bookingDocumentBinder.bind(bookingDocumentDescriptionTF, "bookingDocumentDescription");
+        bookingDocumentBinder.bind(bookingDocumentInfoTF, "bookingDocumentAdditionalInfo");
+
+        BookingDocument newBookingDocument = new BookingDocument();
+        bookingDocumentBinder.setBean(newBookingDocument);
+
+        // Buttons
+        Button cancelDocument = new Button("Cancel");
+        cancelDocument.setDescription("Your data will be lost!");
+        cancelDocument.addClickListener(e -> {
+            this.bookingDocumentVL.setVisible(false);
+            this.addDocumentB.setVisible(true);
+            bookingDocumentDateDF.clear();
+            bookingDocumentDescriptionTF.clear();
+            bookingDocumentInfoTF.clear();
+        });
+
+        Button saveDocument = new Button("Save");
+        saveDocument.addClickListener(e -> {
+            bookingBinder.getBean().addBookingDocument(bookingDocumentBinder.getBean());
+
+            this.bookingDocumentVL.setVisible(false);
+            this.addDocumentB.setVisible(true);
+            bookingRepository.save(bookingBinder.getBean());
+            bookingDocumentDateDF.clear();
+            bookingDocumentDescriptionTF.clear();
+            bookingDocumentInfoTF.clear();
+            documentG.setItems(bookingDocumentRepository.findByBooking(bookingBinder.getBean()));
+        });
+
+        HorizontalLayout documentButtonsHL = new HorizontalLayout(cancelDocument, saveDocument);
+
+        bookingDocumentVL.addComponents(fieldsHL, documentButtonsHL);
+
+        bookingDocumentVL.setVisible(false);
+        return bookingDocumentVL;
+    }
+
 
 }

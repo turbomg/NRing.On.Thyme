@@ -26,7 +26,7 @@ public class Note {
     private String text;
     private NoteStatus noteStatus;
 
-    private boolean isHistoryNote;
+    private boolean historyNote;
 
     @ManyToOne
     private User user; // entered by

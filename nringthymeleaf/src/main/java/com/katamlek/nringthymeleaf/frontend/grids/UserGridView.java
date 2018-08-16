@@ -2,10 +2,8 @@ package com.katamlek.nringthymeleaf.frontend.grids;
 
 import com.katamlek.nringthymeleaf.domain.User;
 import com.katamlek.nringthymeleaf.domain.UserRole;
-import com.katamlek.nringthymeleaf.frontend.forms.UserForm;
 import com.katamlek.nringthymeleaf.frontend.navigation.NavigationManager;
 import com.katamlek.nringthymeleaf.repositories.UserRepository;
-import com.vaadin.event.dd.acceptcriteria.Not;
 import com.vaadin.icons.VaadinIcons;
 import com.vaadin.navigator.View;
 import com.vaadin.shared.ui.grid.ColumnResizeMode;
@@ -27,14 +25,14 @@ import java.util.Arrays;
 @UIScope
 public class UserGridView extends VerticalLayout implements View {
     private UserRepository userRepository;
-    private UserForm userForm;
+    //  private UserForm userForm;
     private NavigationManager navigationManager;
     private Grid<User> userGrid;
     private GridCellFilter filter;
 
-    public UserGridView(UserRepository userRepository, UserForm userForm, NavigationManager navigationManager) {
+    public UserGridView(UserRepository userRepository, NavigationManager navigationManager) {
         this.userRepository = userRepository;
-        this.userForm = userForm;
+    //    this.userForm = userForm;
         this.navigationManager = navigationManager;
         addComponent(buildUserGridView());
         setMargin(false);
@@ -59,7 +57,8 @@ public class UserGridView extends VerticalLayout implements View {
         // Set open user details for editing on double click
         userGrid.addItemClickListener(event -> {
             if (event.getMouseEventDetails().isDoubleClick()) {
-                navigationManager.navigateTo(UserForm.class, event.getItem().getId());
+                Notification.show("User form is not ready yet.");
+                // navigationManager.navigateTo(UserForm.class, event.getItem().getId());
             }
         });
 

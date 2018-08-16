@@ -10,5 +10,5 @@ import java.util.List;
 @Repository
 public interface CustomerRepository extends CrudRepository<Customer, Long> {
 
-    public List<Customer> findDistinctByBookings(Booking booking);
+    public List<Customer> findByBookings(List<Booking> bookings);
 }

@@ -4,6 +4,7 @@ import com.katamlek.nringthymeleaf.domain.BookingPackageItem;
 import com.katamlek.nringthymeleaf.domain.BookingPackageItemCar;
 import com.katamlek.nringthymeleaf.domain.Car;
 import com.katamlek.nringthymeleaf.frontend.forms.BookingForm;
+import com.katamlek.nringthymeleaf.frontend.forms.CustomerForm;
 import com.katamlek.nringthymeleaf.frontend.forms.EventForm;
 import com.katamlek.nringthymeleaf.frontend.navigation.NavigationManager;
 import com.katamlek.nringthymeleaf.repositories.EventRepository;
@@ -118,7 +119,7 @@ public class WelcomeView extends VerticalLayout implements View {
         addBookingBtn.addStyleNames(ValoTheme.BUTTON_BORDERLESS, ValoTheme.BUTTON_LARGE, ValoTheme.BUTTON_ICON_ALIGN_TOP);
 
         Button addCustomerBtn = new Button("Add customer");
-        addCustomerBtn.addClickListener(e -> Notification.show("Not yet")); //todo
+        addCustomerBtn.addClickListener(e -> navigationManager.navigateTo(CustomerForm.class));
         addCustomerBtn.addStyleNames(ValoTheme.BUTTON_BORDERLESS, ValoTheme.BUTTON_LARGE, ValoTheme.BUTTON_ICON_ALIGN_TOP);
         addCustomerBtn.setIcon(VaadinIcons.USER_STAR);
 

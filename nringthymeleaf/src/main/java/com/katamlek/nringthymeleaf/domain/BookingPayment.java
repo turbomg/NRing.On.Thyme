@@ -15,14 +15,13 @@ public class BookingPayment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Temporal(TemporalType.DATE)
+//    @Temporal(TemporalType.DATE)
     @NotNull
     private Date paymentDate;
 
 //    private OfConcern concerns;
 
-    @OneToOne
-    private PaymentNote paymentNote;
+    private String paymentRemarks;
 
     @NotNull
     private BigDecimal paymentAmount;
@@ -36,4 +35,14 @@ public class BookingPayment {
 
     private boolean isUnderEditing;
 
+    public PaymentDefinition getPaymentDefinition() {
+        if (paymentDefinition == null) {
+            paymentDefinition = new PaymentDefinition();
+        }
+        return paymentDefinition;
+    }
+
+    public void setPaymentDefinition(PaymentDefinition paymentDefinition) {
+        this.paymentDefinition = paymentDefinition;
+    }
 }

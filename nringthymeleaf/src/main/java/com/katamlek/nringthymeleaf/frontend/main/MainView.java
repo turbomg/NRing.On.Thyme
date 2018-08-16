@@ -48,6 +48,9 @@ public class MainView extends VerticalLayout implements ViewDisplay {
     private Button pricelist;
     private Button setup;
     private Button logOut;
+
+    // this is a test button to plug in forms to be tested
+
     private VerticalLayout displayArea;
 
     public MainView(NavigationManager navigationManager) {
