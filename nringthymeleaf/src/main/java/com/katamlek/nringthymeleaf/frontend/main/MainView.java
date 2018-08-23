@@ -10,6 +10,7 @@ import com.vaadin.icons.VaadinIcons;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewDisplay;
 import com.vaadin.navigator.ViewLeaveAction;
+import com.vaadin.server.FileResource;
 import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.spring.annotation.SpringViewDisplay;
 import com.vaadin.spring.annotation.UIScope;
@@ -18,12 +19,18 @@ import com.vaadin.ui.themes.ValoTheme;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.PostConstruct;
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
 /**
  * The main view containing the menu and the content area where actual views are
  * shown.
+ */
+
+/**
+ * todo implement security
+ * todo implement
  */
 
 @SpringViewDisplay
@@ -48,8 +55,6 @@ public class MainView extends VerticalLayout implements ViewDisplay {
     private Button pricelist;
     private Button setup;
     private Button logOut;
-
-    // this is a test button to plug in forms to be tested
 
     private VerticalLayout displayArea;
 
@@ -138,64 +143,66 @@ public class MainView extends VerticalLayout implements ViewDisplay {
         currentUser.setCaption("XX"); //todo get user initials from session
         currentUser.addStyleNames(ValoTheme.LABEL_COLORED, ValoTheme.LABEL_LARGE);
 
-        dashboard = new Button("Dashboard");
-        dashboard.addStyleNames(ValoTheme.BUTTON_BORDERLESS, ValoTheme.BUTTON_ICON_ONLY);
+        dashboard = new Button("");
+    //    dashboard.addStyleNames(ValoTheme.BUTTON_BORDERLESS, ValoTheme.BUTTON_ICON_ONLY);
         dashboard.setIcon(VaadinIcons.DASHBOARD);
+        dashboard.addStyleName(ValoTheme.BUTTON_BORDERLESS);
         dashboard.setDescription("Dashboard");
 
-        myAccount = new Button("My account");
-        myAccount.addStyleNames(ValoTheme.BUTTON_BORDERLESS, ValoTheme.BUTTON_ICON_ONLY);
+        myAccount = new Button("");
+    //    myAccount.addStyleNames(ValoTheme.BUTTON_BORDERLESS, ValoTheme.BUTTON_ICON_ONLY);
         myAccount.setIcon(VaadinIcons.USER_HEART);
+        myAccount.addStyleName(ValoTheme.BUTTON_BORDERLESS);
         myAccount.setDescription("My account");
 
-        calendar = new Button("Calendar");
-        calendar.addStyleNames(ValoTheme.BUTTON_BORDERLESS, ValoTheme.BUTTON_ICON_ONLY);
+        calendar = new Button("");
+        calendar.addStyleNames(ValoTheme.BUTTON_BORDERLESS);
         calendar.setIcon(VaadinIcons.CALENDAR);
         calendar.setDescription("Calendar");
 
 
-        bookings = new Button("Bookings");
-        bookings.addStyleNames(ValoTheme.BUTTON_BORDERLESS, ValoTheme.BUTTON_ICON_ONLY);
+        bookings = new Button("");
+        bookings.addStyleNames(ValoTheme.BUTTON_BORDERLESS);
         bookings.setIcon(VaadinIcons.OPEN_BOOK);
         bookings.setDescription("Bookings");
 
-        events = new Button("Events");
-        events.addStyleNames(ValoTheme.BUTTON_BORDERLESS, ValoTheme.BUTTON_ICON_ONLY);
+        events = new Button("");
+        events.addStyleNames(ValoTheme.BUTTON_BORDERLESS);
         events.setIcon(VaadinIcons.SPARK_LINE);
         events.setDescription("Events");
 
-        customers = new Button("Customers");
-        customers.addStyleNames(ValoTheme.BUTTON_BORDERLESS, ValoTheme.BUTTON_ICON_ONLY);
+        customers = new Button("");
+        customers.addStyleNames(ValoTheme.BUTTON_BORDERLESS);
         customers.setIcon(VaadinIcons.USERS);
         customers.setDescription("Customers");
 
-        fleet = new Button("Fleet");
-        fleet.addStyleNames(ValoTheme.BUTTON_BORDERLESS, ValoTheme.BUTTON_ICON_ONLY);
+        fleet = new Button("");
+        fleet.addStyleNames(ValoTheme.BUTTON_BORDERLESS);
         fleet.setIcon(VaadinIcons.CAR);
         fleet.setDescription("Fleet");
 
-        systemUsers = new Button("User management");
-        systemUsers.addStyleNames(ValoTheme.BUTTON_BORDERLESS, ValoTheme.BUTTON_ICON_ONLY);
+        systemUsers = new Button("");
+        systemUsers.addStyleNames(ValoTheme.BUTTON_BORDERLESS);
         systemUsers.setIcon(VaadinIcons.USER_CHECK);
         systemUsers.setDescription("User management");
 
-        reports = new Button("Reports");
-        reports.addStyleNames(ValoTheme.BUTTON_BORDERLESS, ValoTheme.BUTTON_ICON_ONLY);
+        reports = new Button("");
+        reports.addStyleNames(ValoTheme.BUTTON_BORDERLESS);
         reports.setIcon(VaadinIcons.PAPERPLANE);
         reports.setDescription("Reports");
 
-        pricelist = new Button("Price list");
-        pricelist.addStyleNames(ValoTheme.BUTTON_BORDERLESS, ValoTheme.BUTTON_ICON_ONLY);
+        pricelist = new Button("");
+        pricelist.addStyleNames(ValoTheme.BUTTON_BORDERLESS);
         pricelist.setIcon(VaadinIcons.DOLLAR);
         pricelist.setDescription("Reports");
 
-        setup = new Button("Setup");
-        setup.addStyleNames(ValoTheme.BUTTON_BORDERLESS, ValoTheme.BUTTON_ICON_ONLY);
+        setup = new Button("");
+        setup.addStyleNames(ValoTheme.BUTTON_BORDERLESS);
         setup.setIcon(VaadinIcons.COGS);
         setup.setDescription("Setup");
 
-        logOut = new Button("Log out");
-        logOut.addStyleNames(ValoTheme.BUTTON_BORDERLESS, ValoTheme.BUTTON_ICON_ONLY);
+        logOut = new Button("");
+        logOut.addStyleNames(ValoTheme.BUTTON_BORDERLESS);
         logOut.setIcon(VaadinIcons.POWER_OFF);
         logOut.setDescription("Log out");
 

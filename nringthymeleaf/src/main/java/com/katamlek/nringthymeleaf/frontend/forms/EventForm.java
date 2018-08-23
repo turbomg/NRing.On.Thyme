@@ -7,6 +7,7 @@ import com.katamlek.nringthymeleaf.repositories.*;
 import com.katamlek.nringthymeleaf.vaadinutils.CustomStringToBigDecimalConverter;
 import com.katamlek.nringthymeleaf.vaadinutils.CustomStringToIntegerConverter;
 import com.vaadin.data.Binder;
+import com.vaadin.data.converter.LocalDateTimeToDateConverter;
 import com.vaadin.data.converter.LocalDateToDateConverter;
 import com.vaadin.data.provider.DataProvider;
 import com.vaadin.icons.VaadinIcons;
@@ -18,7 +19,11 @@ import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.*;
 import com.vaadin.ui.themes.ValoTheme;
 import org.assertj.core.util.Lists;
+import org.vaadin.gridutil.renderer.BooleanRenderer;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.ZoneOffset;
 import java.util.Date;
 
 /**
@@ -60,7 +65,8 @@ public class EventForm extends VerticalLayout implements View {
     private Label eventDetailsL = new Label("Event details");
     private RadioButtonGroup<EventType> eventTypeRBG;
     private TextField eventNameTF;
-    private DateField eventDateDF;
+    private DateTimeField eventStartDateTimeDTF;
+    private DateTimeField eventEndDateTimeDTF;
     private ComboBox<User> eventResponsibleUserCB;
     private ComboBox<LocationDefinition> eventLocationCB;
     private TextField eventTrackTF;
@@ -109,12 +115,13 @@ public class EventForm extends VerticalLayout implements View {
     public VerticalLayout buildDetailsSectionVL() {
         VerticalLayout eventDetailsVL = new VerticalLayout();
 
-        eventTypeRBG = new RadioButtonGroup<>("", DataProvider.ofItems(EventType.values()));
+        eventTypeRBG = new RadioButtonGroup<>("Event type:", DataProvider.ofItems(EventType.values()));
         eventTypeRBG.setSelectedItem(EventType.EVENT);
         eventTypeRBG.addStyleName(ValoTheme.OPTIONGROUP_HORIZONTAL);
 
         eventNameTF = new TextField("Event name");
-        eventDateDF = new DateField("Event date");
+        eventStartDateTimeDTF = new DateTimeField("Event start date & time");
+        eventEndDateTimeDTF = new DateTimeField("Event end date & time");
         eventResponsibleUserCB = new ComboBox<>("Responsible staff", Lists.newArrayList(userRepository.findAll()));
         eventResponsibleUserCB.setItemCaptionGenerator(e -> e.getName() + " " + e.getSurname());
         eventResponsibleUserCB.setEmptySelectionAllowed(false);
@@ -124,12 +131,12 @@ public class EventForm extends VerticalLayout implements View {
         eventLocationCB.setEmptySelectionAllowed(false);
 
         eventTrackTF = new TextField("Track");
-        eventStartTimeTF = new TextField("Start time");
-        eventEndTimeTF = new TextField("End time");
+        //  eventStartTimeTF = new TextField("Start time");
+        //  eventEndTimeTF = new TextField("End time");
         hideWhenNoBookingsCB = new CheckBox("Hide when no bookings");
         hideFromPublicCalendarCB = new CheckBox("Hide from public calendar");
 
-        eventDetailsVL.addComponents(eventTypeRBG, new HorizontalLayout(eventNameTF, eventLocationCB, eventTrackTF), new HorizontalLayout(eventDateDF, eventStartTimeTF, eventEndTimeTF), new HorizontalLayout(eventResponsibleUserCB, hideFromPublicCalendarCB, hideWhenNoBookingsCB));
+        eventDetailsVL.addComponents(eventTypeRBG, new HorizontalLayout(eventNameTF, eventLocationCB, eventTrackTF), new HorizontalLayout(eventStartDateTimeDTF, eventEndDateTimeDTF), new HorizontalLayout(eventResponsibleUserCB, hideFromPublicCalendarCB, hideWhenNoBookingsCB));
 
         return eventDetailsVL;
     }
@@ -229,8 +236,26 @@ public class EventForm extends VerticalLayout implements View {
         eventPitInUseTF = new TextField("Pitlane in use");
 
         eventNoteG = new Grid<>(EventNote.class);
-        eventNoteG.setColumns("enteredOn", "user", "text", "noteStatus", "internal");
-        eventNoteG.setColumnOrder("enteredOn", "user", "text", "noteStatus", "internal");
+
+        eventNoteG.addColumn(EventNote::isInternal, new BooleanRenderer<>()).setCaption("Internal");
+
+        eventNoteG.addColumn(eventNote -> {
+            SimpleDateFormat sfd = new SimpleDateFormat("dd.MM.yyyy");
+            Date dateNoZeroes = null;
+            try {
+                dateNoZeroes = sfd.parse(sfd.format((eventNote.getEnteredOn())));
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+
+            return dateNoZeroes;
+        }).setId("entered").setCaption("Entered");
+
+        eventNoteG.setColumns("entered", "user", "text", "noteStatus");
+        eventNoteG.setColumnOrder("entered", "user", "text", "noteStatus");
+
+        eventNoteG.addComponentColumn(this::deleteEventNote);
+
 
 //        eventNoteG.addColumn(eventNote -> {
 //            String internalColumn;
@@ -272,13 +297,13 @@ public class EventForm extends VerticalLayout implements View {
         // Bind details
         // eventTypeRBG binds automatically
         eventBinder.bind(eventNameTF, "eventName");
-        // No need to bind date, binds automatically
-        eventBinder.forField(eventDateDF).withConverter(new LocalDateToDateConverter()).bind(com.katamlek.nringthymeleaf.domain.Event::getEventDate, com.katamlek.nringthymeleaf.domain.Event::setEventDate);
+        eventBinder.forField(eventStartDateTimeDTF).withConverter(new LocalDateTimeToDateConverter(ZoneOffset.systemDefault())).bind(com.katamlek.nringthymeleaf.domain.Event::getEventStartDateTime, com.katamlek.nringthymeleaf.domain.Event::setEventStartDateTime);
+        eventBinder.forField(eventEndDateTimeDTF).withConverter(new LocalDateTimeToDateConverter(ZoneOffset.systemDefault())).bind(com.katamlek.nringthymeleaf.domain.Event::getEventStartDateTime, com.katamlek.nringthymeleaf.domain.Event::setEventStartDateTime);
         eventBinder.bind(eventResponsibleUserCB, "eventResponsibleUser");
         eventBinder.bind(eventLocationCB, "eventLocation");
         eventBinder.bind(eventTrackTF, "eventTrack");
-        eventBinder.bind(eventStartTimeTF, "eventStartTime");
-        eventBinder.bind(eventEndTimeTF, "eventEndTime");
+        eventBinder.bind(eventStartDateTimeDTF, "eventStartDateTime");
+        eventBinder.bind(eventEndDateTimeDTF, "eventEndDateTime");
         eventBinder.bind(hideWhenNoBookingsCB, "visibleWhenNoBookings");
         eventBinder.bind(hideFromPublicCalendarCB, "visibleInPublicCalendar");
 
@@ -386,7 +411,7 @@ public class EventForm extends VerticalLayout implements View {
             event.setEventName("");
             event.setVisibleInPublicCalendar(false);
             event.setVisibleWhenNoBookings(false);
-            event.setEventDate(new Date());
+            event.setEventStartDateTime(new Date());
             event.setEventType(EventType.EVENT);
             event.setUnderEditing(true);
             // todo more setters
@@ -475,4 +500,14 @@ public class EventForm extends VerticalLayout implements View {
         return eventNoteVL;
     }
 
+    // Helpers
+    private Button deleteEventNote(EventNote eventNote) {
+        Button deleteENutton = new Button(VaadinIcons.MINUS_CIRCLE);
+        deleteENutton.setCaption("You're about to delete something! Proceed with caution!");
+        deleteENutton.addStyleNames(ValoTheme.BUTTON_SMALL);
+        deleteENutton.addClickListener(e -> {
+            eventNoteRepository.delete(eventNote);
+        });
+        return deleteENutton;
+    }
 }

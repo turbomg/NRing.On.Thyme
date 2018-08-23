@@ -11,5 +11,5 @@ import java.util.Optional;
 @Repository
 public interface CarNoteRepository extends CrudRepository<CarNote, Long> {
 
-        public List<CarNote> findDistinctByCarAndHistoryNote(Car car, boolean isHistory);
+    public List<CarNote> findDistinctByCarAndHistoryNote(Car car, boolean isHistory);
 }

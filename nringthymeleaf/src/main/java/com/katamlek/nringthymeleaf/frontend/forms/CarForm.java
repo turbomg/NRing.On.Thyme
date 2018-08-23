@@ -6,8 +6,12 @@ import com.katamlek.nringthymeleaf.frontend.grids.CarGridView;
 import com.katamlek.nringthymeleaf.frontend.navigation.NavigationManager;
 import com.katamlek.nringthymeleaf.repositories.CarNoteRepository;
 import com.katamlek.nringthymeleaf.repositories.CarRepository;
+import com.katamlek.nringthymeleaf.repositories.LocationDefinitionRepository;
 import com.katamlek.nringthymeleaf.repositories.PriceListCarRepository;
+import com.katamlek.nringthymeleaf.vaadinutils.CustomStringToBigDecimalConverter;
+import com.katamlek.nringthymeleaf.vaadinutils.CustomStringToIntegerConverter;
 import com.vaadin.data.Binder;
+import com.vaadin.data.converter.LocalDateToDateConverter;
 import com.vaadin.data.provider.DataProvider;
 import com.vaadin.icons.VaadinIcons;
 import com.vaadin.navigator.View;
@@ -16,7 +20,6 @@ import com.vaadin.shared.ui.grid.ColumnResizeMode;
 import com.vaadin.spring.annotation.SpringView;
 import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.*;
-import com.vaadin.ui.renderers.ButtonRenderer;
 import com.vaadin.ui.themes.ValoTheme;
 import org.assertj.core.util.Lists;
 
@@ -32,14 +35,17 @@ public class CarForm extends VerticalLayout implements View {
     private CarRepository carRepository;
     private CarNoteRepository carNoteRepository;
     private PriceListCarRepository priceListCarRepository;
+    private LocationDefinitionRepository locationDefinitionRepository;
     private NavigationManager navigationManager;
 
-    public CarForm(CarRepository carRepository, CarNoteRepository carNoteRepository, NavigationManager navigationManager, PriceListCarRepository priceListCarRepository) {
+    public CarForm(CarRepository carRepository, CarNoteRepository carNoteRepository, LocationDefinitionRepository locationDefinitionRepository, NavigationManager navigationManager, PriceListCarRepository priceListCarRepository) {
         this.carRepository = carRepository;
         this.carNoteRepository = carNoteRepository;
         this.priceListCarRepository = priceListCarRepository;
+        this.locationDefinitionRepository = locationDefinitionRepository;
         this.navigationManager = navigationManager;
         addComponent(buildCarForm());
+        setMargin(false);
     }
 
     // Window label & buttons
@@ -51,20 +57,26 @@ public class CarForm extends VerticalLayout implements View {
     // The details section
     private TextField modelTF;
     private TextField plateTF;
+    private TextField vinNumberTF;
     ComboBox<CarColor> carColorCB;
+    private DateField firstRegistrationDF;
     private TextField lastMileageTF;
     private DateField firstBookingDF;
     private DateField lastBookingDF;
+    private TextField carValueTF;
     private RadioButtonGroup<MileageType> mileageTypeRBG;
     private RadioButtonGroup<CarFleet> carFleetRBG;
     private DateField nextTUV;
-    private TextField nextService;
+    private TextField nextServiceAtKm;
 
     // The status section
     private ComboBox<CarStatus> statusCB;
-    private TextField locationTF;
+    private ComboBox<LocationDefinition> locationCB;
     private Grid<CarNote> carNoteG; // where isHistory false
     private Button addNoteB; // other than history note - isHistory false
+    private VerticalLayout carNotesVL = buildCarNoteForm();
+    private TextField noteTF;
+    private DateField noteDateDF;
 
     // History section
     private Grid<CarNote> carHistoryNoteG; // only isHistory true
@@ -75,29 +87,32 @@ public class CarForm extends VerticalLayout implements View {
     private Button addPricingItemB;
 
     // Binder
-    private Binder<Car> carBinder;
+    private Binder<Car> carBinder = new Binder<>(Car.class);
 
     // Build section layouts methods
     // Details
     public HorizontalLayout buildDetailsSection() {
-
         modelTF = new TextField("Model");
         plateTF = new TextField("Plate");
+        vinNumberTF = new TextField("VIN");
         carColorCB = new ComboBox<CarColor>();
         carColorCB.setItems(CarColor.values());
         carColorCB.setCaption("Color");
-        VerticalLayout leftPane = new VerticalLayout(modelTF, plateTF, carColorCB);
+        // todo set renderer when graphics ready
+        VerticalLayout leftPane = new VerticalLayout(modelTF, plateTF, vinNumberTF, carColorCB);
 
+        firstRegistrationDF = new DateField("First registration");
         lastMileageTF = new TextField("Last recorded mileage");
         firstBookingDF = new DateField("First booking");
         lastBookingDF = new DateField("Last booking");
-        VerticalLayout middlePane = new VerticalLayout(lastMileageTF, firstBookingDF, lastBookingDF);
+        carValueTF = new TextField("Car value");
+        VerticalLayout middlePane = new VerticalLayout(firstRegistrationDF, lastMileageTF, firstBookingDF, lastBookingDF, carValueTF);
 
         mileageTypeRBG = new RadioButtonGroup<>("Mileage type", DataProvider.ofItems(MileageType.values()));
         carFleetRBG = new RadioButtonGroup<>("Fleet", DataProvider.ofItems(CarFleet.values()));
         nextTUV = new DateField("Next TUV");
-        nextService = new TextField("Next service at");
-        VerticalLayout rightPane = new VerticalLayout(mileageTypeRBG, carFleetRBG, nextTUV, nextService);
+        nextServiceAtKm = new TextField("Next service at");
+        VerticalLayout rightPane = new VerticalLayout(mileageTypeRBG, carFleetRBG, nextTUV, nextServiceAtKm);
 
         HorizontalLayout detailsHL = new HorizontalLayout(leftPane, middlePane, rightPane);
         detailsHL.setCaption("Car Details");
@@ -114,14 +129,16 @@ public class CarForm extends VerticalLayout implements View {
         statusCB.setItems(CarStatus.values());
         statusCB.setCaption("Car status");
 
-        locationTF = new TextField("Location"); //todo ask Jono if this should be LocationDefinition
+        locationCB = new ComboBox<>("Location");
+        locationCB.setItemCaptionGenerator(e -> e.getLocationName());
+        locationCB.setItems(Lists.newArrayList(locationDefinitionRepository.findAll()));
 
         carNoteG = new Grid<>(CarNote.class);
-
-        carNoteG.setItems(carNoteRepository.findDistinctByCarAndHistoryNote(carBinder.getBean(), false));
+        carNoteG.setHeightByRows(4);
+        carNoteG.setCaption("Car notes");
 
         carNoteG.setColumns("user", "enteredOn", "text");
-        carNoteG.setColumnOrder("user", "enteredOn", "text");
+        carNoteG.setColumnOrder("enteredOn", "user", "text");
         carNoteG.getColumns().forEach(column -> column.setSortable(true));
         carNoteG.setColumnReorderingAllowed(true);
         carNoteG.setColumnResizeMode(ColumnResizeMode.ANIMATED);
@@ -131,12 +148,19 @@ public class CarForm extends VerticalLayout implements View {
 
         // extra button delete for non-history entries only
 
-        carNoteG.addComponentColumn(this::deleteCarNote);
+    //    carNoteG.addComponentColumn(this::deleteCarNote);
 
         carNoteG.setSizeFull();
 
-        statusVL.addComponents(statusCB, locationTF, carNoteG);
-        statusVL.setCaption("Car Status");
+        addNoteB = new Button("Add a note");
+        addNoteB.addClickListener(e -> {
+            carNotesVL.setVisible(true);
+            addNoteB.setVisible(false);
+        });
+
+
+        statusVL.addComponents(statusCB, locationCB, carNoteG, addNoteB, carNotesVL);
+        statusVL.setCaption("Car status");
         return statusVL;
 
     }
@@ -146,7 +170,8 @@ public class CarForm extends VerticalLayout implements View {
         VerticalLayout historyVL = new VerticalLayout();
 
         carHistoryNoteG = new Grid<>(CarNote.class);
-        carHistoryNoteG.setItems(carNoteRepository.findDistinctByCarAndHistoryNote(carBinder.getBean(), true));
+        carHistoryNoteG.setCaption("Car history");
+        carHistoryNoteG.setHeightByRows(4);
 
         carHistoryNoteG.setColumns("user", "enteredOn", "text", "carMileageOut", "carMileageIn", "carMileageTotalKM", "carMileageTotalMIL");
         carHistoryNoteG.setColumnOrder("user", "enteredOn", "text", "carMileageOut", "carMileageIn", "carMileageTotalKM", "carMileageTotalMIL");
@@ -162,18 +187,19 @@ public class CarForm extends VerticalLayout implements View {
 
 
         historyVL.addComponents(carHistoryNoteG, addHistoryNoteB);
-        historyVL.setCaption("Car History");
         return historyVL;
+
+        // todo if manual input is enabled, add noteVL
     }
 
     public VerticalLayout buildPricingSection() {
         VerticalLayout pricingVL = new VerticalLayout();
         pricingG = new Grid<>(PriceListCar.class);
+        pricingG.setCaption("Car pricing");
+        pricingG.setHeightByRows(4);
 
-        pricingG.setItems(priceListCarRepository.findDistinctByCar(carBinder.getBean()));
-
-        pricingG.setColumns("description", "defaultNote", "startPrice", "startKM", "per10KM", "instruction", "carPricingGroup");
-        pricingG.setColumnOrder("description", "defaultNote", "startPrice", "startKM", "per10KM", "instruction", "carPricingGroup");
+        pricingG.setColumns("description", "defaultNote", "startPrice", "startKM", "per10KM", "instruction", "pricingGroup");
+        pricingG.setColumnOrder("description", "defaultNote", "startPrice", "startKM", "per10KM", "instruction", "pricingGroup");
         pricingG.getColumns().forEach(column -> column.setSortable(true));
         pricingG.setColumnReorderingAllowed(true);
         pricingG.setColumnResizeMode(ColumnResizeMode.ANIMATED);
@@ -202,11 +228,35 @@ public class CarForm extends VerticalLayout implements View {
     // Put all together
     public VerticalLayout buildCarForm() {
         VerticalLayout carForm = new VerticalLayout();
-        carForm.addComponents(carFormL, buildDetailsSection(), buildStatusSection(), buildHistorySection());
+        carForm.addComponents(carFormL, buildDetailsSection(), buildStatusSection(), buildHistorySection(), buildPricingSection());
 
-        // The binder
-        carBinder = new Binder(Car.class); //todo define fields
+        // Bindings
+        // For the car
+        carBinder.bind(modelTF, "model");
         carBinder.bind(plateTF, "plate");
+        carBinder.bind(vinNumberTF, "carVin");
+        carBinder.bind(carColorCB, "carColor");
+        carBinder.bind(firstRegistrationDF, "carFirstRegistrationDate");
+        carBinder.forField(lastMileageTF)
+                .withConverter(new CustomStringToIntegerConverter("Enter a number please."))
+                .bind(Car::getLastMileage, Car::setLastMileage);
+        carBinder.bind(firstBookingDF, "firstBooking");
+        carBinder.bind(lastBookingDF, "lastBooking");
+        carBinder.forField(carValueTF)
+                .withConverter(new CustomStringToBigDecimalConverter("Please enter a number."))
+                .bind(Car::getCarValueFromAdac, Car::setCarValueFromAdac);
+        carBinder.bind(mileageTypeRBG, "mileageType");
+        carBinder.bind(carFleetRBG, "carFleet");
+        carBinder.bind(nextTUV, "nextTUV");
+        carBinder.forField(nextServiceAtKm)
+                .withConverter(new CustomStringToIntegerConverter("Please enter a number."))
+                .bind(Car::getNextServiceAtKm, Car::setNextServiceAtKm);
+
+        carBinder.bind(statusCB, "carStatus");
+        carBinder.bind(locationCB, "currentLocation");
+
+        // todo For the car history - if we want
+        // todo For the pricing - in stage 2
 
         // Form buttons
         HorizontalLayout buttonsHL = new HorizontalLayout();
@@ -296,6 +346,12 @@ public class CarForm extends VerticalLayout implements View {
                     return;
                 }
             }
+
+            carNoteG.setItems(carNoteRepository.findDistinctByCarAndHistoryNote(carBinder.getBean(), false));
+            carHistoryNoteG.setItems(carNoteRepository.findDistinctByCarAndHistoryNote(carBinder.getBean(), true));
+            pricingG.setItems(priceListCarRepository.findDistinctByCar(carBinder.getBean()));
+
+
         }
         carBinder.setBean(car);
         // todo ??.focus();
@@ -307,8 +363,65 @@ public class CarForm extends VerticalLayout implements View {
         addComponent(new Label("Car not found"));
     }
 
-    // Helpers
+    // Mini - layouts with notes
+    // Event note form
+    public VerticalLayout buildCarNoteForm() {
+        VerticalLayout carNoteVL = new VerticalLayout();
+        carNoteVL.setCaption("Enter the note");
 
+        /**
+         * I do not allow to edit notes deliberately - too much a hassle, no real need to do it.
+         * If needed, I can get back to this form and implement editing.
+         */
+
+        // todo null newCarNote as adding another still works on the same instance
+//        moved down EventNote newEventNote = new EventNote();
+
+        // Fields
+        noteDateDF = new DateField("Note date");
+        noteTF = new TextField("Text");
+
+        HorizontalLayout fieldsHL = new HorizontalLayout(noteDateDF, noteTF);
+
+        // Separate binder
+        Binder<CarNote> carNoteBinder = new Binder<>(CarNote.class);
+        carNoteBinder.forField(noteDateDF).withConverter(new LocalDateToDateConverter()).bind(CarNote::getEnteredOn, CarNote::setEnteredOn);
+        carNoteBinder.bind(noteTF, "text");
+
+        CarNote newCarNote = new CarNote();
+        carNoteBinder.setBean(newCarNote);
+
+        // Buttons
+        Button cancelNote = new Button("Cancel");
+        cancelNote.setDescription("Your data will be lost!");
+        cancelNote.addClickListener(e -> {
+            this.carNotesVL.setVisible(false);
+            this.addNoteB.setVisible(true);
+            noteDateDF.clear();
+            noteTF.clear();
+        });
+
+        Button saveNote = new Button("Save");
+        saveNote.addClickListener(e -> {
+            carBinder.getBean().addCarNote(carNoteBinder.getBean());
+
+            this.carNotesVL.setVisible(false);
+            this.addNoteB.setVisible(true);
+            carRepository.save(carBinder.getBean());
+            noteDateDF.clear();
+            noteTF.clear();
+            carNoteG.setItems(carNoteRepository.findDistinctByCarAndHistoryNote(carBinder.getBean(), false));
+        });
+
+        HorizontalLayout documentButtonsHL = new HorizontalLayout(cancelNote, saveNote);
+
+        carNoteVL.addComponents(fieldsHL, documentButtonsHL);
+
+        carNoteVL.setVisible(false);
+        return carNoteVL;
+    }
+
+    // Helpers
     private Button deleteCarNote(CarNote carNote) {
         Button deleteCNButton = new Button(VaadinIcons.MINUS_CIRCLE);
         deleteCNButton.addStyleNames(ValoTheme.BUTTON_SMALL);

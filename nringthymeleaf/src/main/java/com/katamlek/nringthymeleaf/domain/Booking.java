@@ -64,7 +64,6 @@ public class Booking {
     @OneToMany(cascade = CascadeType.ALL,  mappedBy = "booking")
     private List<TemporaryPackageItem> temporaryPackageItemList = new ArrayList<>();
 
-
     public User getCreatedBy() {
         if (createdBy == null) {
             createdBy = new User();
@@ -128,6 +127,16 @@ public class Booking {
 //        }
 //    }
 
+    public List<TemporaryPackageItem> getTemporaryPackageItems() {
+        if (temporaryPackageItemList == null) {
+            temporaryPackageItemList = new ArrayList<>();
+        }
+        return temporaryPackageItemList;
+    }
+
+    public void setTemporaryPackageItems(List<TemporaryPackageItem> packageItems) {
+        this.temporaryPackageItemList = temporaryPackageItemList;
+    }
 
     public List<BookingPackageItem> getPackageItems() {
         if (packageItems == null) {
@@ -214,6 +223,12 @@ public class Booking {
             temporaryPackageItem.setBooking(null);
         }
     }
+
+    @Override
+    public String toString() {
+        return "Booking{" + "id=" + id + '}';
+    }
+
 }
 
 

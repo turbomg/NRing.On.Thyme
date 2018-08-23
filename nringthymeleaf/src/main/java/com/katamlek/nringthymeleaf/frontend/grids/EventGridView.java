@@ -4,6 +4,7 @@ import com.katamlek.nringthymeleaf.domain.EventType;
 import com.katamlek.nringthymeleaf.domain.LocationDefinition;
 import com.katamlek.nringthymeleaf.frontend.forms.EventForm;
 import com.katamlek.nringthymeleaf.frontend.navigation.NavigationManager;
+import com.katamlek.nringthymeleaf.frontend.views.WelcomeView;
 import com.katamlek.nringthymeleaf.repositories.EventRepository;
 import com.katamlek.nringthymeleaf.repositories.LocationDefinitionRepository;
 import com.vaadin.icons.VaadinIcons;
@@ -48,7 +49,7 @@ public class EventGridView extends VerticalLayout implements View {
         eventGrid.setItems(Lists.newArrayList(eventRepository.findAll()));
 
         // Setting visible colums according to specs
-        eventGrid.setColumns("eventName", "eventType", "eventTrack", "eventDate", "eventStartTime", "eventEndTime");
+        eventGrid.setColumns("eventName", "eventType", "eventTrack", "eventStartDateTime", "eventEndDateTime");
 
         eventGrid.addColumn(event -> {
             return "abc";
@@ -57,7 +58,7 @@ public class EventGridView extends VerticalLayout implements View {
         }).setCaption("Location").setId("location");
 
         // Setting column order
-        eventGrid.setColumnOrder("eventName", "eventType", "location", "eventTrack", "eventDate", "eventStartTime", "eventEndTime");
+        eventGrid.setColumnOrder("eventName", "eventType", "location", "eventTrack", "eventStartDateTime", "eventEndDateTime");
 
         // Set columns hideable, reordering etc.
         eventGrid.getColumns().forEach(column -> column.setSortable(true));
@@ -79,9 +80,10 @@ public class EventGridView extends VerticalLayout implements View {
 
         this.filter.setTextFilter("eventTrack", true, true);
 
-        this.filter.setDateFilter("eventDate", new SimpleDateFormat("HH:mm:ss dd.MM.yyyy"), true);
-        this.filter.setTextFilter("eventStartTime", true, true);
-        this.filter.setTextFilter("eventEndTime", true, true);
+        this.filter.setDateFilter("eventStartDateTime", new SimpleDateFormat("HH:mm dd.MM.yyyy"), true);
+        this.filter.setDateFilter("eventEndDateTime", new SimpleDateFormat("HH:mm dd.MM.yyyy"), true);
+        // this.filter.setTextFilter("eventEndTime", true, true);
+      //  this.filter.setTextFilter("eventEndDateTime", true, true);
 
 
         // Inline editor - turning off, way too dangerous
@@ -104,13 +106,18 @@ public class EventGridView extends VerticalLayout implements View {
         addEventBtn.addStyleNames(ValoTheme.BUTTON_BORDERLESS_COLORED);
         addEventBtn.setIcon(VaadinIcons.PLUS);
 
+        Button backToDashboard = new Button("Back to dashboard");
+        backToDashboard.addClickListener(e -> navigationManager.navigateTo(WelcomeView.class));
+        backToDashboard.addStyleNames(ValoTheme.BUTTON_BORDERLESS_COLORED);
+        backToDashboard.setIcon(VaadinIcons.DASHBOARD);
+
         Button clearAllFilters = new Button("Remove filters", e -> {
             filter.clearAllFilters();
         });
         clearAllFilters.setStyleName(ValoTheme.BUTTON_BORDERLESS);
         clearAllFilters.setIcon(VaadinIcons.ERASER);
 
-        buttonsEventHL.addComponents(addEventBtn, clearAllFilters);
+        buttonsEventHL.addComponents(addEventBtn, clearAllFilters, backToDashboard);
 
         return buttonsEventHL;
     }

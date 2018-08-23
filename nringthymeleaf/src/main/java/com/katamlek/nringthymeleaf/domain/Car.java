@@ -4,6 +4,8 @@ import lombok.Data;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
+import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -23,12 +25,12 @@ public class Car {
     private String plate;
 
     private CarColor carColor;
-    private Long lastMileage;
+    private Integer lastMileage;
 
-    @Temporal(TemporalType.TIMESTAMP)
+  //  @Temporal(TemporalType.TIMESTAMP)
     private Date firstBooking;
 
-    @Temporal(TemporalType.TIMESTAMP)
+  //  @Temporal(TemporalType.TIMESTAMP)
     private Date lastBooking;
 
     private MileageType mileageType;
@@ -38,7 +40,7 @@ public class Car {
     @Temporal(TemporalType.DATE)
     private Date nextTUV;
 
-    private Long nextServiceAtKm;
+    private Integer nextServiceAtKm;
 
     @OneToOne
     private LocationDefinition currentLocation;
@@ -47,7 +49,7 @@ public class Car {
     private boolean currentlyInUse;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "car")
-    private List<CarNote> carNotes;
+    private List<CarNote> carNotes = new ArrayList<>();
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "car")
     private List<CarNote> carHistory;
@@ -58,6 +60,41 @@ public class Car {
     @OneToOne
     private BookingPackageItemCar bookingPackageItemCar;
 
+    @OneToOne
+    private TemporaryPackageItem temporaryPackageItem;
+
     private boolean isUnderEditing;
+
+    private String carVin;
+    private Date carFirstRegistrationDate;
+    private BigDecimal carValueFromAdac;
+
+    // Overriding some Lombok defaults
+
+    public List<CarNote> getCarNotes() {
+        if (carNotes == null) {
+            carNotes = new ArrayList<>();
+        }
+        return carNotes;
+    }
+
+    public void setCarNotes(List<CarNote> carNotes) {
+        this.carNotes = carNotes;
+    }
+
+
+    public void addCarNote(CarNote carNote) {
+        if (carNote != null) {
+            carNote.setCar(this);
+            this.carNotes.add(carNote);
+        }
+    }
+
+    public void removeCarNote(CarNote carNote) {
+        if (carNotes != null && this.carNotes.contains(carNote)) {
+            this.carNotes.remove(carNote);
+            carNote.setCar(null);
+        }
+    }
 
 }

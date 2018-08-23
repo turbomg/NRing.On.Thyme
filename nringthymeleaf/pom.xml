@@ -23,7 +23,8 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <java.version>1.8</java.version>
         <vaadin.version>8.4.1</vaadin.version>
- <!--       <vaadin.widgetset.mode>cdn</vaadin.widgetset.mode>  -->
+        <vaadin.plugin.version>8.3.0</vaadin.plugin.version>
+        <!--       <vaadin.widgetset.mode>cdn</vaadin.widgetset.mode>  -->
     </properties>
 
     <dependencies>
@@ -37,14 +38,32 @@
         </dependency>
 
         <dependency>
+            <groupId>uk.com.robust-it</groupId>
+            <artifactId>cloning</artifactId>
+            <version>1.9.10</version>
+        </dependency>
+
+        <dependency>
+            <groupId>net.sf.dozer</groupId>
+            <artifactId>dozer</artifactId>
+            <version>5.4.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-themes</artifactId>
+            <version>${vaadin.version}</version>
+        </dependency>
+
+        <dependency>
             <groupId>org.vaadin.blackbluegl</groupId>
             <artifactId>calendar-component</artifactId>
             <version>2.0-BETA4</version>
         </dependency>
 
         <dependency>
-        <groupId>org.projectlombok</groupId>
-        <artifactId>lombok</artifactId>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
         </dependency>
 
         <dependency>
@@ -125,6 +144,41 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
             </plugin>
+
+            <plugin>
+                <groupId>com.vaadin</groupId>
+                <artifactId>vaadin-maven-plugin</artifactId>
+                <!-- dalam latest, zapytac pawla czy ok -->
+                <version>${vaadin.plugin.version}</version>
+                <!--
+                <configuration>
+                    <widgetsetMode>fetch</widgetsetMode>
+                </configuration>
+                -->
+                <configuration>
+                    <webappDirectory>${basedir}/target/classes/VAADIN/widgetsets</webappDirectory>
+                    <draftCompile>false</draftCompile>
+                    <compileReport>false</compileReport>
+                    <style>OBF</style>
+                    <strict>true</strict>
+                </configuration>
+                <executions>
+                    <!-- You are free to mark this as permanently ignored in Eclipse -->
+                    <execution>
+                        <configuration>
+                            <!-- if you don't specify any modules, the plugin will find them -->
+                        </configuration>
+                        <goals>
+                            <goal>resources</goal>
+                            <goal>update-widgetset</goal>
+                            <goal>compile-theme</goal>
+                            <goal>compile</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+
         </plugins>
     </build>
 

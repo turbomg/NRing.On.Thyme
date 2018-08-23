@@ -26,4 +26,7 @@ public class LocationDefinition {
 
     @OneToOne
     private BookingPackageItem bookingPackageItem;
+
+    @OneToOne
+    private TemporaryPackageItem temporaryPackageItem;
 }

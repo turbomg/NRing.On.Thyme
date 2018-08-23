@@ -1,0 +1,7 @@
+<module>
+    <inherits name="org.vaadin.gridutil.WidgetSet" />
+
+    <inherits name="org.vaadin.addon.calendar.WidgetSet" />
+
+    <inherits name="com.vaadin.DefaultWidgetSet" />
+</module>

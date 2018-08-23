@@ -3,6 +3,7 @@ package com.katamlek.nringthymeleaf.frontend.grids;
 import com.katamlek.nringthymeleaf.domain.*;
 import com.katamlek.nringthymeleaf.frontend.forms.CarForm;
 import com.katamlek.nringthymeleaf.frontend.navigation.NavigationManager;
+import com.katamlek.nringthymeleaf.frontend.views.WelcomeView;
 import com.katamlek.nringthymeleaf.repositories.CarRepository;
 import com.katamlek.nringthymeleaf.repositories.LocationDefinitionRepository;
 import com.vaadin.icons.VaadinIcons;
@@ -118,7 +119,12 @@ public class CarGridView extends VerticalLayout implements View {
         clearAllFilters.setStyleName(ValoTheme.BUTTON_BORDERLESS);
         clearAllFilters.setIcon(VaadinIcons.ERASER);
 
-        buttonsCarHL.addComponents(addCarBtn, clearAllFilters);
+        Button backToDashboard = new Button("Back to dashboard");
+        backToDashboard.addClickListener(e -> navigationManager.navigateTo(WelcomeView.class));
+        backToDashboard.addStyleNames(ValoTheme.BUTTON_BORDERLESS_COLORED);
+        backToDashboard.setIcon(VaadinIcons.DASHBOARD);
+
+        buttonsCarHL.addComponents(addCarBtn, clearAllFilters, backToDashboard);
 
         return buttonsCarHL;
     }

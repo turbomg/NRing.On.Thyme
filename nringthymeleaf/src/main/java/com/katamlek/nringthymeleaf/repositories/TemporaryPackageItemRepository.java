@@ -10,4 +10,6 @@ import java.util.List;
 @Repository
 public interface TemporaryPackageItemRepository extends CrudRepository<TemporaryPackageItem, Long> {
     public List<TemporaryPackageItem> findByBooking(Booking booking);
+
+    // public List<TemporaryPackageItem> findEventRelatedItemsOnly() {}
 }

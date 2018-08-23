@@ -1,16 +1,14 @@
 package com.katamlek.nringthymeleaf.frontend.views;
 
-import com.katamlek.nringthymeleaf.domain.BookingPackageItem;
 import com.katamlek.nringthymeleaf.domain.BookingPackageItemCar;
-import com.katamlek.nringthymeleaf.domain.Car;
 import com.katamlek.nringthymeleaf.frontend.forms.BookingForm;
-import com.katamlek.nringthymeleaf.frontend.forms.CustomerForm;
 import com.katamlek.nringthymeleaf.frontend.forms.EventForm;
 import com.katamlek.nringthymeleaf.frontend.navigation.NavigationManager;
 import com.katamlek.nringthymeleaf.repositories.EventRepository;
 import com.katamlek.nringthymeleaf.repositories.UserRepository;
 import com.vaadin.icons.VaadinIcons;
 import com.vaadin.navigator.View;
+import com.vaadin.server.FileResource;
 import com.vaadin.spring.annotation.SpringView;
 import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.*;
@@ -18,6 +16,7 @@ import com.vaadin.ui.themes.ValoTheme;
 import org.apache.commons.lang3.time.DateUtils;
 import org.assertj.core.util.Lists;
 
+import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -50,9 +49,9 @@ public class WelcomeView extends VerticalLayout implements View {
 
         // Grids
         Grid<com.katamlek.nringthymeleaf.domain.Event> eventsToday = new Grid<>(com.katamlek.nringthymeleaf.domain.Event.class);
-        eventsToday.setItems(Lists.newArrayList(eventRepository.findByEventDate(today)));
+        eventsToday.setItems(Lists.newArrayList(eventRepository.findByEventStartDateTime(today)));
         Grid<com.katamlek.nringthymeleaf.domain.Event> eventsTomorrow = new Grid<>(com.katamlek.nringthymeleaf.domain.Event.class);
-        eventsTomorrow.setItems(Lists.newArrayList(eventRepository.findByEventDate(tomorrow)));
+        eventsTomorrow.setItems(Lists.newArrayList(eventRepository.findByEventStartDateTime(tomorrow)));
 
         eventsToday.addItemClickListener(event -> {
             if (event.getMouseEventDetails().isDoubleClick()) {
@@ -61,14 +60,14 @@ public class WelcomeView extends VerticalLayout implements View {
         });
 
         eventsToday.setHeaderVisible(false);
-        eventsToday.setColumns("eventName", "eventDate", "eventStartTime", "eventEndTime");
+        eventsToday.setColumns("eventName", "eventStartDateTime", "eventEndDateTime");
         eventsToday.addComponentColumn(this::buildCountTodayColumn);
 
         eventsToday.setHeightByRows(4);
         eventsToday.setCaption("Today " + (dateFormat.format(today)));
 
         eventsTomorrow.setHeaderVisible(false);
-        eventsTomorrow.setColumns("eventName", "eventDate", "eventStartTime", "eventEndTime");
+        eventsTomorrow.setColumns("eventName", "eventStartDateTime", "eventEndDateTime");
         eventsTomorrow.addComponentColumn(this::buildCountTomorrowColumn);
 
         eventsTomorrow.addItemClickListener(event -> {
@@ -119,21 +118,38 @@ public class WelcomeView extends VerticalLayout implements View {
         addBookingBtn.addStyleNames(ValoTheme.BUTTON_BORDERLESS, ValoTheme.BUTTON_LARGE, ValoTheme.BUTTON_ICON_ALIGN_TOP);
 
         Button addCustomerBtn = new Button("Add customer");
-        addCustomerBtn.addClickListener(e -> navigationManager.navigateTo(CustomerForm.class));
+        addCustomerBtn.addClickListener(e -> Notification.show("Will do this for you in the 2nd stage of the project."));
+        // addCustomerBtn.addClickListener(e -> navigationManager.navigateTo(CustomerForm.class));
         addCustomerBtn.addStyleNames(ValoTheme.BUTTON_BORDERLESS, ValoTheme.BUTTON_LARGE, ValoTheme.BUTTON_ICON_ALIGN_TOP);
         addCustomerBtn.setIcon(VaadinIcons.USER_STAR);
 
-        // todo - all of the below
+        // todo
         Button printIndemnityForm = new Button("Print blank idemnity form");
-        printIndemnityForm.addClickListener(e -> Notification.show("Can't do this for you yet."));
+        // printIndemnityForm.addClickListener(e -> Notification.show("Can't do this for you yet."));
         printIndemnityForm.addStyleNames(ValoTheme.BUTTON_BORDERLESS, ValoTheme.BUTTON_LARGE, ValoTheme.BUTTON_ICON_ALIGN_TOP);
         printIndemnityForm.setIcon(VaadinIcons.PRINT);
+        printIndemnityForm.addClickListener(e -> {
+            File pdfFile = new File("/Users/admin/work/projekty/NRingThyme/nringthymeleaf/src/main/resources/files/Indemnity GER 2018.pdf");
+            Embedded pdf = new Embedded(null, new FileResource(pdfFile));
+            // pdf.setMimeType("application/pdf");
+            // pdf.setType(Embedded.TYPE_BROWSER);
+            pdf.setSizeFull();
 
+            Window window = new Window("Print form");
+            VerticalLayout printVL = new VerticalLayout();
+            printVL.addComponent(pdf);
+
+            window.setContent(printVL);
+            UI.getCurrent().addWindow(window);
+        });
+
+        // not needed - stored in the system
         Button printMileageSheet = new Button("Print mileage sheet");
         printMileageSheet.addClickListener(e -> Notification.show("Can't do this for you yet."));
         printMileageSheet.addStyleNames(ValoTheme.BUTTON_BORDERLESS, ValoTheme.BUTTON_LARGE, ValoTheme.BUTTON_ICON_ALIGN_TOP);
         printMileageSheet.setIcon(VaadinIcons.CALC);
 
+        // not needed - stored elsewhere
         Button printCarChecklist = new Button("Print car checklist");
         printCarChecklist.addClickListener(e -> Notification.show("Can't do this for you yet."));
         printCarChecklist.addStyleNames(ValoTheme.BUTTON_BORDERLESS, ValoTheme.BUTTON_LARGE, ValoTheme.BUTTON_ICON_ALIGN_TOP);

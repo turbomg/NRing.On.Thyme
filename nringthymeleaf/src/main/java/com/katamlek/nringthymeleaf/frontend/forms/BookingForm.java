@@ -2,13 +2,14 @@ package com.katamlek.nringthymeleaf.frontend.forms;
 
 import com.katamlek.nringthymeleaf.domain.*;
 import com.katamlek.nringthymeleaf.frontend.grids.BookingGridView;
-import com.katamlek.nringthymeleaf.frontend.grids.CustomerGridView;
 import com.katamlek.nringthymeleaf.frontend.navigation.NavigationManager;
 import com.katamlek.nringthymeleaf.repositories.*;
 import com.katamlek.nringthymeleaf.vaadinutils.CustomStringToBigDecimalConverter;
 import com.katamlek.nringthymeleaf.vaadinutils.CustomStringToIntegerConverter;
+import com.rits.cloning.Cloner;
 import com.vaadin.data.Binder;
 import com.vaadin.data.HasValue;
+import com.vaadin.data.converter.LocalDateTimeToDateConverter;
 import com.vaadin.data.converter.LocalDateToDateConverter;
 import com.vaadin.icons.VaadinIcons;
 import com.vaadin.navigator.View;
@@ -19,11 +20,16 @@ import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.*;
 import com.vaadin.ui.themes.ValoTheme;
 import org.assertj.core.util.Lists;
+import org.dozer.DozerBeanMapper;
+import org.dozer.Mapper;
 import org.springframework.beans.BeanUtils;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.ZoneOffset;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * Builds booking form for already registered booking or from scratch.
@@ -43,8 +49,10 @@ public class BookingForm extends VerticalLayout implements View {
     private BookingNoteRepository bookingNoteRepository;
     private BookingPackageItemCarRepository bookingPackageItemCarRepository;
     private TemporaryPackageItemRepository temporaryPackageItemRepository;
+    private CarRepository carRepository;
+    private EventRepository eventRepository;
 
-    public BookingForm(BookingRepository bookingRepository, NavigationManager navigationManager, BookingPackageItemRepository bookingPackageItemRepository, BookingPaymentRepository bookingPaymentRepository, BookingDocumentRepository bookingDocumentRepository, BookingNoteRepository bookingNoteRepository, BookingPackageItemCarRepository bookingPackageItemCarRepository, CustomerRepository customerRepository, UserRepository userRepository, TemporaryPackageItemRepository temporaryPackageItemRepository) {
+    public BookingForm(BookingRepository bookingRepository, NavigationManager navigationManager, BookingPackageItemRepository bookingPackageItemRepository, BookingPaymentRepository bookingPaymentRepository, BookingDocumentRepository bookingDocumentRepository, BookingNoteRepository bookingNoteRepository, BookingPackageItemCarRepository bookingPackageItemCarRepository, CustomerRepository customerRepository, UserRepository userRepository, TemporaryPackageItemRepository temporaryPackageItemRepository, CarRepository carRepository, EventRepository eventRepository) {
         this.bookingRepository = bookingRepository;
         this.userRepository = userRepository;
         this.navigationManager = navigationManager;
@@ -55,6 +63,8 @@ public class BookingForm extends VerticalLayout implements View {
         this.bookingPackageItemCarRepository = bookingPackageItemCarRepository;
         this.customerRepository = customerRepository;
         this.temporaryPackageItemRepository = temporaryPackageItemRepository;
+        this.carRepository = carRepository;
+        this.eventRepository = eventRepository;
         addComponent(buildBookingForm());
         setMargin(false);
     }
@@ -85,7 +95,6 @@ public class BookingForm extends VerticalLayout implements View {
     private ComboBox<BookingStatus> bookingStatusCB;
 
     // Drivers
-
     private Grid<Customer> driverG;
     private Button findDriverB;
     private Button addNewDriverB;
@@ -93,6 +102,8 @@ public class BookingForm extends VerticalLayout implements View {
     // Package
     private Grid<TemporaryPackageItem> packageG;
     private Button addPackageItemB;
+    private Button addCarChangeB;
+    RadioButtonGroup<String> choseTypeRBG;
 
     // Payments
     private Grid<BookingPayment> paymentG;
@@ -118,7 +129,7 @@ public class BookingForm extends VerticalLayout implements View {
     private TextField paymentAmountTF;
     private TextField paymentRemarksTF;
 
-    // customer
+    // customer == driver
     private VerticalLayout customersVL = buildCustomerForm();
     private ComboBox<Customer> customerPickCB;
     private TextField customerId;
@@ -127,17 +138,50 @@ public class BookingForm extends VerticalLayout implements View {
     private TextField customerGroup;
     private TextField customerGeneralInformation;
 
-    private Binder<Customer> customerBinder; // just sets the relationship between booking and customer
+    // package item // todo exchange temp solution to target one or expand functionality to meet the target one
+    // for an extra
+    private ComboBox<com.katamlek.nringthymeleaf.domain.Event> extraEventCB;
+    private DateTimeField extraItemDateTimeStartDTF;
+    private DateTimeField extraItemDateTimeEndDTF;
+    // private TextField itemTimeTF;
+    private TextField extraItemDescriptionTF;
+    private TextField extraItemPriceTF;
+    private TextField extraItemUOMTF;
+    private TextField extraItemQuantityTF;
+    private TextField extraItemTotalTF;
+    private CheckBox extraIsItemCancelledCB;
+    private Integer countItemForCaledarStatistics; // the number to be summed for calendar and stats
 
-    // package item // todo exchange temp solution to target one
-    private VerticalLayout tempPackageItemVL = buildTempPackageItemForm();
-    private DateField itemDateDF;
-    private TextField itemTimeTF;
-    private TextField itemDescriptionTF;
-    private TextField itemPriceTF;
-    private TextField itemQuantityTF;
-    private TextField itemTotalTF;
-    private CheckBox isItemCancelledCB;
+    private VerticalLayout extrasPackageItemVL = buildExtraItemLayout();
+
+    // for a car
+    private ComboBox<com.katamlek.nringthymeleaf.domain.Event> carEventCB;
+    private DateTimeField carItemDateTimeStartDTF;
+    private DateTimeField carItemDateTimeEndDTF;
+    // private TextField itemTimeTF;
+    private TextField carItemDescriptionTF;
+    private TextField carItemPriceTF;
+    private TextField carItemUOMTF;
+    private TextField carItemQuantityTF;
+    private TextField carItemTotalTF;
+    private CheckBox carIsItemCancelledCB;
+
+    private ComboBox<Car> carSelectionCB;
+    private ComboBox<CarStatus> carStatusSelectionCB;
+    private ComboBox<MileageType> carMileageTypeCB;
+    private TextField carKMOut;
+    private TextField carKMIn;
+    private TextField carKMTotal;
+    private TextField carMechanicNotes;
+    private Integer countCarForCaledarStatistics; // the number to be summed for calendar and stats
+
+    private VerticalLayout carPackageItemVL = buildCarItemLayout();
+
+    // car change
+    private VerticalLayout carChangeVL = buildCarChangeLayout();
+    private ComboBox<TemporaryPackageItem> carToChangeCB;
+    private ComboBox<CarStatus> oldCarStatus;
+    private Button proceedB;
 
     // booking document
     private VerticalLayout bookingDocumentVL = buildBookingDocumentForm();
@@ -147,6 +191,8 @@ public class BookingForm extends VerticalLayout implements View {
 
     // Binder
     private Binder<Booking> bookingBinder;
+    private Binder<TemporaryPackageItem> carItemBinder;
+    private Binder<TemporaryPackageItem> extraItemBinder;
 
     // Methods that construct sections
     // Details
@@ -229,6 +275,7 @@ public class BookingForm extends VerticalLayout implements View {
         cancelB.addClickListener(e -> {
             bookingBinder.getBean().setBookingStatus(BookingStatus.CANCELLED);
             bookingRepository.save(bookingBinder.getBean());
+            Notification.show("Booking was cancelled.");
         });
 
         cancelB.addStyleNames(ValoTheme.BUTTON_BORDERLESS, ValoTheme.BUTTON_LARGE, ValoTheme.BUTTON_ICON_ALIGN_TOP);
@@ -238,10 +285,16 @@ public class BookingForm extends VerticalLayout implements View {
         duplicateB.addStyleNames(ValoTheme.BUTTON_BORDERLESS, ValoTheme.BUTTON_LARGE, ValoTheme.BUTTON_ICON_ALIGN_TOP);
         duplicateB.setIcon(VaadinIcons.COPY);
         duplicateB.addClickListener(e -> {
-            Booking duplicateBooking = new Booking();
-            BeanUtils.copyProperties(bookingBinder.getBean(), duplicateBooking);
-            bookingRepository.save(duplicateBooking);
-            navigationManager.navigateTo(BookingForm.class, duplicateBooking.getId());
+//            Cloner cloner = new Cloner();
+//            Booking clonedBooking = cloner.deepClone(bookingBinder.getBean());
+//            bookingBinder.setBean(clonedBooking);
+//            clonedBooking.setId(null);
+
+//            Mapper mapper = new DozerBeanMapper();
+//            Booking destinationBooking =
+//                    mapper.map(bookingBinder.getBean(), Booking.class);
+//
+//            navigationManager.navigateTo(BookingForm.class, destinationBooking.getId());
         });
 
         // HL with user and date and something else
@@ -286,12 +339,12 @@ public class BookingForm extends VerticalLayout implements View {
 
         driverG.setHeightByRows(4);
 
-        findDriverB = new Button("Search for driver");
-        findDriverB.addStyleNames(ValoTheme.BUTTON_BORDERLESS, ValoTheme.BUTTON_SMALL);
-        findDriverB.addClickListener(e -> {
-            navigationManager.navigateTo(CustomerGridView.class);
-        }); //todo - how to move data from this list to the form?
-        findDriverB.setIcon(VaadinIcons.SEARCH);
+//        findDriverB = new Button("Search for driver");
+//        findDriverB.addStyleNames(ValoTheme.BUTTON_BORDERLESS, ValoTheme.BUTTON_SMALL);
+//        findDriverB.addClickListener(e -> {
+//            navigationManager.navigateTo(CustomerGridView.class);
+//        }); //todo - how to move data from this list to the form?
+//        findDriverB.setIcon(VaadinIcons.SEARCH);
 
         addNewDriverB = new Button("Add driver");
 
@@ -303,7 +356,7 @@ public class BookingForm extends VerticalLayout implements View {
         addNewDriverB.addStyleNames(ValoTheme.BUTTON_BORDERLESS_COLORED, ValoTheme.BUTTON_SMALL);
         addNewDriverB.setIcon(VaadinIcons.PLUS);
 
-        HorizontalLayout buttonsHL = new HorizontalLayout(addNewDriverB, findDriverB);
+        HorizontalLayout buttonsHL = new HorizontalLayout(addNewDriverB);
 
         driversVL.addComponents(driverG, buttonsHL);
         driversVL.setCaption("Driver details");
@@ -312,13 +365,18 @@ public class BookingForm extends VerticalLayout implements View {
 
     // Package
     public VerticalLayout buildPackageSection() {
+
+
+        // todo when placing a car in the item, update the lastBooking in car
+        // todo when returning the car (setting booking to CLOSED) update the lastRecordedMileage in Car
+        // todo prefill car fields with car data from Car repo
+        // todo remember to implement car change
+
         VerticalLayout packageVL = new VerticalLayout();
         packageVL.setMargin(false);
 
         packageG = new Grid<>(TemporaryPackageItem.class);
-        packageG.setColumns("itemDate", "startTime", "itemDescription", "itemUnitPrice", "itemQuantity", "itemTotal", "cancelled");
-
-//        packageG.setItems(bookingPackageItemRepository.findDistinctByBooking(bookingBinder.getBean()));
+        packageG.setColumns("startDateTime", "itemDescription", "itemUnitPrice", "itemQuantity", "itemTotal", "cancelled");
 
         packageG.getColumns().forEach(column -> column.setSortable(true));
         packageG.setColumnReorderingAllowed(true);
@@ -332,30 +390,263 @@ public class BookingForm extends VerticalLayout implements View {
 
         packageG.addItemClickListener(event -> {
             if (event.getMouseEventDetails().isDoubleClick()) {
-                navigationManager.navigateTo(BookingPackageItemForm.class, event.getItem().getId());
+                //todo - set visible what needs to be visible
             }
         });
 
         packageG.setHeightByRows(4);
 
-        packageG.setColumnOrder("itemDate", "startTime", "itemDescription", "itemUnitPrice", "itemQuantity", "itemTotal", "cancelled");
+        packageG.setColumnOrder("startDateTime", "itemDescription", "itemUnitPrice", "itemQuantity", "itemTotal", "cancelled");
         packageG.addStyleNames(ValoTheme.TABLE_COMPACT);
 
-//        Button addItem = new Button("Add item");
-//        addItem.addClickListener(e -> navigationManager.navigateTo(BookingPackageItemForm.class));
-//        addItem.addStyleNames(ValoTheme.BUTTON_BORDERLESS_COLORED, ValoTheme.BUTTON_SMALL);
-//        addItem.setIcon(VaadinIcons.PLUS);
+        packageVL.addComponents(packageG);
+        packageVL.setCaption("Package details");
 
         addPackageItemB = new Button("Add item");
-        addPackageItemB.addClickListener(e -> {
-            tempPackageItemVL.setVisible(true);
-            addPackageItemB.setVisible(false);
+        choseTypeRBG = new RadioButtonGroup<>("What kind of item do you want to add?");
+        choseTypeRBG.setItems("I want to add a car-related item.", "I want to add some extra.");
+
+        choseTypeRBG.addSelectionListener(c -> {
+
+            if (choseTypeRBG.getValue().equals("I want to add a car-related item.")) {
+                extrasPackageItemVL.setVisible(false);
+                carPackageItemVL.setVisible(true);
+                choseTypeRBG.setVisible(false);
+            } else {
+                carPackageItemVL.setVisible(false);
+                extrasPackageItemVL.setVisible(true);
+                choseTypeRBG.setVisible(false);
+            }
         });
 
-        packageVL.addComponents(packageG, addPackageItemB);
-        packageVL.setCaption("Package details");
+        packageVL.addComponents(choseTypeRBG);
+        choseTypeRBG.setVisible(false);
+
+
+        addCarChangeB = new Button("Add car change");
+        addCarChangeB.addClickListener(e -> carChangeVL.setVisible(true));
+
+        addPackageItemB.addClickListener(e -> {
+            choseTypeRBG.setVisible(true);
+            addPackageItemB.setVisible(false);
+            addCarChangeB.setVisible(false);
+        });
+
+        HorizontalLayout packageItemButtonsHL = new HorizontalLayout(addPackageItemB, addCarChangeB);
+
+        packageVL.addComponents(packageItemButtonsHL);
+
+        packageVL.addComponents(extrasPackageItemVL, carPackageItemVL, carChangeVL);
+
         return packageVL;
     }
+
+    // Mini layouts for an extra and a car package item
+
+    public VerticalLayout buildExtraItemLayout() {
+
+        TemporaryPackageItem extraItem = new TemporaryPackageItem();
+
+        VerticalLayout extraVL = new VerticalLayout();
+        extraVL.setCaption("Enter the extra data");
+
+        extraEventCB = new ComboBox<>("Event");
+        extraEventCB.setItemCaptionGenerator(e -> e.getEventName() + " " + e.getEventStartDateTime());
+
+        extraItemDateTimeStartDTF = new DateTimeField("Start date and time");
+        extraItemDateTimeEndDTF = new DateTimeField("End date and time");
+        extraItemDescriptionTF = new TextField("Item description"); // for now entered manually, //todo import from price list or pick the entire item from price list
+        extraItemPriceTF = new TextField("Unit price");
+        extraItemUOMTF = new TextField("UOM");
+        extraItemQuantityTF = new TextField("Quantity");
+        extraItemTotalTF = new TextField("Total");
+        extraIsItemCancelledCB = new CheckBox("This item is cancelled");
+
+        extraIsItemCancelledCB.addValueChangeListener(e -> {
+            if (extraIsItemCancelledCB.getValue().equals(1)) {
+                extraItemBinder.getBean().setCancelled(true);
+                // todo update the item on the booking - remove from collection, add to collection??? or is the cascade enough?
+                bookingRepository.save(bookingBinder.getBean());
+            }
+        });
+
+        HorizontalLayout basicInformationHL = new HorizontalLayout(extraItemDateTimeStartDTF, extraItemDateTimeEndDTF, extraItemDescriptionTF);
+        HorizontalLayout priceInformationHL = new HorizontalLayout(extraItemPriceTF, extraItemUOMTF, extraItemQuantityTF, extraItemTotalTF);
+
+        // bindings
+        extraItemBinder = new Binder<>(TemporaryPackageItem.class);
+        extraItemBinder.bind(extraEventCB, "event");
+        extraItemBinder.forField(extraItemDateTimeStartDTF).withConverter(new LocalDateTimeToDateConverter(ZoneOffset.systemDefault())).bind(TemporaryPackageItem::getStartDateTime, TemporaryPackageItem::setStartDateTime);
+        extraItemBinder.forField(extraItemDateTimeEndDTF).withConverter(new LocalDateTimeToDateConverter(ZoneOffset.systemDefault())).bind(TemporaryPackageItem::getEndDateTime, TemporaryPackageItem::setEndDateTime);
+        extraItemBinder.bind(extraItemDescriptionTF, "itemDescription");
+        extraItemBinder.forField(extraItemPriceTF)
+        .withConverter(new CustomStringToBigDecimalConverter("Enter a number please."))
+        .bind(TemporaryPackageItem::getItemUnitPrice, TemporaryPackageItem::setItemUnitPrice);
+        extraItemBinder.bind(extraItemUOMTF, "unitOfMeasure");
+        extraItemBinder.forField(extraItemQuantityTF)
+                .withConverter(new CustomStringToIntegerConverter("Enter a number please."))
+                .bind(TemporaryPackageItem::getItemQuantity, TemporaryPackageItem::setItemQuantity);
+
+        // total is set on save()
+        // cancelled is bound already
+
+        TemporaryPackageItem newExtra = new TemporaryPackageItem();
+        extraItemBinder.setBean(newExtra);
+
+        // save and cancel operation
+        Button cancelItem = new Button("Cancel");
+        cancelItem.setDescription("Your data will be lost!");
+        cancelItem.addClickListener(e -> {
+            this.extrasPackageItemVL.setVisible(false);
+            this.addPackageItemB.setVisible(true);
+            this.choseTypeRBG.setVisible(false);
+            this.addCarChangeB.setVisible(true);
+            //todo clear fields or null the object
+        });
+
+        Button saveItem = new Button("Save");
+        saveItem.addClickListener(e -> {
+            //todo null
+            extraItemBinder.getBean().setStatistiscCount(0);
+            extraItemBinder.getBean().setItemTotal(extraItemBinder.getBean().getItemUnitPrice().multiply(BigDecimal.valueOf(extraItemBinder.getBean().getItemQuantity())));
+            bookingBinder.getBean().addTemporaryPackageItem(extraItemBinder.getBean());
+            this.extrasPackageItemVL.setVisible(false);
+            this.addPackageItemB.setVisible(true);
+            bookingRepository.save(bookingBinder.getBean());
+            this.packageG.setItems(temporaryPackageItemRepository.findByBooking(bookingBinder.getBean()));
+            //todo clear fields or null the object
+        });
+
+        HorizontalLayout buttonsHL = new HorizontalLayout(cancelItem, saveItem);
+
+        extraVL.setVisible(false);
+
+        // put the layout together
+        extraVL.addComponents(extraEventCB, extraIsItemCancelledCB, basicInformationHL, priceInformationHL, buttonsHL);
+
+        return extraVL;
+    }
+
+    public VerticalLayout buildCarItemLayout() {
+        VerticalLayout carVL = new VerticalLayout();
+        carVL.setCaption("Enter the car data");
+
+        carEventCB = new ComboBox<>("Event");
+
+        carItemDateTimeStartDTF = new DateTimeField("Start date and time");
+        carItemDateTimeEndDTF = new DateTimeField("End date and time");
+        carItemDescriptionTF = new TextField("Car description"); // plate, model //todo
+        carItemPriceTF = new TextField("Unit price");
+        carItemUOMTF = new TextField("UOM");
+        carItemQuantityTF = new TextField("Quantity");
+        carItemTotalTF = new TextField("Total");
+        carIsItemCancelledCB = new CheckBox("This item is cancelled");
+        carIsItemCancelledCB.addValueChangeListener(e -> {
+            if (carIsItemCancelledCB.getValue().equals(1)) {
+                carItemBinder.getBean().setCancelled(true);
+                // todo update the item on the booking - remove from collection, add to collection??? or is the cascade enough?
+                bookingRepository.save(bookingBinder.getBean());
+            }
+        });
+
+        carSelectionCB = new ComboBox<>("Pick the car");
+        carSelectionCB.setItemCaptionGenerator(e -> e.getModel() + " " + e.getPlate());
+
+        carStatusSelectionCB = new ComboBox<>("Car status");
+        carStatusSelectionCB.setItems(CarStatus.values());
+
+        carMileageTypeCB = new ComboBox<>("Mileage type");
+        carMileageTypeCB.setItems(MileageType.values());
+
+        carKMOut = new TextField("Km out"); // todo set the basis of the current value in the car record
+        carKMIn = new TextField("Km in");
+        carKMTotal = new TextField("Km total"); // todo compute
+        carMechanicNotes = new TextField("Mechanic notes");
+
+
+        HorizontalLayout carData = new HorizontalLayout(carSelectionCB, carStatusSelectionCB);
+
+        HorizontalLayout generalInformationHL = new HorizontalLayout(carItemDateTimeStartDTF, carItemDateTimeEndDTF, carItemDateTimeEndDTF);
+        HorizontalLayout pricesHL = new HorizontalLayout(carItemPriceTF, carItemUOMTF, carItemQuantityTF, carItemTotalTF);
+
+        HorizontalLayout mileageHL = new HorizontalLayout(carMileageTypeCB, carKMOut, carKMIn, carKMTotal);
+
+        // bindings
+        carItemBinder = new Binder<>(TemporaryPackageItem.class);
+        carItemBinder.bind(carEventCB, "event");
+        carItemBinder.bind(carItemDateTimeStartDTF, "startDateTime");
+        carItemBinder.bind(carItemDateTimeEndDTF, "endDateTime");
+        carItemBinder.bind(carItemDescriptionTF, "itemDescription");
+        carItemBinder.forField(carItemPriceTF)
+                .withConverter(new CustomStringToBigDecimalConverter("Enter a number please."))
+                .bind(TemporaryPackageItem::getItemUnitPrice, TemporaryPackageItem::setItemUnitPrice);
+        carItemBinder.bind(carItemUOMTF, "unitOfMeasure");
+        carItemBinder.forField(carItemQuantityTF)
+                .withConverter(new CustomStringToIntegerConverter("Enter a number please."))
+                .bind(TemporaryPackageItem::getItemQuantity, TemporaryPackageItem::setItemQuantity);
+
+        // total is set on save()
+        // cancelled is bound already
+
+        TemporaryPackageItem newCar = new TemporaryPackageItem();
+        carItemBinder.setBean(newCar);
+
+        // save and cancel buttons
+        Button cancelItem = new Button("Cancel");
+        cancelItem.setDescription("Your data will be lost!");
+        cancelItem.addClickListener(e -> {
+            this.carPackageItemVL.setVisible(false);
+            this.addPackageItemB.setVisible(true);
+            this.choseTypeRBG.setVisible(false);
+            this.addCarChangeB.setVisible(true);
+            //todo clear fields or null the object
+        });
+
+        Button saveItem = new Button("Save");
+        saveItem.addClickListener(e -> {
+            carItemBinder.getBean().setStatistiscCount(1);
+            carItemBinder.getBean().setItemTotal(carItemBinder.getBean().getItemUnitPrice().multiply(BigDecimal.valueOf(carItemBinder.getBean().getItemQuantity())));
+            bookingBinder.getBean().addTemporaryPackageItem(carItemBinder.getBean());
+            this.extrasPackageItemVL.setVisible(false);
+            this.addPackageItemB.setVisible(true);
+            bookingRepository.save(bookingBinder.getBean());
+            this.packageG.setItems(temporaryPackageItemRepository.findByBooking(bookingBinder.getBean()));
+            //todo clear fields or null the object
+        });
+
+        HorizontalLayout buttonsHL = new HorizontalLayout(cancelItem, saveItem);
+
+        carVL.setVisible(false);
+
+        // put the layout together
+
+        carVL.addComponents(carEventCB, carIsItemCancelledCB, carData, generalInformationHL, pricesHL, carMechanicNotes, buttonsHL);
+
+        carVL.setVisible(false);
+        return carVL;
+    }
+
+    public VerticalLayout buildCarChangeLayout() {
+        VerticalLayout changeVL = new VerticalLayout();
+        VerticalLayout newCarVL = buildCarItemLayout();
+        newCarVL.setVisible(false);
+
+        changeVL.setCaption("Enter car change data");
+
+        carToChangeCB = new ComboBox<>("Select car to change");
+
+
+        oldCarStatus = new ComboBox<>("Set the current car status");
+        oldCarStatus.setItems(CarStatus.values());
+
+        proceedB = new Button("Proceed to new car selection");
+        proceedB.addClickListener(e -> newCarVL.setVisible(true));
+
+        changeVL.addComponents(new HorizontalLayout(carToChangeCB, oldCarStatus), proceedB, newCarVL);
+        changeVL.setVisible(false);
+        return changeVL;
+    }
+
 
     // Payments
     public VerticalLayout buildPaymentsSection() {
@@ -380,7 +671,7 @@ public class BookingForm extends VerticalLayout implements View {
 
         paymentG.addItemClickListener(event -> {
             if (event.getMouseEventDetails().isDoubleClick()) {
- //               navigationManager.navigateTo(PaymentForm.class, event.getItem().getId()); // todo show the payment on VL
+                //               navigationManager.navigateTo(PaymentForm.class, event.getItem().getId()); // todo show the payment on VL
             }
         });
 
@@ -553,7 +844,7 @@ public class BookingForm extends VerticalLayout implements View {
 
         HorizontalLayout buttonsHL = new HorizontalLayout(saveAll, cancelAll, backToList);
 
-        bookingForm.addComponents(bookingFormL, buttonsHL, buildDetailsSection(), buildDriversSection(), customersVL, buildPackageSection(), tempPackageItemVL, buildPaymentsSection(), bookingPaymentVL, buildDocumentsSection(), bookingDocumentVL);
+        bookingForm.addComponents(bookingFormL, buttonsHL, buildDetailsSection(), buildDriversSection(), customersVL, buildPackageSection(), buildPaymentsSection(), bookingPaymentVL, buildDocumentsSection(), bookingDocumentVL);
 
         bookingForm.setMargin(false);
 
@@ -570,9 +861,19 @@ public class BookingForm extends VerticalLayout implements View {
         bookingBinder.bind(emailConfirmationCB, "emailConfirmationSent");
         bookingBinder.bind(emailReminderCB, "emailReminderSent");
         bookingBinder.forField(emailReminderDateDF).withConverter(new LocalDateToDateConverter()).bind(Booking::getEmailReminderSendDate, Booking::setEmailReminderSendDate);
+        bookingBinder.bind(bookingStatusCB, "bookingStatus");
 
-        // Booking notes
-        // see buildBookingNoteForm()
+        // other properties see respective methods
+
+        // list contents setup
+        extraEventCB.setItems(Lists.newArrayList(eventRepository.findAll()));
+        extraEventCB.setItemCaptionGenerator(e -> e.getEventName() + " " + e.getEventStartDateTime());
+
+        //todo add for all CB empty selection caption & null not allowed
+        carEventCB.setItems(Lists.newArrayList(eventRepository.findAll()));
+        carEventCB.setItemCaptionGenerator(e -> e.getEventName() + " " + e.getEventStartDateTime());
+
+        carSelectionCB.setItems(Lists.newArrayList(carRepository.findAll()));
 
         return bookingForm;
     }
@@ -830,6 +1131,12 @@ public class BookingForm extends VerticalLayout implements View {
                 driverG.setItems(customerRepository.findByBookings(Arrays.asList(booking)));
 
                 documentG.setItems(bookingDocumentRepository.findByBooking(booking));
+
+                packageG.setItems(temporaryPackageItemRepository.findByBooking(booking));
+
+                List<TemporaryPackageItem> bookedCars = new ArrayList<>(Lists.newArrayList(booking.getTemporaryPackageItemList()));
+                carToChangeCB.setItems(bookedCars);
+
                 if (booking == null) {
                     showNotFound();
                     return;
@@ -838,12 +1145,13 @@ public class BookingForm extends VerticalLayout implements View {
         }
         bookingBinder.setBean(booking);
 
+
 //        // Setting note lists, no way to do it earlier
 //        noteG.setItems(bookingNoteRepository.findByBooking(bookingBinder.getBean()));
 //        paymentG.setItems(bookingPaymentRepository.findByBooking(bookingBinder.getBean()));
 //        documentG.setItems(bookingDocumentRepository.findByBooking(bookingBinder.getBean()));
 
-        bookingStatusCB.focus();
+        // bookingStatusCB.focus();
     }
 
     // Won't hopefully happen
@@ -943,7 +1251,7 @@ public class BookingForm extends VerticalLayout implements View {
         customerPickCB.addValueChangeListener(new HasValue.ValueChangeListener<Customer>() {
             @Override
             public void valueChange(HasValue.ValueChangeEvent<Customer> valueChangeEvent) {
-                customerId.setValue(String.valueOf(valueChangeEvent.getValue().getDocumentId()));
+                customerId.setValue(String.valueOf(valueChangeEvent.getValue().getId()));
                 customerName.setValue(valueChangeEvent.getValue().getCustomerFirstName());
                 customerSurname.setValue(valueChangeEvent.getValue().getCustomerLastName());
                 customerGroup.setValue(String.valueOf(valueChangeEvent.getValue().getCustomerGroup()));
@@ -995,94 +1303,6 @@ public class BookingForm extends VerticalLayout implements View {
         return customersVL;
 
     }
-
-    // Temporary package item
-    public VerticalLayout buildTempPackageItemForm() {
-        VerticalLayout tempItemVL = new VerticalLayout();
-        tempItemVL.setCaption("Enter the package item");
-
-        // Fields
-        itemDateDF = new DateField("Date");
-        itemTimeTF = new TextField("Start time");
-        itemDescriptionTF = new TextField("Description");
-        itemPriceTF = new TextField("Unit price");
-        itemQuantityTF = new TextField("Quantity");
-        itemTotalTF = new TextField("Total");
-        itemTotalTF.setEnabled(false);
-        isItemCancelledCB = new CheckBox("Cancelled");
-
-        HorizontalLayout fieldsHL = new HorizontalLayout(itemDateDF, itemTimeTF, itemDescriptionTF, itemPriceTF, itemQuantityTF, itemTotalTF, isItemCancelledCB);
-
-        // Separate binder
-        Binder<TemporaryPackageItem> temporaryPackageItemBinder = new Binder<>(TemporaryPackageItem.class);
-
-        temporaryPackageItemBinder.forField(itemDateDF)
-                .withConverter(new LocalDateToDateConverter())
-                .bind(TemporaryPackageItem::getItemDate, TemporaryPackageItem::setItemDate);
-
-        temporaryPackageItemBinder.bind(itemTimeTF, "startTime");
-        temporaryPackageItemBinder.bind(itemDescriptionTF, "itemDescription");
-        temporaryPackageItemBinder.forField(itemPriceTF)
-                .withConverter(new CustomStringToBigDecimalConverter("Enter a number!"))
-                .bind(TemporaryPackageItem::getItemUnitPrice, TemporaryPackageItem::setItemUnitPrice);
-
-        temporaryPackageItemBinder.forField(itemQuantityTF)
-                .withConverter(new CustomStringToIntegerConverter("Enter a number!"))
-                .bind(TemporaryPackageItem::getItemQuantity, TemporaryPackageItem::setItemQuantity);
-
-        temporaryPackageItemBinder.bind(isItemCancelledCB, "cancelled");
-
-        TemporaryPackageItem newTemporaryPackageItem = new TemporaryPackageItem();
-        temporaryPackageItemBinder.setBean(newTemporaryPackageItem);
-
-        //todo fix this damned conversion
-//        BigDecimal convertedPrice = new BigDecimal(itemPriceTF.getValue());
-//        BigDecimal convertedUnit = new BigDecimal(itemQuantityTF.getValue());
-//        BigDecimal total = convertedPrice.multiply(convertedUnit);
-//        total.setScale(2, BigDecimal.ROUND_HALF_UP);
-//        String totalConverted = total.toString();
-//        itemTotalTF.setValue(totalConverted);
-
-        // Buttons
-        Button cancelItem = new Button("Cancel");
-        cancelItem.setDescription("Your data will be lost!");
-        cancelItem.addClickListener(e -> {
-            this.tempPackageItemVL.setVisible(false);
-            this.addPackageItemB.setVisible(true);
-            itemDateDF.clear();
-            itemTimeTF.clear();
-            itemDescriptionTF.clear();
-            itemPriceTF.clear();
-            itemQuantityTF.clear();
-            itemTotalTF.clear();
-            isItemCancelledCB.clear();
-        });
-
-        Button saveItem = new Button("Save");
-        saveItem.addClickListener(e -> {
-            bookingBinder.getBean().addTemporaryPackageItem(temporaryPackageItemBinder.getBean());
-
-            this.tempPackageItemVL.setVisible(false);
-            this.addPackageItemB.setVisible(true);
-            temporaryPackageItemRepository.save(temporaryPackageItemBinder.getBean());
-            itemDateDF.clear();
-            itemTimeTF.clear();
-            itemDescriptionTF.clear();
-            itemPriceTF.clear();
-            itemQuantityTF.clear();
-            itemTotalTF.clear();
-            isItemCancelledCB.clear();
-            packageG.setItems(temporaryPackageItemRepository.findByBooking(bookingBinder.getBean()));
-        });
-
-        HorizontalLayout packageButtonsHL = new HorizontalLayout(cancelItem, saveItem);
-
-        tempItemVL.addComponents(fieldsHL, packageButtonsHL);
-
-        tempItemVL.setVisible(false);
-        return tempItemVL;
-    }
-
 
     // Booking payment
     public VerticalLayout buildBookingPaymentForm() {
@@ -1194,6 +1414,5 @@ public class BookingForm extends VerticalLayout implements View {
         bookingDocumentVL.setVisible(false);
         return bookingDocumentVL;
     }
-
 
 }

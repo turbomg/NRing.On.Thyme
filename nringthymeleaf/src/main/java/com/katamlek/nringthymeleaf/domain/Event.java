@@ -5,6 +5,8 @@ import lombok.*;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -31,11 +33,12 @@ public class Event {
     private String eventTrack;
 
     //  @Temporal(TemporalType.DATE)
-    private Date eventDate;
+    private Date eventStartDateTime; // using datetime field later on
+    private Date eventEndDateTime; // using datetime field later on
 
-    private String eventStartTime;
-
-    private String eventEndTime;
+//    private String eventStartTime;
+//
+//    private String eventEndTime;
 
     @ManyToOne(cascade = CascadeType.ALL)
     private User eventResponsibleUser;
@@ -67,6 +70,9 @@ public class Event {
 
     @OneToOne(cascade = CascadeType.ALL)
     private BookingPackageItemEvent bookingPackageItemEvent;
+
+    @OneToOne
+    private TemporaryPackageItem temporaryPackageItem;
 
     private boolean isUnderEditing; //todo add this property to every editable class
 

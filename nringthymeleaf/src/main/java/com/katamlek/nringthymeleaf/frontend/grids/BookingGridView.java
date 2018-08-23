@@ -3,6 +3,7 @@ package com.katamlek.nringthymeleaf.frontend.grids;
 import com.katamlek.nringthymeleaf.domain.*;
 import com.katamlek.nringthymeleaf.frontend.forms.BookingForm;
 import com.katamlek.nringthymeleaf.frontend.navigation.NavigationManager;
+import com.katamlek.nringthymeleaf.frontend.views.WelcomeView;
 import com.katamlek.nringthymeleaf.repositories.BookingRepository;
 import com.katamlek.nringthymeleaf.repositories.UserRepository;
 import com.vaadin.icons.VaadinIcons;
@@ -16,8 +17,10 @@ import org.assertj.core.util.Lists;
 import org.vaadin.gridutil.cell.CellFilterComponent;
 import org.vaadin.gridutil.cell.GridCellFilter;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Date;
 
 @UIScope
 @SpringView
@@ -64,7 +67,6 @@ public class BookingGridView extends VerticalLayout implements View {
         // Inline editor
         // bookingGrid.getEditor().setEnabled(true);
 
-        //TODO
         // Extra buttons - cancel booking, duplicate
         bookingGrid.addComponentColumn(this::buildCancelButton);
         bookingGrid.addComponentColumn(this::buildDuplicateButton);
@@ -83,7 +85,7 @@ public class BookingGridView extends VerticalLayout implements View {
         this.filter.setDateFilter("emailReminderSendDate", new SimpleDateFormat("HH:mm:ss dd.MM.yyyy"), true);
         this.filter.setBooleanFilter("emailReminderSent");
 
-        bookingGrid.setStyleName(ValoTheme.TABLE_BORDERLESS);
+     //   bookingGrid.setStyleName(ValoTheme.TABLE_BORDERLESS);
 
         return bookingGrid;
     }
@@ -104,13 +106,18 @@ public class BookingGridView extends VerticalLayout implements View {
         clearAllFilters.setStyleName(ValoTheme.BUTTON_BORDERLESS);
         clearAllFilters.setIcon(VaadinIcons.ERASER);
 
+        Button backToDashboard = new Button("Back to dashboard");
+        backToDashboard.addClickListener(e -> navigationManager.navigateTo(WelcomeView.class));
+        backToDashboard.addStyleNames(ValoTheme.BUTTON_BORDERLESS_COLORED);
+        backToDashboard.setIcon(VaadinIcons.DASHBOARD);
+
         // for testing purposes only - comment out when done
 //        Button showMeTestForm = new Button("Show test booking form");
 //        showMeTestForm.setStyleName(ValoTheme.BUTTON_BORDERLESS);
 //        showMeTestForm.setIcon(VaadinIcons.EYE);
 //        showMeTestForm.addClickListener(e -> navigationManager.navigateTo(BookingForm.class));
 
-        buttonsBookingHL.addComponents(addBookingBtn, clearAllFilters);
+        buttonsBookingHL.addComponents(addBookingBtn, clearAllFilters, backToDashboard);
 
         return buttonsBookingHL;
     }
@@ -133,6 +140,8 @@ public class BookingGridView extends VerticalLayout implements View {
         cancelButton.addStyleNames(ValoTheme.BUTTON_SMALL);
         cancelButton.addClickListener(e -> {
             booking.setBookingStatus(BookingStatus.CANCELLED);
+            bookingRepository.save(booking);
+            Notification.show("Booking was cancelled.");
         });
         return cancelButton;
     }

@@ -15,14 +15,17 @@ public class PriceListCar extends PriceList {
     private Integer startKM;
     private Integer per10KM;
     private boolean instruction;
+    private String defaultNote;
 
     @OneToOne
-    private BookingPackageItemCar bookingPackageItemCar;
+    private BookingPackageItemCar bookingPackageItemCar; //todo I don't think so, item writes it's data to item
 
     @OneToOne
-    private PricingGroup pricingGroup;
+    private PricingGroup pricingGroup; // todo as above
 
     @ManyToOne
     private Car car;
+
+    private boolean isValid; // determines if the price list item is "in force"
 
 }

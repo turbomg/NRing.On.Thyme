@@ -5,16 +5,18 @@ import com.katamlek.nringthymeleaf.frontend.navigation.NavigationManager;
 import com.vaadin.annotations.Theme;
 import com.vaadin.annotations.Title;
 import com.vaadin.annotations.Viewport;
+import com.vaadin.annotations.Widgetset;
 import com.vaadin.server.DefaultErrorHandler;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.spring.annotation.SpringUI;
 import com.vaadin.ui.UI;
 import org.springframework.beans.factory.annotation.Autowired;
 
-@Theme("valo")
+@Theme("mytheme")
 @SpringUI
 //@Viewport("width=device-width,initial-scale=1.0,user-scalable=no")
 @Title("Booking Management System")
+@Widgetset("basepage.RingWidgetSet")
 public class AppUI extends UI implements HasLogger {
 
 //	private final SpringViewProvider viewProvider;

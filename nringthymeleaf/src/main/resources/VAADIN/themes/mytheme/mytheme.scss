@@ -1,7 +1,9 @@
+// If you edit this file you need to compile the theme. See README.md for details.
+
 // Global variable overrides. Must be declared before importing Valo.
 
 // Defines the plaintext font size, weight and family. Font size affects general component sizing.
-//$v-font-size: 16px;
+//$v-font-size: 30px;
 //$v-font-weight: 300;
 //$v-font-family: "Open Sans", sans-serif;
 
@@ -27,37 +29,10 @@
 // For more information, see: https://vaadin.com/book/-/page/themes.valo.html
 // Example variants can be copy/pasted from https://vaadin.com/wiki/-/wiki/Main/Valo+Examples
 
-// The "App Shell" template colors are based off v-focus-color
-$v-focus-color: #4b4b65;
+@import "../valo/valo.scss";
 
-// Background gradient and image used for the menu, false disables
-$app-background-gradient: unquote("linear-gradient(145deg, #484962 30%, #d06b41 100%)");
-$app-background-image: url('bg.jpg');
-
-@import '../valo/valo.scss';
-@import 'ordersgrid';
-@import 'ordersview';
-@import 'dashboardview';
-@import 'menu';
-
-@mixin apptheme {
+@mixin mytheme {
   @include valo;
-  @include ordersgrid;
-  @include ordersview;
-  @include dashboardview;
-  @include menu;
 
-  .v-errorindicator {
-    // Only show validation errors using field styles
-    display: none;
-  }
-  .Vaadin-Icons {
-    // Make Vaadin Icons behave exactly like FontAwesome
-    font-style: normal;
-    font-weight: normal;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    display: inline-block;
-    text-align: center;
-  }
+  // Insert your own theme rules here
 }
