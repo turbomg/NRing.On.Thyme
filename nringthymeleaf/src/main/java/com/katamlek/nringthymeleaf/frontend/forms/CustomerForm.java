@@ -9,6 +9,7 @@ import com.katamlek.nringthymeleaf.repositories.AgentRepository;
 import com.katamlek.nringthymeleaf.repositories.CustomerDocumentRepository;
 import com.katamlek.nringthymeleaf.repositories.CustomerNoteRepository;
 import com.katamlek.nringthymeleaf.repositories.CustomerRepository;
+import com.vaadin.data.validator.StringLengthValidator;
 import com.vaadin.icons.VaadinIcons;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener;
@@ -39,6 +40,8 @@ public class CustomerForm extends VerticalLayout implements View {
         this.customerNoteRepository = customerNoteRepository;
         this.customerDocumentRepository = customerDocumentRepository;
 
+        addComponent(customerFormL);
+        customerFormL.addStyleNames(ValoTheme.LABEL_BOLD, ValoTheme.LABEL_LARGE);
         addComponent(buildCustomerForm());
         setMargin(false);
     }
@@ -81,12 +84,16 @@ public class CustomerForm extends VerticalLayout implements View {
 
     public VerticalLayout buildDetailsSection() {
         VerticalLayout detailsVL = new VerticalLayout();
-        detailsVL.setCaption("Customer details");
+        detailsVL.addComponent(new Label("Customer details"));
         detailsVL.setMargin(false);
 
         firstNameTF = new TextField("First name");
         lastNameTF = new TextField("Last name");
-        HorizontalLayout namesHL = new HorizontalLayout(firstNameTF, lastNameTF);
+        customerGroupCB = new ComboBox<>("Group");
+        customerGroupCB.setItems(CustomerGroup.values());
+        agentCB = new ComboBox<>("Agent");
+        agentCB.setItems(Lists.newArrayList(agentRepository.findAll()));
+        HorizontalLayout namesHL = new HorizontalLayout(firstNameTF, lastNameTF, customerGroupCB, agentCB);
 
         addressTF = new TextField("Address");
         phoneTF = new TextField("Phone");
@@ -94,15 +101,13 @@ public class CustomerForm extends VerticalLayout implements View {
         HorizontalLayout contactDataHL = new HorizontalLayout(addressTF, phoneTF, emailTF);
 
         newsletterCB = new CheckBox("Newsletter");
-        customerGroupCB = new ComboBox<>("Group");
-        customerGroupCB.setItems(CustomerGroup.values());
-        agentCB = new ComboBox<>("Agent");
-        agentCB.setItems(Lists.newArrayList(agentRepository.findAll()));
-        HorizontalLayout otherInfoHL = new HorizontalLayout(newsletterCB, customerGroupCB, agentCB);
+        HorizontalLayout otherInfoHL = new HorizontalLayout(newsletterCB);
 
         generalNoteTF = new TextField("General information");
 
         customerNoteG = new Grid<>(CustomerNote.class);
+        customerNoteG.setCaption("Customer notes");
+        customerNoteG.setHeightByRows(4);
 
         customerNoteG.setColumns("enteredOn", "text");
         //todo set the binder and...      customerNoteG.setItems(customerNoteRepository.findCustomerNoteByCustomerAndHistoryNote(customerBinder.getBean(), false));
@@ -132,8 +137,9 @@ public class CustomerForm extends VerticalLayout implements View {
 
 
         addNoteB = new Button("Add customer note");
-        addNoteB.addStyleNames(ValoTheme.BUTTON_BORDERLESS_COLORED, ValoTheme.BUTTON_SMALL);
-        addNoteB.setIcon(VaadinIcons.PLUS);
+        addNoteB.setWidth("300px");
+//        addNoteB.addStyleNames(ValoTheme.BUTTON_BORDERLESS_COLORED, ValoTheme.BUTTON_SMALL);
+//        addNoteB.setIcon(VaadinIcons.PLUS);
         addNoteB.addClickListener(e -> {
             Notification.show("Please be patient, will open the form soon.");
             //todo get the form and add the note;
@@ -146,24 +152,27 @@ public class CustomerForm extends VerticalLayout implements View {
 
     public VerticalLayout buildEmergencyContactSection() {
         VerticalLayout emergencyVL = new VerticalLayout();
-        emergencyVL.setCaption("Emergency contact");
+        emergencyVL.addComponents(new Label("Emergency contact"));
         emergencyVL.setMargin(false);
+
+        HorizontalLayout emergencyHL = new HorizontalLayout();
+        emergencyHL.setMargin(false);
 
         emergencyFirstNameTF = new TextField("First name");
         emergencyLastNameTF = new TextField("Last name");
-        HorizontalLayout namesHL = new HorizontalLayout(emergencyFirstNameTF, emergencyLastNameTF);
-
         emergencyPhoneTF = new TextField("Phone");
         emergencyEmailTF = new TextField("E-mail");
-        HorizontalLayout contactDataHL = new HorizontalLayout(emergencyPhoneTF, emergencyEmailTF);
-        emergencyVL.addComponents(namesHL, contactDataHL);
+
+        emergencyHL.addComponents(emergencyFirstNameTF, emergencyLastNameTF, emergencyPhoneTF, emergencyEmailTF);
+
+        emergencyVL.addComponent(emergencyHL);
 
         return emergencyVL;
     }
 
     public VerticalLayout buildDocumentsSection() {
         VerticalLayout documentsVL = new VerticalLayout();
-        documentsVL.setCaption("Customer documents");
+        documentsVL.addComponent(new Label("Customer documents"));
         documentsVL.setMargin(false);
 
         customerDocumentG = new Grid<>(CustomerDocument.class);
@@ -184,7 +193,7 @@ public class CustomerForm extends VerticalLayout implements View {
 
         customerDocumentG.setHeightByRows(4);
         customerDocumentG.addStyleNames(ValoTheme.TABLE_BORDERLESS, ValoTheme.TABLE_COMPACT);
-      //  customerDocumentG.setCaption("Customer documents");
+        //  customerDocumentG.setCaption("Customer documents");
 
         customerDocumentG.addItemClickListener(event -> {
             if (event.getMouseEventDetails().isDoubleClick()) {
@@ -194,8 +203,9 @@ public class CustomerForm extends VerticalLayout implements View {
         });
 
         addDocumentB = new Button("Add customer document");
-        addDocumentB.addStyleNames(ValoTheme.BUTTON_BORDERLESS_COLORED, ValoTheme.BUTTON_SMALL);
-        addDocumentB.setIcon(VaadinIcons.PLUS);
+        addDocumentB.setWidth("300px");
+//        addDocumentB.addStyleNames(ValoTheme.BUTTON_BORDERLESS_COLORED, ValoTheme.BUTTON_SMALL);
+//        addDocumentB.setIcon(VaadinIcons.PLUS);
         addDocumentB.addClickListener(e -> {
             Notification.show("Please be patient, will open the form soon.");
             //todo get the form and add the note;
@@ -208,7 +218,7 @@ public class CustomerForm extends VerticalLayout implements View {
 
     public VerticalLayout buildHistorySection() {
         VerticalLayout historyVL = new VerticalLayout();
-        historyVL.setCaption("Customer history");
+        historyVL.addComponent(new Label("Customer history"));
         historyVL.setMargin(false);
 
         historyG = new Grid<>(CustomerNote.class);
@@ -229,7 +239,7 @@ public class CustomerForm extends VerticalLayout implements View {
 
         historyG.setHeightByRows(4);
         historyG.addStyleNames(ValoTheme.TABLE_BORDERLESS, ValoTheme.TABLE_COMPACT);
-    //    historyG.setCaption("Customer history");
+        //    historyG.setCaption("Customer history");
 
         historyG.addItemClickListener(event -> {
             if (event.getMouseEventDetails().isDoubleClick()) {
@@ -240,8 +250,9 @@ public class CustomerForm extends VerticalLayout implements View {
 
 
         addHistoryNoteB = new Button("Add customer history item");
-        addHistoryNoteB.addStyleNames(ValoTheme.BUTTON_BORDERLESS_COLORED, ValoTheme.BUTTON_SMALL);
-        addHistoryNoteB.setIcon(VaadinIcons.PLUS);
+        addHistoryNoteB.setWidth("300px");
+//        addHistoryNoteB.addStyleNames(ValoTheme.BUTTON_BORDERLESS_COLORED, ValoTheme.BUTTON_SMALL);
+//        addHistoryNoteB.setIcon(VaadinIcons.PLUS);
         addHistoryNoteB.addClickListener(e -> {
             Notification.show("Please be patient, will open the form soon.");
             //todo get the form and add the note like a non-history note, just set isHistory to true on enter;
@@ -255,7 +266,6 @@ public class CustomerForm extends VerticalLayout implements View {
     // Put it all together
     public VerticalLayout buildCustomerForm() {
         VerticalLayout customerForm = new VerticalLayout();
-        customerForm.addComponent(customerFormL);
 
         customerForm.addComponents(buildDetailsSection());
         customerForm.addComponents(buildEmergencyContactSection());
@@ -265,8 +275,16 @@ public class CustomerForm extends VerticalLayout implements View {
         customerBinder = new com.vaadin.data.Binder<>(Customer.class);
 
         // Binder
-        customerBinder.bind(firstNameTF, "customerFirstName");
-        customerBinder.bind(lastNameTF, "customerLastName");
+        customerBinder.forField(firstNameTF)
+                .asRequired()
+                .withValidator(new StringLengthValidator("Enter the full name!", 1, 1000))
+                .bind(Customer::getCustomerFirstName, Customer::setCustomerFirstName);
+
+        customerBinder.forField(lastNameTF)
+                .asRequired()
+                .withValidator(new StringLengthValidator("Enter the full surname", 1, 1000))
+                .bind(Customer::getCustomerLastName, Customer::setCustomerLastName);
+
         customerBinder.bind(addressTF, "customerAddress");
         customerBinder.bind(phoneTF, "customerPhoneNumber");
         customerBinder.bind(emailTF, "customerEmail");
@@ -283,8 +301,9 @@ public class CustomerForm extends VerticalLayout implements View {
 
         // Form buttons
         saveAll = new Button("Save");
-        saveAll.addStyleNames(ValoTheme.BUTTON_BORDERLESS, ValoTheme.BUTTON_BORDERLESS_COLORED);
-        saveAll.setIcon(VaadinIcons.PENCIL);
+        saveAll.setWidth("150px");
+        //   saveAll.addStyleNames(ValoTheme.BUTTON_BORDERLESS, ValoTheme.BUTTON_BORDERLESS_COLORED);
+        //    saveAll.setIcon(VaadinIcons.PENCIL);
         saveAll.addClickListener(e -> {
             try {
                 customerRepository.save(customerBinder.getBean());
@@ -297,9 +316,10 @@ public class CustomerForm extends VerticalLayout implements View {
         });
 
         cancelAll = new Button("Cancel");
+        cancelAll.setWidth("150px");
         cancelAll.setDescription("Caution! Your data will be lost!");
-        cancelAll.addStyleNames(ValoTheme.BUTTON_BORDERLESS);
-        cancelAll.setIcon(VaadinIcons.ERASER);
+        //  cancelAll.addStyleNames(ValoTheme.BUTTON_BORDERLESS);
+        //  cancelAll.setIcon(VaadinIcons.ERASER);
         cancelAll.addClickListener(e -> {
 
             //Confirmation popup
@@ -332,8 +352,9 @@ public class CustomerForm extends VerticalLayout implements View {
         });
 
         backToList = new Button("Back to list");
-        backToList.addStyleNames(ValoTheme.BUTTON_BORDERLESS);
-        backToList.setIcon(VaadinIcons.ARROW_LEFT);
+        backToList.setWidth("150px");
+//        backToList.addStyleNames(ValoTheme.BUTTON_BORDERLESS);
+//        backToList.setIcon(VaadinIcons.ARROW_LEFT);
         backToList.addClickListener(e -> navigationManager.navigateTo(BookingGridView.class));
 
         HorizontalLayout buttonsHL = new HorizontalLayout(saveAll, cancelAll, backToList);

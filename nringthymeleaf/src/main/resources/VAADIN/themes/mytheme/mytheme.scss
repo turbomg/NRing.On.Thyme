@@ -8,8 +8,8 @@
 //$v-font-family: "Open Sans", sans-serif;
 
 // Defines the border used by all components.
-//$v-border: 1px solid (v-shade 0.7);
-//$v-border-radius: 4px;
+$v-border: 3px solid (v-shade 0.7);
+$v-border-radius: 0px;
 
 // Affects the color of some component elements, e.g Button, Panel title, etc
 //$v-background-color: hsl(210, 0%, 98%);
@@ -22,9 +22,9 @@
 //$v-shadow-opacity: 5%;
 
 // Defines colors for indicating status (focus, success, failure)
-//$v-focus-color: valo-focus-color(); // Calculates a suitable color automatically
-//$v-friendly-color: #2c9720;
-//$v-error-indicator-color: #ed473b;
+$v-focus-color: valo-focus-color(); // Calculates a suitable color automatically
+$v-friendly-color: #2c9720;
+$v-error-indicator-color: #ed473b;
 
 // For more information, see: https://vaadin.com/book/-/page/themes.valo.html
 // Example variants can be copy/pasted from https://vaadin.com/wiki/-/wiki/Main/Valo+Examples

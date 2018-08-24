@@ -1,27 +1,9 @@
 package com.katamlek.nringthymeleaf.frontend.views;
 
-import com.katamlek.nringthymeleaf.domain.Event;
-import com.katamlek.nringthymeleaf.domain.EventType;
-import com.katamlek.nringthymeleaf.frontend.calendar.CalendarEntry;
-import com.katamlek.nringthymeleaf.repositories.EventRepository;
-import com.katamlek.nringthymeleaf.repositories.TemporaryPackageItemRepository;
 import com.vaadin.navigator.View;
 import com.vaadin.spring.annotation.SpringView;
 import com.vaadin.spring.annotation.UIScope;
-import com.vaadin.ui.Grid;
-import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
-import org.assertj.core.util.Lists;
-import org.vaadin.addon.calendar.Calendar;
-import org.vaadin.addon.calendar.item.BasicItemProvider;
-import org.vaadin.addon.calendar.item.CalendarItemProvider;
-
-import javax.persistence.criteria.CriteriaBuilder;
-import java.time.LocalDate;
-import java.time.YearMonth;
-import java.time.ZonedDateTime;
-import java.util.*;
-import java.util.stream.Collectors;
 
 @SpringView
 @UIScope

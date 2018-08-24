@@ -5,5 +5,5 @@ package com.katamlek.nringthymeleaf.domain;
  * or the package item in question.
  */
 public enum PaymentStatus {
-    IN_FULL, PARTIALLY, NOT
+    IN_FULL, PARTIALLY, NOT_PAID
 }

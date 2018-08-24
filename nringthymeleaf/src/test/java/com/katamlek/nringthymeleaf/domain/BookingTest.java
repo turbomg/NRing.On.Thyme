@@ -9,7 +9,6 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -29,7 +28,7 @@ public class BookingTest {
     // No items if repository empty
     public void findNoItems() {
         Booking booking = new Booking();
-        booking.setPaymentStatus(PaymentStatus.NOT);
+        booking.setPaymentStatus(PaymentStatus.NOT_PAID);
 
         Iterable<Booking> bookings = bookingRepository.findAll();
 
@@ -96,7 +95,7 @@ public class BookingTest {
         persisted.setSignatureStatus(SignatureStatus.SIGNED);
         persisted.setCustomers(new ArrayList<Customer>());
 
-        persisted.setPaymentStatus(PaymentStatus.NOT);
+        persisted.setPaymentStatus(PaymentStatus.NOT_PAID);
 
         bookingRepository.save(persisted);
 
@@ -106,7 +105,7 @@ public class BookingTest {
 
         Booking found = bookingRepository.findById(persisted.getId()).get();
 
-        assertThat(found.getPaymentStatus().equals(PaymentStatus.NOT));
+        assertThat(found.getPaymentStatus().equals(PaymentStatus.NOT_PAID));
     }
 
     // Update test methods
@@ -132,12 +131,12 @@ public class BookingTest {
         assertThat(bookings).contains(booking);
 
         bookingRepository.findById(booking.getId());
-        booking.setPaymentStatus(PaymentStatus.NOT);
+        booking.setPaymentStatus(PaymentStatus.NOT_PAID);
         bookingRepository.save(booking);
 
         Booking found = bookingRepository.findById(booking.getId()).get();
 
-        assertThat(found.getPaymentStatus().equals(PaymentStatus.NOT));
+        assertThat(found.getPaymentStatus().equals(PaymentStatus.NOT_PAID));
     }
 
     // Delete test methods

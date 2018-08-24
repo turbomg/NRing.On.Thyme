@@ -6,10 +6,12 @@ import com.katamlek.nringthymeleaf.frontend.navigation.NavigationManager;
 import com.katamlek.nringthymeleaf.repositories.*;
 import com.katamlek.nringthymeleaf.vaadinutils.CustomStringToBigDecimalConverter;
 import com.katamlek.nringthymeleaf.vaadinutils.CustomStringToIntegerConverter;
+import com.vaadin.data.BeanValidationBinder;
 import com.vaadin.data.Binder;
 import com.vaadin.data.converter.LocalDateTimeToDateConverter;
 import com.vaadin.data.converter.LocalDateToDateConverter;
 import com.vaadin.data.provider.DataProvider;
+import com.vaadin.data.validator.StringLengthValidator;
 import com.vaadin.icons.VaadinIcons;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener;
@@ -53,7 +55,10 @@ public class EventForm extends VerticalLayout implements View {
         this.priceList = priceList;
         this.noteRepository = noteRepository;
         this.eventNoteRepository = eventNoteRepository;
+        addComponent(eventWindowTitleL);
+        eventWindowTitleL.addStyleNames(ValoTheme.LABEL_NO_MARGIN, ValoTheme.LABEL_LARGE);
         addComponent(buildEventForm());
+        setMargin(false);
     }
 
     //Window title
@@ -82,10 +87,10 @@ public class EventForm extends VerticalLayout implements View {
     private TextField eventSpacesBookedTF;
     //    private Grid<EventNote> eventInternalNoteG;
 //    private Button addNewInternalInfoNoteBTN;
-    private Label eventCurrentEntriesPaidL;
-    private Label eventCurrentEntriesUnpaidL;
-    private Label eventCurrentValuePaidL;
-    private Label eventCurrentValueUnpaidL;
+    private TextField eventCurrentEntriesPaidTF;
+    private TextField eventCurrentEntriesUnpaidTF;
+    private TextField eventCurrentValuePaidTF;
+    private TextField eventCurrentValueUnpaidTF;
 
     // Public pricing
     private Label eventPublicPriceL = new Label("Public pricing");
@@ -109,7 +114,7 @@ public class EventForm extends VerticalLayout implements View {
     private CheckBox internalCB;
 
     // The binders
-    Binder<com.katamlek.nringthymeleaf.domain.Event> eventBinder = new Binder<>(com.katamlek.nringthymeleaf.domain.Event.class);
+    BeanValidationBinder<com.katamlek.nringthymeleaf.domain.Event> eventBinder = new BeanValidationBinder<>(com.katamlek.nringthymeleaf.domain.Event.class);
 
     // Event details
     public VerticalLayout buildDetailsSectionVL() {
@@ -136,7 +141,8 @@ public class EventForm extends VerticalLayout implements View {
         hideWhenNoBookingsCB = new CheckBox("Hide when no bookings");
         hideFromPublicCalendarCB = new CheckBox("Hide from public calendar");
 
-        eventDetailsVL.addComponents(eventTypeRBG, new HorizontalLayout(eventNameTF, eventLocationCB, eventTrackTF), new HorizontalLayout(eventStartDateTimeDTF, eventEndDateTimeDTF), new HorizontalLayout(eventResponsibleUserCB, hideFromPublicCalendarCB, hideWhenNoBookingsCB));
+        eventDetailsVL.addComponents(eventTypeRBG, new HorizontalLayout(eventStartDateTimeDTF, eventEndDateTimeDTF), new HorizontalLayout(eventNameTF, eventLocationCB, eventTrackTF, eventResponsibleUserCB), new HorizontalLayout(hideFromPublicCalendarCB, hideWhenNoBookingsCB));
+        eventDetailsVL.setMargin(false);
 
         return eventDetailsVL;
     }
@@ -165,63 +171,42 @@ public class EventForm extends VerticalLayout implements View {
 //        addNewInternalInfoNoteBTN.addClickListener(e -> Notification.show("I can't do this for you yet"));
 
         generalInfoVL.addComponents(eventOrganizerTF, eventCostToRSRTF, eventSpacesBookedTF);
+        generalInfoVL.setMargin(false);
 
         VerticalLayout profitVL = new VerticalLayout();
-        eventCurrentEntriesPaidL = new Label("Current entries paid:");
-        eventCurrentEntriesUnpaidL = new Label("Current unpaid entries:");
-        eventCurrentValuePaidL = new Label("Current amount paid:");
-        eventCurrentValueUnpaidL = new Label("Outstanding amount:");
 
-        // Query the database for the values, for now setting the placeholders
-        // Paid entries query
-        Integer entriesPaid = 10;
 
-        //Unpaid entries query
-        Integer entriesUnpaid = 2;
+        //todo set the values in the fields
+        eventCurrentEntriesPaidTF = new TextField("Current entries paid:");
+        eventCurrentEntriesPaidTF.setEnabled(false);
+        eventCurrentEntriesUnpaidTF = new TextField("Current unpaid entries:");
+        eventCurrentEntriesUnpaidTF.setEnabled(false);
+        eventCurrentValuePaidTF = new TextField("Current amount paid:");
+        eventCurrentValuePaidTF.setEnabled(false);
+        eventCurrentValueUnpaidTF = new TextField("Outstanding amount:");
+        eventCurrentValueUnpaidTF.setEnabled(false);
 
-        // Paid amount
-        Integer amountPaid = 1000;
+        VerticalLayout numberOfEntries = new VerticalLayout(eventCurrentEntriesPaidTF, eventCurrentEntriesUnpaidTF);
+        VerticalLayout valueOfentries = new VerticalLayout(eventCurrentValuePaidTF, eventCurrentValueUnpaidTF);
 
-        // Outstanding amount
-        Integer amountOutstanding = 400;
-
-        // todo
-        // For the given event id find all bookings with this id where status != cancelled - Booking
-
-        // For the given event id find all bookings with this id in To_Pay status - Booking
-
-        // For the given event id find all bookings with this id in Paid status and sum the amounts - Booking Payment, paymentAmount
-
-        // For the given event id find all bookings with this id in To_Pay status and sum
-
-        Label paidL = new Label(entriesPaid.toString());
-        Label unpaidL = new Label(entriesUnpaid.toString());
-        Label paidAmtL = new Label(amountPaid.toString());
-        Label unpaidAmtL = new Label(amountOutstanding.toString());
-
-        HorizontalLayout paidEntriesHL = new HorizontalLayout(eventCurrentEntriesPaidL, paidL);
-        HorizontalLayout unpaidEntriesHL = new HorizontalLayout(eventCurrentEntriesUnpaidL, unpaidL);
-        HorizontalLayout amtPaidHL = new HorizontalLayout(eventCurrentValuePaidL, paidAmtL);
-        HorizontalLayout amdUnpaidHL = new HorizontalLayout(eventCurrentValueUnpaidL, unpaidAmtL);
-
-        profitVL.addComponents(paidEntriesHL, unpaidEntriesHL, amtPaidHL, amdUnpaidHL);
-
-        internalInfoVL.addComponents(generalInfoVL, profitVL);
+        internalInfoVL.addComponents(generalInfoVL, numberOfEntries, valueOfentries);
+        internalInfoVL.setMargin(false);
 
         return internalInfoVL;
     }
 
     // Event pricing
-    public VerticalLayout buildEventPricingSectionVL() {
-        VerticalLayout publicPricingVL = new VerticalLayout();
+    public HorizontalLayout buildEventPricingSectionHL() {
+        HorizontalLayout publicPricingHL = new HorizontalLayout();
 
         eventEntryFeeTF = new TextField("Entry fee");
         eventAdditionalDriverFeeTF = new TextField("Additional driver");
 
 
-        publicPricingVL.addComponents(eventEntryFeeTF, eventAdditionalDriverFeeTF);
+        publicPricingHL.addComponents(eventEntryFeeTF, eventAdditionalDriverFeeTF);
+        publicPricingHL.setMargin(false);
 
-        return publicPricingVL;
+        return publicPricingHL;
     }
 
     // Event public info
@@ -235,7 +220,11 @@ public class EventForm extends VerticalLayout implements View {
         eventTrackdayFormatTF = new TextField("Trackday format");
         eventPitInUseTF = new TextField("Pitlane in use");
 
+        HorizontalLayout fields = new HorizontalLayout(eventCarTypesTF, eventTyreTypesTF, eventNoiseLimitTF, eventTrackdayFormatTF, eventPitInUseTF);
+
         eventNoteG = new Grid<>(EventNote.class);
+        eventNoteG.setCaption("Event notes");
+        eventNoteG.setHeightByRows(4);
 
         eventNoteG.addColumn(EventNote::isInternal, new BooleanRenderer<>()).setCaption("Internal");
 
@@ -271,12 +260,14 @@ public class EventForm extends VerticalLayout implements View {
         eventNoteG.setColumnResizeMode(ColumnResizeMode.ANIMATED);
 
         addNoteBTN = new Button("Add a note");
+        addNoteBTN.setWidth("300px");
         addNoteBTN.addClickListener(e -> {
             eventNoteVL.setVisible(true);
             addNoteBTN.setVisible(false);
         });
 
-        publicInfoVL.addComponents(eventCarTypesTF, eventTyreTypesTF, eventNoiseLimitTF, eventTrackdayFormatTF, eventPitInUseTF, eventNoteG, addNoteBTN);
+        publicInfoVL.addComponents(fields, eventNoteG, addNoteBTN);
+        publicInfoVL.setMargin(false);
 
         return publicInfoVL;
     }
@@ -284,26 +275,35 @@ public class EventForm extends VerticalLayout implements View {
     // Put it all together
     public VerticalLayout buildEventForm() {
         VerticalLayout eventForm = new VerticalLayout();
-        eventForm.addComponent(eventWindowTitleL);
+        eventForm.setMargin(false);
 
         eventForm.addComponents(eventDetailsL, buildDetailsSectionVL());
         eventForm.addComponents(eventInternalInfoL, buildInternalInfoSectionVL());
-        eventForm.addComponents(eventPublicPriceL, buildEventPricingSectionVL());
+        eventForm.addComponents(eventPublicPriceL, buildEventPricingSectionHL());
         eventForm.addComponents(eventPublicInfoL, buildPublicInfoSectionVL());
         eventForm.addComponents(eventNoteVL);
 
         // todo validation binding when RSR tells us how to do it
 
         // Bind details
-        // eventTypeRBG binds automatically
-        eventBinder.bind(eventNameTF, "eventName");
-        eventBinder.forField(eventStartDateTimeDTF).withConverter(new LocalDateTimeToDateConverter(ZoneOffset.systemDefault())).bind(com.katamlek.nringthymeleaf.domain.Event::getEventStartDateTime, com.katamlek.nringthymeleaf.domain.Event::setEventStartDateTime);
-        eventBinder.forField(eventEndDateTimeDTF).withConverter(new LocalDateTimeToDateConverter(ZoneOffset.systemDefault())).bind(com.katamlek.nringthymeleaf.domain.Event::getEventStartDateTime, com.katamlek.nringthymeleaf.domain.Event::setEventStartDateTime);
+        eventBinder.forField(eventNameTF)
+                .asRequired()
+                .withValidator(new StringLengthValidator("Enter the full event name!", 3, 1000))
+                .bind(com.katamlek.nringthymeleaf.domain.Event::getEventName, com.katamlek.nringthymeleaf.domain.Event::setEventName);
+
+        eventBinder.forField(eventStartDateTimeDTF)
+                .asRequired("Required")
+                .withConverter(new LocalDateTimeToDateConverter(ZoneOffset.systemDefault())).bind(com.katamlek.nringthymeleaf.domain.Event::getEventStartDateTime, com.katamlek.nringthymeleaf.domain.Event::setEventStartDateTime);
+
+        eventBinder.forField(eventEndDateTimeDTF)
+                .asRequired("Set the end date.")
+                .withConverter(new LocalDateTimeToDateConverter(ZoneOffset.systemDefault())).bind(com.katamlek.nringthymeleaf.domain.Event::getEventStartDateTime, com.katamlek.nringthymeleaf.domain.Event::setEventStartDateTime);
+
         eventBinder.bind(eventResponsibleUserCB, "eventResponsibleUser");
         eventBinder.bind(eventLocationCB, "eventLocation");
         eventBinder.bind(eventTrackTF, "eventTrack");
-        eventBinder.bind(eventStartDateTimeDTF, "eventStartDateTime");
-        eventBinder.bind(eventEndDateTimeDTF, "eventEndDateTime");
+//        eventBinder.bind(eventStartDateTimeDTF, "eventStartDateTime");
+//        eventBinder.bind(eventEndDateTimeDTF, "eventEndDateTime");
         eventBinder.bind(hideWhenNoBookingsCB, "visibleWhenNoBookings");
         eventBinder.bind(hideFromPublicCalendarCB, "visibleInPublicCalendar");
 
@@ -329,6 +329,7 @@ public class EventForm extends VerticalLayout implements View {
         // Buttons
         HorizontalLayout buttonsHL = new HorizontalLayout();
         Button cancelBTN = new Button("Cancel");
+        cancelBTN.setWidth("150px");
         cancelBTN.setDescription("Be careful, your data may evaporate!");
         cancelBTN.addClickListener(e -> {
             //Confirmation popup
@@ -361,7 +362,8 @@ public class EventForm extends VerticalLayout implements View {
         });
 
         Button saveEventBTN = new Button("Save");
-
+        saveEventBTN.setWidth("150px");
+        saveEventBTN.addStyleName(ValoTheme.BUTTON_PRIMARY);
         saveEventBTN.addClickListener(e -> {
             try {
                 // todo underEditing  false shall be set here, before save
@@ -376,11 +378,12 @@ public class EventForm extends VerticalLayout implements View {
         });
 
         Button toListBTN = new Button("Back to list");
-        toListBTN.addStyleNames(ValoTheme.BUTTON_BORDERLESS);
-        toListBTN.setIcon(VaadinIcons.ARROW_LEFT);
+        toListBTN.setWidth("150px");
+   //     toListBTN.addStyleNames(ValoTheme.BUTTON_BORDERLESS);
+   //     toListBTN.setIcon(VaadinIcons.ARROW_LEFT);
         toListBTN.addClickListener(e -> navigationManager.navigateTo(EventGridView.class));
 
-        buttonsHL.addComponents(cancelBTN, saveEventBTN, toListBTN);
+        buttonsHL.addComponents(saveEventBTN, cancelBTN, toListBTN);
 
         addComponent(buttonsHL);
 
@@ -408,11 +411,12 @@ public class EventForm extends VerticalLayout implements View {
             // New
             event = new com.katamlek.nringthymeleaf.domain.Event();
 
-            event.setEventName("");
-            event.setVisibleInPublicCalendar(false);
+         //   event.setEventName("");
+            event.setVisibleInPublicCalendar(true); // will not be visible
             event.setVisibleWhenNoBookings(false);
             event.setEventStartDateTime(new Date());
-            event.setEventType(EventType.EVENT);
+            event.setEventEndDateTime(new Date());
+            event.setEventType(EventType.TOURISTENFAHRTEN);
             event.setUnderEditing(true);
             // todo more setters
         } else {

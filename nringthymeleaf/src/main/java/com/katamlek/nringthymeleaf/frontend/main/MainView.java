@@ -61,6 +61,7 @@ public class MainView extends VerticalLayout implements ViewDisplay {
     public MainView(NavigationManager navigationManager) {
         this.navigationManager = navigationManager;
         //	this.viewAccessControl = viewAccessControl;
+     //   this.setSizeFull();
         addComponent(buildMainView());
     }
 
@@ -135,75 +136,82 @@ public class MainView extends VerticalLayout implements ViewDisplay {
 
     public HorizontalLayout buildMainView() {
         HorizontalLayout mainLayoutVL = new HorizontalLayout();
+  //      mainLayoutVL.setSizeFull();
+   //     mainLayoutVL.setWidth("100%");
 
         // Side menu
         menu = new VerticalLayout();
+  //      menu.setWidth("50px");
 
         Label currentUser = new Label();
-        currentUser.setCaption("XX"); //todo get user initials from session
-        currentUser.addStyleNames(ValoTheme.LABEL_COLORED, ValoTheme.LABEL_LARGE);
+    //    currentUser.setCaption("XX"); //todo get user initials from session
+    //    currentUser.addStyleNames(ValoTheme.LABEL_COLORED, ValoTheme.LABEL_LARGE);
+        currentUser.setIcon(new FileResource(new File("/Users/admin/work/projekty/NRingThyme/nringthymeleaf/src/main/resources/files/icon_initials.png")));
 
         dashboard = new Button("");
     //    dashboard.addStyleNames(ValoTheme.BUTTON_BORDERLESS, ValoTheme.BUTTON_ICON_ONLY);
-        dashboard.setIcon(VaadinIcons.DASHBOARD);
-        dashboard.addStyleName(ValoTheme.BUTTON_BORDERLESS);
+    //    dashboard.setIcon(VaadinIcons.DASHBOARD);
+
+        dashboard.setIcon(new FileResource(new File("/Users/admin/work/projekty/NRingThyme/nringthymeleaf/src/main/resources/files/icon_dashboard.svg")));
+
+        dashboard.addStyleNames(ValoTheme.BUTTON_BORDERLESS);
         dashboard.setDescription("Dashboard");
 
         myAccount = new Button("");
     //    myAccount.addStyleNames(ValoTheme.BUTTON_BORDERLESS, ValoTheme.BUTTON_ICON_ONLY);
-        myAccount.setIcon(VaadinIcons.USER_HEART);
+        myAccount.setIcon(new FileResource(new File("/Users/admin/work/projekty/NRingThyme/nringthymeleaf/src/main/resources/files/icon_myaccount.svg")));
         myAccount.addStyleName(ValoTheme.BUTTON_BORDERLESS);
         myAccount.setDescription("My account");
 
         calendar = new Button("");
         calendar.addStyleNames(ValoTheme.BUTTON_BORDERLESS);
-        calendar.setIcon(VaadinIcons.CALENDAR);
+        calendar.setIcon(new FileResource(new File("/Users/admin/work/projekty/NRingThyme/nringthymeleaf/src/main/resources/files/icon_calendar.svg")));
         calendar.setDescription("Calendar");
 
 
         bookings = new Button("");
         bookings.addStyleNames(ValoTheme.BUTTON_BORDERLESS);
-        bookings.setIcon(VaadinIcons.OPEN_BOOK);
+        bookings.setIcon(new FileResource(new File("/Users/admin/work/projekty/NRingThyme/nringthymeleaf/src/main/resources/files/icon_bookings.svg")));
         bookings.setDescription("Bookings");
 
         events = new Button("");
         events.addStyleNames(ValoTheme.BUTTON_BORDERLESS);
-        events.setIcon(VaadinIcons.SPARK_LINE);
+        events.setIcon(new FileResource(new File("/Users/admin/work/projekty/NRingThyme/nringthymeleaf/src/main/resources/files/icon_events.svg")));
         events.setDescription("Events");
 
         customers = new Button("");
         customers.addStyleNames(ValoTheme.BUTTON_BORDERLESS);
-        customers.setIcon(VaadinIcons.USERS);
+        customers.setIcon(new FileResource(new File("/Users/admin/work/projekty/NRingThyme/nringthymeleaf/src/main/resources/files/icon_usermanagement.svg")));
         customers.setDescription("Customers");
 
         fleet = new Button("");
         fleet.addStyleNames(ValoTheme.BUTTON_BORDERLESS);
-        fleet.setIcon(VaadinIcons.CAR);
+        fleet.setIcon(new FileResource(new File("/Users/admin/work/projekty/NRingThyme/nringthymeleaf/src/main/resources/files/icon_fleet.svg")));
         fleet.setDescription("Fleet");
 
         systemUsers = new Button("");
         systemUsers.addStyleNames(ValoTheme.BUTTON_BORDERLESS);
-        systemUsers.setIcon(VaadinIcons.USER_CHECK);
+        systemUsers.setIcon(new FileResource(new File("/Users/admin/work/projekty/NRingThyme/nringthymeleaf/src/main/resources/files/icon_usermanagement.svg")));
         systemUsers.setDescription("User management");
 
         reports = new Button("");
         reports.addStyleNames(ValoTheme.BUTTON_BORDERLESS);
-        reports.setIcon(VaadinIcons.PAPERPLANE);
+        reports.setIcon(new FileResource(new File("/Users/admin/work/projekty/NRingThyme/nringthymeleaf/src/main/resources/files/icon_reports.svg")));
         reports.setDescription("Reports");
 
         pricelist = new Button("");
         pricelist.addStyleNames(ValoTheme.BUTTON_BORDERLESS);
-        pricelist.setIcon(VaadinIcons.DOLLAR);
-        pricelist.setDescription("Reports");
+        pricelist.setIcon(new FileResource(new File("/Users/admin/work/projekty/NRingThyme/nringthymeleaf/src/main/resources/files/icon_pricelist.svg")));
+        pricelist.setDescription("Price lists");
 
         setup = new Button("");
         setup.addStyleNames(ValoTheme.BUTTON_BORDERLESS);
-        setup.setIcon(VaadinIcons.COGS);
+        setup.setIcon(new FileResource(new File("/Users/admin/work/projekty/NRingThyme/nringthymeleaf/src/main/resources/files/icon_setup.svg")));
         setup.setDescription("Setup");
 
         logOut = new Button("");
         logOut.addStyleNames(ValoTheme.BUTTON_BORDERLESS);
-        logOut.setIcon(VaadinIcons.POWER_OFF);
+        logOut.setIcon(new FileResource(new File("/Users/admin/work/projekty/NRingThyme/nringthymeleaf/src/main/resources/files/icon_logout.svg")));
         logOut.setDescription("Log out");
 
         menu.addComponents(currentUser, dashboard, myAccount, calendar, bookings, events,
@@ -231,8 +239,11 @@ public class MainView extends VerticalLayout implements ViewDisplay {
         displayArea.setSpacing(false);
         displayArea.setMargin(false);
         displayArea.setResponsive(true);
+    //    displayArea.setSizeFull();
 
+//        mainLayoutVL.setSizeFull();
         mainLayoutVL.addComponents(menu, displayArea);
+//        mainLayoutVL.setExpandRatio(displayArea, 0.7f);
         return mainLayoutVL;
     }
 }

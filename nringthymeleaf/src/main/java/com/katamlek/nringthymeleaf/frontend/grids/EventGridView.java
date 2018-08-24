@@ -103,19 +103,22 @@ public class EventGridView extends VerticalLayout implements View {
 
         Button addEventBtn = new Button("Add event"); // add new event
         addEventBtn.addClickListener(e -> navigationManager.navigateTo(EventForm.class));
-        addEventBtn.addStyleNames(ValoTheme.BUTTON_BORDERLESS_COLORED);
-        addEventBtn.setIcon(VaadinIcons.PLUS);
+//        addEventBtn.addStyleNames(ValoTheme.BUTTON_BORDERLESS_COLORED);
+//        addEventBtn.setIcon(VaadinIcons.PLUS);
+        addEventBtn.setWidth("200px");
 
         Button backToDashboard = new Button("Back to dashboard");
         backToDashboard.addClickListener(e -> navigationManager.navigateTo(WelcomeView.class));
-        backToDashboard.addStyleNames(ValoTheme.BUTTON_BORDERLESS_COLORED);
-        backToDashboard.setIcon(VaadinIcons.DASHBOARD);
+//        backToDashboard.addStyleNames(ValoTheme.BUTTON_BORDERLESS_COLORED);
+//        backToDashboard.setIcon(VaadinIcons.DASHBOARD);
+        backToDashboard.setWidth("200px");
 
         Button clearAllFilters = new Button("Remove filters", e -> {
             filter.clearAllFilters();
         });
-        clearAllFilters.setStyleName(ValoTheme.BUTTON_BORDERLESS);
-        clearAllFilters.setIcon(VaadinIcons.ERASER);
+//        clearAllFilters.setStyleName(ValoTheme.BUTTON_BORDERLESS);
+//        clearAllFilters.setIcon(VaadinIcons.ERASER);
+        clearAllFilters.setWidth("200px");
 
         buttonsEventHL.addComponents(addEventBtn, clearAllFilters, backToDashboard);
 

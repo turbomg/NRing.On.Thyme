@@ -37,7 +37,7 @@ public class Car {
 
     private CarFleet carFleet;
 
-    @Temporal(TemporalType.DATE)
+//    @Temporal(TemporalType.DATE)
     private Date nextTUV;
 
     private Integer nextServiceAtKm;

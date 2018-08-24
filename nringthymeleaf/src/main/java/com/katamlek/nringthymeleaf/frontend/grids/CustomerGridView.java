@@ -5,6 +5,7 @@ import com.katamlek.nringthymeleaf.domain.Customer;
 import com.katamlek.nringthymeleaf.domain.CustomerGroup;
 import com.katamlek.nringthymeleaf.frontend.forms.CustomerForm;
 import com.katamlek.nringthymeleaf.frontend.navigation.NavigationManager;
+import com.katamlek.nringthymeleaf.frontend.views.WelcomeView;
 import com.katamlek.nringthymeleaf.repositories.CustomerNoteRepository;
 import com.katamlek.nringthymeleaf.repositories.CustomerRepository;
 import com.vaadin.icons.VaadinIcons;
@@ -153,16 +154,22 @@ public class CustomerGridView extends VerticalLayout implements View {
 
         Button addCustomerBtn = new Button("Add customer");
         addCustomerBtn.addClickListener(e -> navigationManager.navigateTo(CustomerForm.class));
-        addCustomerBtn.addStyleNames(ValoTheme.BUTTON_BORDERLESS_COLORED);
-        addCustomerBtn.setIcon(VaadinIcons.PLUS);
+//        addCustomerBtn.addStyleNames(ValoTheme.BUTTON_BORDERLESS_COLORED);
+//        addCustomerBtn.setIcon(VaadinIcons.PLUS);
+        addCustomerBtn.setWidth("200px");
 
         Button clearAllFilters = new Button("Remove filters", e -> {
             filter.clearAllFilters();
         });
-        clearAllFilters.addStyleNames(ValoTheme.BUTTON_BORDERLESS);
-        clearAllFilters.setIcon(VaadinIcons.ERASER);
+//        clearAllFilters.addStyleNames(ValoTheme.BUTTON_BORDERLESS);
+//        clearAllFilters.setIcon(VaadinIcons.ERASER);
+        clearAllFilters.setWidth("200px");
 
-        buttonsHL.addComponents(addCustomerBtn, clearAllFilters);
+        Button backToDashboard = new Button("Back to dashboard");
+        backToDashboard.addClickListener(e -> navigationManager.navigateTo(WelcomeView.class));
+        backToDashboard.setWidth("200px");
+
+        buttonsHL.addComponents(addCustomerBtn, clearAllFilters, backToDashboard);
         return buttonsHL;
     }
 

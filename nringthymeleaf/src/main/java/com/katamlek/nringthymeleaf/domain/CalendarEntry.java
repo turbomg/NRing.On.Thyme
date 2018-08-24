@@ -1,4 +1,4 @@
-package com.katamlek.nringthymeleaf.frontend.calendar;
+package com.katamlek.nringthymeleaf.domain;
 
 import com.katamlek.nringthymeleaf.domain.EventType;
 import com.katamlek.nringthymeleaf.repositories.EventRepository;

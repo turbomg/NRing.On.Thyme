@@ -13,6 +13,7 @@ import com.katamlek.nringthymeleaf.vaadinutils.CustomStringToIntegerConverter;
 import com.vaadin.data.Binder;
 import com.vaadin.data.converter.LocalDateToDateConverter;
 import com.vaadin.data.provider.DataProvider;
+import com.vaadin.data.validator.StringLengthValidator;
 import com.vaadin.icons.VaadinIcons;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener;
@@ -23,6 +24,8 @@ import com.vaadin.ui.*;
 import com.vaadin.ui.themes.ValoTheme;
 import org.assertj.core.util.Lists;
 
+import java.util.Date;
+
 /**
  * Used to enter a new car data/ edit the existing car data.
  */
@@ -30,6 +33,8 @@ import org.assertj.core.util.Lists;
 @SpringView
 @UIScope
 public class CarForm extends VerticalLayout implements View {
+
+    // todo add save, cancel, back to list
 
     // The constructor
     private CarRepository carRepository;
@@ -44,6 +49,8 @@ public class CarForm extends VerticalLayout implements View {
         this.priceListCarRepository = priceListCarRepository;
         this.locationDefinitionRepository = locationDefinitionRepository;
         this.navigationManager = navigationManager;
+        addComponent(carFormL);
+        carFormL.addStyleNames(ValoTheme.LABEL_BOLD, ValoTheme.LABEL_LARGE);
         addComponent(buildCarForm());
         setMargin(false);
     }
@@ -52,6 +59,7 @@ public class CarForm extends VerticalLayout implements View {
     private Label carFormL = new Label("Car Form");
     private Button saveB;
     private Button cancelB;
+    private Button backToList;
 
     // Section fields
     // The details section
@@ -91,31 +99,36 @@ public class CarForm extends VerticalLayout implements View {
 
     // Build section layouts methods
     // Details
-    public HorizontalLayout buildDetailsSection() {
+    public VerticalLayout buildDetailsSection() {
+
         modelTF = new TextField("Model");
         plateTF = new TextField("Plate");
         vinNumberTF = new TextField("VIN");
         carColorCB = new ComboBox<CarColor>();
         carColorCB.setItems(CarColor.values());
         carColorCB.setCaption("Color");
+        carValueTF = new TextField("Car value");
         // todo set renderer when graphics ready
-        VerticalLayout leftPane = new VerticalLayout(modelTF, plateTF, vinNumberTF, carColorCB);
 
         firstRegistrationDF = new DateField("First registration");
         lastMileageTF = new TextField("Last recorded mileage");
         firstBookingDF = new DateField("First booking");
         lastBookingDF = new DateField("Last booking");
-        carValueTF = new TextField("Car value");
-        VerticalLayout middlePane = new VerticalLayout(firstRegistrationDF, lastMileageTF, firstBookingDF, lastBookingDF, carValueTF);
 
         mileageTypeRBG = new RadioButtonGroup<>("Mileage type", DataProvider.ofItems(MileageType.values()));
+        mileageTypeRBG.setSelectedItem(MileageType.KILOMETERES);
         carFleetRBG = new RadioButtonGroup<>("Fleet", DataProvider.ofItems(CarFleet.values()));
+        carFleetRBG.setSelectedItem(CarFleet.NURBURG);
         nextTUV = new DateField("Next TUV");
         nextServiceAtKm = new TextField("Next service at");
-        VerticalLayout rightPane = new VerticalLayout(mileageTypeRBG, carFleetRBG, nextTUV, nextServiceAtKm);
 
-        HorizontalLayout detailsHL = new HorizontalLayout(leftPane, middlePane, rightPane);
-        detailsHL.setCaption("Car Details");
+        HorizontalLayout topPane = new HorizontalLayout(modelTF, plateTF, vinNumberTF, carColorCB, carValueTF);
+        HorizontalLayout middlePane = new HorizontalLayout(firstRegistrationDF, firstBookingDF, lastMileageTF, lastBookingDF, nextTUV, nextServiceAtKm);
+        HorizontalLayout bottomPane = new HorizontalLayout(mileageTypeRBG, carFleetRBG);
+
+        VerticalLayout detailsHL = new VerticalLayout(new Label("Car Details"), bottomPane, topPane, middlePane);
+
+        detailsHL.setMargin(false);
 
         return detailsHL;
 
@@ -125,9 +138,9 @@ public class CarForm extends VerticalLayout implements View {
     public VerticalLayout buildStatusSection() {
         VerticalLayout statusVL = new VerticalLayout();
 
-        statusCB = new ComboBox<>();
+        statusCB = new ComboBox<>("Status");
         statusCB.setItems(CarStatus.values());
-        statusCB.setCaption("Car status");
+//        statusCB.setCaption("Car status");
 
         locationCB = new ComboBox<>("Location");
         locationCB.setItemCaptionGenerator(e -> e.getLocationName());
@@ -148,19 +161,21 @@ public class CarForm extends VerticalLayout implements View {
 
         // extra button delete for non-history entries only
 
-    //    carNoteG.addComponentColumn(this::deleteCarNote);
+        //    carNoteG.addComponentColumn(this::deleteCarNote);
 
         carNoteG.setSizeFull();
+        carNoteG.setCaption("Car notes");
+        carNoteG.setHeightByRows(4);
 
         addNoteB = new Button("Add a note");
         addNoteB.addClickListener(e -> {
             carNotesVL.setVisible(true);
             addNoteB.setVisible(false);
         });
+        addNoteB.setWidth("300px");
 
-
-        statusVL.addComponents(statusCB, locationCB, carNoteG, addNoteB, carNotesVL);
-        statusVL.setCaption("Car status");
+        statusVL.addComponents(new Label("Car status"), statusCB, locationCB, carNoteG, addNoteB, carNotesVL);
+        statusVL.setMargin(false);
         return statusVL;
 
     }
@@ -170,7 +185,6 @@ public class CarForm extends VerticalLayout implements View {
         VerticalLayout historyVL = new VerticalLayout();
 
         carHistoryNoteG = new Grid<>(CarNote.class);
-        carHistoryNoteG.setCaption("Car history");
         carHistoryNoteG.setHeightByRows(4);
 
         carHistoryNoteG.setColumns("user", "enteredOn", "text", "carMileageOut", "carMileageIn", "carMileageTotalKM", "carMileageTotalMIL");
@@ -180,22 +194,23 @@ public class CarForm extends VerticalLayout implements View {
         carHistoryNoteG.setColumnResizeMode(ColumnResizeMode.ANIMATED);
         // no inline editing - it's history
         // no buttons delete, edit - it's history entries
-        carNoteG.setSizeFull();
+        carHistoryNoteG.setSizeFull();
+        carHistoryNoteG.setHeightByRows(4);
 
         addHistoryNoteB = new Button("Add history note");
         addHistoryNoteB.addClickListener(e -> Notification.show("I can't do this yet")); //todo
+        addHistoryNoteB.setWidth("300px");
 
-
-        historyVL.addComponents(carHistoryNoteG, addHistoryNoteB);
+        historyVL.addComponents(new Label("Car history"), carHistoryNoteG, addHistoryNoteB);
+        historyVL.setMargin(false);
         return historyVL;
 
-        // todo if manual input is enabled, add noteVL
+        // todo add note functionality
     }
 
     public VerticalLayout buildPricingSection() {
         VerticalLayout pricingVL = new VerticalLayout();
         pricingG = new Grid<>(PriceListCar.class);
-        pricingG.setCaption("Car pricing");
         pricingG.setHeightByRows(4);
 
         pricingG.setColumns("description", "defaultNote", "startPrice", "startKM", "per10KM", "instruction", "pricingGroup");
@@ -217,54 +232,29 @@ public class CarForm extends VerticalLayout implements View {
         });
 
         pricingG.setSizeFull();
+        pricingG.setHeightByRows(4);
 
         addPricingItemB = new Button("Add pricing item");
         addPricingItemB.addClickListener(e -> Notification.show("Can't do this yet, sorry")); //todo
+        addPricingItemB.setWidth("300px");
 
-        pricingVL.addComponents(pricingG, addPricingItemB);
+        pricingVL.addComponents(new Label("Car pricing"), pricingG, addPricingItemB);
+        pricingVL.setMargin(false);
         return pricingVL;
     }
 
     // Put all together
     public VerticalLayout buildCarForm() {
         VerticalLayout carForm = new VerticalLayout();
-        carForm.addComponents(carFormL, buildDetailsSection(), buildStatusSection(), buildHistorySection(), buildPricingSection());
-
-        // Bindings
-        // For the car
-        carBinder.bind(modelTF, "model");
-        carBinder.bind(plateTF, "plate");
-        carBinder.bind(vinNumberTF, "carVin");
-        carBinder.bind(carColorCB, "carColor");
-        carBinder.bind(firstRegistrationDF, "carFirstRegistrationDate");
-        carBinder.forField(lastMileageTF)
-                .withConverter(new CustomStringToIntegerConverter("Enter a number please."))
-                .bind(Car::getLastMileage, Car::setLastMileage);
-        carBinder.bind(firstBookingDF, "firstBooking");
-        carBinder.bind(lastBookingDF, "lastBooking");
-        carBinder.forField(carValueTF)
-                .withConverter(new CustomStringToBigDecimalConverter("Please enter a number."))
-                .bind(Car::getCarValueFromAdac, Car::setCarValueFromAdac);
-        carBinder.bind(mileageTypeRBG, "mileageType");
-        carBinder.bind(carFleetRBG, "carFleet");
-        carBinder.bind(nextTUV, "nextTUV");
-        carBinder.forField(nextServiceAtKm)
-                .withConverter(new CustomStringToIntegerConverter("Please enter a number."))
-                .bind(Car::getNextServiceAtKm, Car::setNextServiceAtKm);
-
-        carBinder.bind(statusCB, "carStatus");
-        carBinder.bind(locationCB, "currentLocation");
-
-        // todo For the car history - if we want
-        // todo For the pricing - in stage 2
 
         // Form buttons
         HorizontalLayout buttonsHL = new HorizontalLayout();
 
         cancelB = new Button("Cancel");
+        cancelB.setWidth("150px");
         cancelB.setDescription("Caution! Your data will be lost!");
-        cancelB.addStyleNames(ValoTheme.BUTTON_BORDERLESS);
-        cancelB.setIcon(VaadinIcons.ERASER);
+//        cancelB.addStyleNames(ValoTheme.BUTTON_BORDERLESS);
+//        cancelB.setIcon(VaadinIcons.ERASER);
         cancelB.addClickListener(e -> {
             //Confirmation popup
             Window window = new Window("Do you really want to drop the changes?");
@@ -296,6 +286,7 @@ public class CarForm extends VerticalLayout implements View {
         });
 
         saveB = new Button("Save");
+        saveB.setWidth("150px");
 
         saveB.addClickListener(e -> {
             try {
@@ -308,6 +299,51 @@ public class CarForm extends VerticalLayout implements View {
                 Notification.show("I saved your data.");
             }
         });
+
+        backToList = new Button("Back to list");
+        backToList.setWidth("150px");
+        backToList.addClickListener(e -> navigationManager.navigateTo(CarGridView.class));
+
+        buttonsHL = new HorizontalLayout(cancelB, saveB, backToList);
+
+        carForm.addComponents(buttonsHL, buildDetailsSection(), buildStatusSection(), buildHistorySection(), buildPricingSection());
+
+        // Bindings
+        // For the car
+        carBinder.forField(modelTF)
+                .asRequired()
+                .withValidator(new StringLengthValidator("Enter the full model!", 1, 1000))
+                .bind(Car::getModel, Car::setModel);
+
+        carBinder.forField(plateTF)
+                .asRequired()
+                .withValidator(new StringLengthValidator("Enter the full plate!", 1, 1000))
+                .bind(Car::getPlate, Car::setPlate);
+
+        carBinder.forField(vinNumberTF)
+                .asRequired()
+                .withValidator(new StringLengthValidator("Enter the correct VIN!", 1, 1000))
+                .bind(Car::getCarVin, Car::setCarVin);
+
+        carBinder.bind(carColorCB, "carColor");
+        carBinder.bind(firstRegistrationDF, "carFirstRegistrationDate");
+        carBinder.forField(lastMileageTF).withConverter(new CustomStringToIntegerConverter("Enter a number please.")).bind(Car::getLastMileage, Car::setLastMileage);
+        carBinder.bind(firstBookingDF, "firstBooking");
+        carBinder.bind(lastBookingDF, "lastBooking");
+        carBinder.forField(carValueTF).withConverter(new CustomStringToBigDecimalConverter("Please enter a number.")).bind(Car::getCarValueFromAdac, Car::setCarValueFromAdac);
+        carBinder.bind(mileageTypeRBG, "mileageType");
+        carBinder.bind(carFleetRBG, "carFleet");
+        carBinder.bind(nextTUV, "nextTUV");
+        carBinder.forField(nextServiceAtKm).withConverter(new CustomStringToIntegerConverter("Please enter a number.")).bind(Car::getNextServiceAtKm, Car::setNextServiceAtKm);
+
+        carBinder.bind(statusCB, "carStatus");
+        carBinder.bind(locationCB, "currentLocation");
+
+        // todo For the car history - if we want
+        // todo For the pricing - in stage 2
+
+
+        // carForm.addComponents(carFormL, formButtons, buildDetailsSection(), buildStatusSection(), buildHistorySection(), buildPricingSection());
 
         return carForm;
 
@@ -331,6 +367,14 @@ public class CarForm extends VerticalLayout implements View {
         if (id == null) {
             // New
             car = new Car();
+            car.setCarFirstRegistrationDate(new Date());
+            car.setFirstBooking(new Date());
+            car.setLastBooking(new Date());
+            car.setNextTUV(new Date());
+
+            car.setMileageType(MileageType.KILOMETERES);
+            car.setCarFleet(CarFleet.NURBURG);
+            car.setCarStatus(CarStatus.FREE);
 
             car.setUnderEditing(true);
             // todo more setters
@@ -354,7 +398,7 @@ public class CarForm extends VerticalLayout implements View {
 
         }
         carBinder.setBean(car);
-        // todo ??.focus();
+        modelTF.focus();
     }
 
     // Won't hopefully happen

@@ -109,20 +109,23 @@ public class CarGridView extends VerticalLayout implements View {
 
         Button addCarBtn = new Button("Add car"); // add new car
         //addCarBtn.addClickListener(e -> Notification.show("Let me work on it!")); //todo
-           addCarBtn.addClickListener(e -> navigationManager.navigateTo(CarForm.class));
-        addCarBtn.addStyleNames(ValoTheme.BUTTON_BORDERLESS_COLORED);
-        addCarBtn.setIcon(VaadinIcons.PLUS);
+        addCarBtn.addClickListener(e -> navigationManager.navigateTo(CarForm.class));
+//        addCarBtn.addStyleNames(ValoTheme.BUTTON_BORDERLESS_COLORED);
+//        addCarBtn.setIcon(VaadinIcons.PLUS);
+        addCarBtn.setWidth("200px");
 
         Button clearAllFilters = new Button("Remove filters", e -> {
             filter.clearAllFilters();
         });
-        clearAllFilters.setStyleName(ValoTheme.BUTTON_BORDERLESS);
-        clearAllFilters.setIcon(VaadinIcons.ERASER);
+//        clearAllFilters.setStyleName(ValoTheme.BUTTON_BORDERLESS);
+//        clearAllFilters.setIcon(VaadinIcons.ERASER);
+        clearAllFilters.setWidth("200px");
 
         Button backToDashboard = new Button("Back to dashboard");
         backToDashboard.addClickListener(e -> navigationManager.navigateTo(WelcomeView.class));
-        backToDashboard.addStyleNames(ValoTheme.BUTTON_BORDERLESS_COLORED);
-        backToDashboard.setIcon(VaadinIcons.DASHBOARD);
+//        backToDashboard.addStyleNames(ValoTheme.BUTTON_BORDERLESS_COLORED);
+//        backToDashboard.setIcon(VaadinIcons.DASHBOARD);
+        backToDashboard.setWidth("200px");
 
         buttonsCarHL.addComponents(addCarBtn, clearAllFilters, backToDashboard);
 

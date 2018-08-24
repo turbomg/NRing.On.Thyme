@@ -2,6 +2,7 @@ package com.katamlek.nringthymeleaf.frontend.grids;
 
 import com.katamlek.nringthymeleaf.domain.*;
 import com.katamlek.nringthymeleaf.frontend.forms.BookingForm;
+import com.katamlek.nringthymeleaf.frontend.frontutils.BookingDuplicator;
 import com.katamlek.nringthymeleaf.frontend.navigation.NavigationManager;
 import com.katamlek.nringthymeleaf.frontend.views.WelcomeView;
 import com.katamlek.nringthymeleaf.repositories.BookingRepository;
@@ -30,11 +31,13 @@ public class BookingGridView extends VerticalLayout implements View {
     private UserRepository userRepository;
     private NavigationManager navigationManager;
     private Grid<Booking> bookingGrid;
+    private BookingDuplicator bookingDuplicator;
 
-    public BookingGridView(BookingRepository bookingRepository, UserRepository userRepository, NavigationManager navigationManager) {
+    public BookingGridView(BookingRepository bookingRepository, UserRepository userRepository, NavigationManager navigationManager, BookingDuplicator bookingDuplicator) {
         this.bookingRepository = bookingRepository;
         this.userRepository = userRepository;
         this.navigationManager = navigationManager;
+        this.bookingDuplicator = bookingDuplicator;
         addComponent(buildBookingGridView());
         setMargin(false);
     }
@@ -97,19 +100,22 @@ public class BookingGridView extends VerticalLayout implements View {
 
         Button addBookingBtn = new Button("Add booking"); // add new booking
         addBookingBtn.addClickListener(e -> navigationManager.navigateTo(BookingForm.class));
-        addBookingBtn.addStyleNames(ValoTheme.BUTTON_BORDERLESS_COLORED);
-        addBookingBtn.setIcon(VaadinIcons.PLUS);
+//        addBookingBtn.addStyleNames(ValoTheme.BUTTON_BORDERLESS_COLORED);
+//        addBookingBtn.setIcon(VaadinIcons.PLUS);
+        addBookingBtn.setWidth("200px");
 
         Button clearAllFilters = new Button("Remove filters", e -> {
             filter.clearAllFilters();
         });
-        clearAllFilters.setStyleName(ValoTheme.BUTTON_BORDERLESS);
-        clearAllFilters.setIcon(VaadinIcons.ERASER);
+//        clearAllFilters.setStyleName(ValoTheme.BUTTON_BORDERLESS);
+//        clearAllFilters.setIcon(VaadinIcons.ERASER);
+        clearAllFilters.setWidth("200px");
 
         Button backToDashboard = new Button("Back to dashboard");
         backToDashboard.addClickListener(e -> navigationManager.navigateTo(WelcomeView.class));
-        backToDashboard.addStyleNames(ValoTheme.BUTTON_BORDERLESS_COLORED);
-        backToDashboard.setIcon(VaadinIcons.DASHBOARD);
+//        backToDashboard.addStyleNames(ValoTheme.BUTTON_BORDERLESS_COLORED);
+//        backToDashboard.setIcon(VaadinIcons.DASHBOARD);
+        backToDashboard.setWidth("200px");
 
         // for testing purposes only - comment out when done
 //        Button showMeTestForm = new Button("Show test booking form");
@@ -149,7 +155,7 @@ public class BookingGridView extends VerticalLayout implements View {
     private Button buildDuplicateButton(Booking booking) {
         Button duplicateButton = new Button(VaadinIcons.COPY);
         duplicateButton.setStyleName(ValoTheme.BUTTON_TINY);
-        duplicateButton.addClickListener(e -> Notification.show("Will try!")); // todo - copy data, save object, open form
+        duplicateButton.addClickListener(e -> bookingDuplicator.duplicateBooking(booking));
         return duplicateButton;
     }
 

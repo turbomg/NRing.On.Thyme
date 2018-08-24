@@ -56,7 +56,7 @@
 //            if (event.getMouseEventDetails().isDoubleClick()) {
 //                UI.getCurrent().getNavigator().navigateTo("xxx");
 //                // todo set navigator to the selected car
-//                // todo NOT A NAVIGATOR ! New carEditForm(Long id);
+//                // todo NOT_PAID A NAVIGATOR ! New carEditForm(Long id);
 //            }
 //        });
 //
