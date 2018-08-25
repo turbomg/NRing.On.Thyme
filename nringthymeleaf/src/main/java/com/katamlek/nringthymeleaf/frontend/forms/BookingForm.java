@@ -19,6 +19,7 @@ import com.vaadin.spring.annotation.SpringView;
 import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.*;
 import com.vaadin.ui.themes.ValoTheme;
+import org.apache.commons.lang3.time.DateFormatUtils;
 import org.assertj.core.util.Lists;
 
 import java.math.BigDecimal;
@@ -508,7 +509,7 @@ public class BookingForm extends VerticalLayout implements View {
 
         Button saveItem = new Button("Save");
         saveItem.addClickListener(e -> {
-            //todo null
+            //todo fix some NPE - can't really recall what
             extraItemBinder.getBean().setStatistiscCount(0);
             extraItemBinder.getBean().setItemTotal(extraItemBinder.getBean().getItemUnitPrice().multiply(BigDecimal.valueOf(extraItemBinder.getBean().getItemQuantity())));
             bookingBinder.getBean().addTemporaryPackageItem(extraItemBinder.getBean());
@@ -602,7 +603,15 @@ public class BookingForm extends VerticalLayout implements View {
 
         Button saveItem = new Button("Save");
         saveItem.addClickListener(e -> {
+
+            // set keys for statistics
+            String dateComponent = DateFormatUtils.format(carItemBinder.getBean().getStartDateTime(), "yyyy-MM-dd");
+            String typeComponent = String.valueOf(carItemBinder.getBean().getEvent().getEventType());
+
+            String key = typeComponent + "+" + dateComponent;
+
             carItemBinder.getBean().setStatistiscCount(1);
+            carItemBinder.getBean().setCalendarKey(key);
             carItemBinder.getBean().setItemTotal(carItemBinder.getBean().getItemUnitPrice().multiply(BigDecimal.valueOf(carItemBinder.getBean().getItemQuantity())));
             bookingBinder.getBean().addTemporaryPackageItem(carItemBinder.getBean());
             this.extrasPackageItemVL.setVisible(false);

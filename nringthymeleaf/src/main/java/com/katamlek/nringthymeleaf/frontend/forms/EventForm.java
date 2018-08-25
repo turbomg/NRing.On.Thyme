@@ -20,6 +20,7 @@ import com.vaadin.spring.annotation.SpringView;
 import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.*;
 import com.vaadin.ui.themes.ValoTheme;
+import org.apache.commons.lang3.time.DateFormatUtils;
 import org.assertj.core.util.Lists;
 import org.vaadin.gridutil.renderer.BooleanRenderer;
 

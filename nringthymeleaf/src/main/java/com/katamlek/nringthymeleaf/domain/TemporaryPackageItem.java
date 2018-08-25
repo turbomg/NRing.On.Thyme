@@ -44,5 +44,5 @@ public class TemporaryPackageItem {
     private Booking booking;
 
     private Integer statistiscCount; // how many times count the item for calendar and other stats
-
+    private String calendarKey; // additional key used to produce calendar entries
 }

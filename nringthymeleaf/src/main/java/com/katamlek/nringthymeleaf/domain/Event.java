@@ -74,7 +74,7 @@ public class Event {
     @OneToOne
     private TemporaryPackageItem temporaryPackageItem;
 
-    private boolean isUnderEditing; //todo add this property to every editable class
+    private boolean isUnderEditing;
 
     // Overwrite some getters of Lombok to avoid NPE
 
